@@ -28,6 +28,9 @@ Full documentation lives in **[docs/](docs/)**, available in Chinese and English
 | 02 | [数据集与预训练模型调研](docs/02-数据集与预训练模型调研-CN.md) | [Datasets & Pretrained Models](docs/02-Datasets-and-Pretrained-Models-EN.md) |
 | 03 | [生成式数据增广 Pipeline 设计](docs/03-生成式数据增广Pipeline设计-CN.md) | [Generative Augmentation Pipeline](docs/03-Generative-Augmentation-Pipeline-EN.md) |
 | 04 | [文献综述](docs/04-文献综述-CN.md) | [Literature Survey](docs/04-Literature-Survey-EN.md) |
+| 05 | [技术路线图](docs/05-技术路线图-CN.md) | [Technological Roadmap](docs/05-Technological-Roadmap-EN.md) |
+| 06 | [团队分工](docs/06-团队分工-CN.md) | [Teamwork Allocation](docs/06-Teamwork-Allocation-EN.md) |
+| 07 | [项目章程](docs/07-项目章程-CN.md) | [Project Charter](docs/07-Project-Charter-EN.md) |
 
 → 索引与阅读路径见 [docs/README.md](docs/README.md)
 
@@ -35,16 +38,18 @@ Full documentation lives in **[docs/](docs/)**, available in Chinese and English
 
 ## 当前状态 / Status
 
-📋 **规划阶段（M0）** — 已完成需求分析、技术方案、数据调研、增广 pipeline 设计与文献综述；尚未开始实现。
+📋 **规划阶段（M0）** — 已完成需求分析、技术方案、数据调研、增广 pipeline 设计、文献综述、技术路线图、团队分工与项目章程草案；尚未开始实现。
 
-*Planning phase (M0). Requirements analysis, technical plan, dataset survey, augmentation pipeline design and literature survey are complete; implementation has not started.*
+*Planning phase (M0). Requirements analysis, technical plan, dataset survey, augmentation pipeline design, literature survey, technological roadmap, teamwork allocation and the draft project charter are complete; implementation has not started.*
 
 ### 待办 / Open items
 
-- [ ] 确定风险分类体系 Risk Taxonomy（M0 首要交付物）
-- [ ] 确认团队分工与项目周期
-- [ ] 核实文献引用（见 [docs/04-文献综述-CN.md](docs/04-文献综述-CN.md) §8 核实状态表）
-- [ ] 采集电信场景种子数据
+- [ ] 召开首次团队会议：认领 A–E 角色、**选举队长**（议程见 [docs/06 §10](docs/06-团队分工-CN.md)）
+- [ ] 完成项目章程签署（[docs/07 §14](docs/07-项目章程-CN.md)）
+- [ ] 确定风险分类体系 Risk Taxonomy（M0 首要交付物，关键路径起点）
+- [ ] 确认项目周期、范围界定与可用算力
+- [ ] 核实文献引用（见 [docs/04 §8](docs/04-文献综述-CN.md) 核实状态表）
+- [ ] 采集电信场景种子数据（≥300 张，TG1 判据）
 
 ---
 
