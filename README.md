@@ -34,6 +34,11 @@ Full documentation lives in **[docs/](docs/)**, available in Chinese and English
 
 → 索引与阅读路径见 [docs/README.md](docs/README.md)
 
+**学校官方模板 / Official templates** — [`template/`](template/)
+`EE6008_Project_Charter_Template.docx`（项目章程）｜ `EE6008-Project ReportTemplate.docx`（项目报告）
+文档 07 已严格按 Charter 模板重构；文档 01 §7 与 04 §9 已按 Report 模板校准结构建议。
+*Document 07 follows the Charter template exactly; documents 01 §7 and 04 §9 are calibrated to the Report template.*
+
 ---
 
 ## 当前状态 / Status
@@ -45,11 +50,13 @@ Full documentation lives in **[docs/](docs/)**, available in Chinese and English
 ### 待办 / Open items
 
 - [ ] 召开首次团队会议：认领 A–E 角色、**选举队长**（议程见 [docs/06 §10](docs/06-团队分工-CN.md)）
-- [ ] 完成项目章程签署（[docs/07 §14](docs/07-项目章程-CN.md)）
+- [ ] 核对 Project No.（推测 45）、学年学期、导师姓名，填入 [docs/07](docs/07-项目章程-CN.md) 并誊入 Word 模板（附提交前检查清单）
 - [ ] 确定风险分类体系 Risk Taxonomy（M0 首要交付物，关键路径起点）
 - [ ] 确认项目周期、范围界定与可用算力
 - [ ] 核实文献引用（见 [docs/04 §8](docs/04-文献综述-CN.md) 核实状态表）
 - [ ] 采集电信场景种子数据（≥300 张，TG1 判据）
+- [ ] 建立 `progress/` 目录记录里程碑**实际**完成日期与范围变更 —— 报告模板要求 Planned vs Actual 对照（见 [docs/01 §7.4](docs/01-技术方案与里程碑-CN.md)）
+- [ ] 向导师确认是否需要提交 team project video（报告模板附录提及）
 
 ---
 

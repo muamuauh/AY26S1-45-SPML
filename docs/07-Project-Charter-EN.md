@@ -1,382 +1,336 @@
-# TelecomSafe — Project Charter
+# EE6008 Project Charter
 
-> Document version: v1.0 (draft, pending signature) ｜ Generated: 2026-08-19
+> Document version: v2.0 ｜ Generated: 2026-08-22
 > Chinese counterpart: [07-项目章程-CN.md](07-项目章程-CN.md)
-> Status: ⬜ Draft　⬜ Reviewed　⬜ Approved
->
-> **The project charter is the project's formal authorisation document.** Once signed by the supervisor and all members, it becomes the baseline for scope, objectives and governance; any scope change must follow the change control process in §13.
+> **This document follows the fields and tables of the official school template `template/EE6008_Project_Charter_Template.docx` exactly, and can be copied section by section into the Word template.**
 
 ---
 
-## 1. Project Identification
+## 📌 How to Use
 
 | Item | Content |
 |------|---------|
-| **Project name** | TelecomSafe |
-| **Full title** | A Novel Generative Image-based Learning Framework for Enhancing the Construction Safety of Telecommunication Projects |
-| **Project code** | AY26S1-45-SPML |
-| **Repository** | https://github.com/muamuauh/AY26S1-45-SPML |
-| **Project type** | Academic research project |
-| **Duration** | W1 – W16 (16 weeks, one semester) ｜ Start date: TBC |
-| **Team size** | 5 |
-| **Charter version** | v1.0 (draft) |
+| Template source | `template/EE6008_Project_Charter_Template.docx` |
+| Official sections | Cover → Date Prepared → Project information table → Project Purpose or Justification → Project Description → Summary Milestones → Team Member Activity matrix → Summary Budget → Risk Assessment |
+| Approach here | Section headings match the official template **exactly**; content is pre-filled for TelecomSafe |
+| `<<...>>` | Placeholder requiring confirmation by the team or supervisor |
+| Detailed rationale | The official template is deliberately brief; full argumentation lives in companion documents 00–06 (see Appendix B) |
+
+> ⚠️ **Change from v1.0 to v2.0**: v1.0 followed a generic PMBOK structure (15 sections including scope, stakeholders, assumptions, constraints, change control and a signature page), which does not match the school template. v2.0 has been restructured into the official template's 8 fields. Content dropped by the official template (out-of-scope statements, stakeholder analysis, assumptions and constraints, change control) has been moved to **Appendix A** and retained for internal management use.
 
 ---
 
-## 2. Business Case
-
-### 2.1 Problem Statement
-
-Safety risks at telecommunication construction sites arise from five sources: **uneven terrain, improperly operated machinery, poorly stored materials, missing personal protective equipment, and unsafe worker behaviour**.
-
-Deep-learning-based computer vision offers an efficient means of identifying these risks, but its performance is constrained by one core bottleneck:
-
-> **The limited availability and diversity of labelled, sector-specific images** for the telecommunication industry.
-
-A systematic literature search (Google Scholar / IEEE Xplore / ACM DL) established that **no public, annotated safety-detection dataset exists for telecommunication construction scenes** (see `04-Literature-Survey-EN.md` §3.2). The nearest existing work addresses asset inspection of telecommunication towers, not safety during construction.
-
-### 2.2 Why Now
-
-1. **The technology window is open**: diffusion models and controllable generation (ControlNet, inpainting) reached practical maturity in 2023–2024, making the "generation-is-annotation" paradigm viable
-2. **The research gap is well defined**: generative augmentation work in construction safety is concentrated in 2024–2026, and no one has addressed the telecommunication vertical
-3. **A structural data acquisition deadlock**: real photographs of safety violations involve worker portrait rights and labour-relations exposure, making lawful collection and publication difficult — synthetic data removes the problem at its root
-
-### 2.3 Expected Value
-
-| Type | Value |
-|------|-------|
-| Academic | Addresses five research gaps (G1–G5); credible target for submission to *Automation in Construction* |
-| Data | Produces a releasable TelecomSynth synthetic dataset and Risk Taxonomy, each a citable contribution in its own right |
-| Engineering | Delivers a working prototype for telecommunication construction safety appraisal |
-| Compliance | The synthetic-data approach avoids real worker privacy issues, making practical adoption feasible |
-
----
-
-## 3. Objectives and Success Criteria
-
-### 3.1 Overall Objective
-
-Develop and evaluate a generative image-based learning framework for telecommunication construction safety, achieving high effectiveness and robustness in identifying potential risks across four dimensions: **terrain, machinery, materials and workers**.
-
-### 3.2 Specific Objectives and Success Criteria (SMART)
-
-| # | Objective | Measurable success criterion | Verification | Priority |
-|---|-----------|----------------------------|-------------|----------|
-| **O1** | Establish a telecommunication construction risk taxonomy | Risk Taxonomy with 4 categories × ≥20 sub-classes, each with decidable quantitative criteria | Supervisor review | **Must** |
-| **O2** | Build the generative augmentation pipeline | ≥3,000 synthetic images passing the quality gates; FID < 50; human realism ≥ 3.0/5 | Gate TG2 | **Must** |
-| **O3** | Prove generative augmentation is effective | E3 improves mAP by ≥ 2.0 over E2 (conventional augmentation) | Gate TG3 | **Must** |
-| **O4** | Implement multi-dimensional perception | ≥2 dimensions reach usable accuracy (mAP@50 ≥ 0.70); target is 4 dimensions | Experimental report | **Must (2)** |
-| **O5** | Implement fusion-based risk appraisal | Risk-level classification accuracy ≥ 0.70 against expert annotation | Gate TG4 | Desired |
-| **O6** | Deliver a runnable system | End-to-end demo presentable; single-image inference < 3 s | Gate TG5 | Desired |
-| **O7** | Verify robustness | Complete performance degradation curves under low light / rain-fog / blur / small targets | Experimental report | Desired |
-| **O8** | Complete academic output | Paper/technical report finalised; defence passed | Supervisor and examiners | **Must** |
-
-> **On priority**: failure of a "Must" objective means the project has not met its target. Failure of a "Desired" objective can be handled through a downgrade path (see `05-Technological-Roadmap-EN.md` §6) and must be explained in the report.
-
-### 3.3 Explicit Non-Objectives
-
-The following are **not** success criteria, stated here to prevent scope inflation:
-
-- ❌ Production-grade deployment on real-time video streams
-- ❌ Integration with existing construction management systems (BIM / ERP)
-- ❌ Commercial product development and market validation
-- ❌ Procurement and deployment of hardware (cameras, UAVs)
-- ❌ Coverage of every telecommunication construction trade and every risk type
-
----
-
-## 4. Project Scope
-
-### 4.1 In Scope
-
-| Category | Content |
-|----------|---------|
-| **Risk dimensions** | Terrain, Machinery, Materials, Workers (including PPE and unsafe behaviour) |
-| **Scenes** | Base stations, lattice and monopole towers, optical cable trenching, rooftop antennas, equipment-room work |
-| **Input forms** | Handheld photographs, fixed camera imagery (video is a desired item) |
-| **Technologies** | Generative AI data augmentation, deep-learning detection/segmentation, information fusion for risk appraisal |
-| **Deliverables** | Datasets, models, pipeline code, demo system, experimental report, paper/technical report |
-
-### 4.2 Out of Scope
-
-| Category | Note |
-|----------|------|
-| UAV aerial input | Listed as an H3 extension, not delivered this cycle |
-| Tower-mounted recorders | As above; requires additional equipment |
-| Production deployment and operations | Prototype only |
-| Multi-region regulatory adaptation | The rule base covers selected standards only (OSHA 1926, GB 26859) |
-| Sensor / IoT data fusion | Fusion is within-image and multi-dimensional only |
-| Edge device optimisation | Listed as H3 |
-
-### 4.3 Key Scoping Decision ⚠️
-
-> **Delivering all four risk dimensions to high quality within one semester is close to impossible.**
->
-> **Recommendation**: decide at M0 to "focus on Workers + Machinery (satisfying O4), keeping Terrain and Materials merely functional", and state the scoping rationale honestly in the final report.
->
-> This decision must be confirmed at the first team meeting and recorded in the minutes. If all four dimensions are pursued, raise the severity of risk R7 in §12 accordingly.
-
----
-
-## 5. Deliverables
-
-| ID | Deliverable | Form | Milestone | Acceptance criterion |
-|----|------------|------|-----------|---------------------|
-| **D1** | Risk Taxonomy | Document + YAML | M0 (W1) | 4 categories × ≥20 sub-classes, each with quantitative criteria; supervisor approved |
-| **D2** | Annotation guideline | Document | M1 (W2) | Includes edge-case rules; two-annotator pilot agreement Kappa ≥ 0.7 |
-| **D3** | TelecomSeed-v1 real dataset | Images + COCO annotation | M1 (W3) | ≥300 annotated; strict train/val/test split |
-| **D4** | Generation pipeline code | Repository | M2 (W6) | Four engines + four gates runnable; documented |
-| **D5** | TelecomSynth-v1 synthetic dataset | Images + annotation + metadata | M2 (W6) | ≥3,000 images; FID < 50; per-image seed/prompt metadata |
-| **D6** | Generation quality report | Document | M2 (W6) | FID/CLIP/human ratings and per-gate rejection rates |
-| **D7** | Perception models and weights | Model files + code | M3 (W9) | ≥2 dimensions at mAP@50 ≥ 0.70 |
-| **D8** | E1–E3 core experiment results | Report + W&B logs | M3 (W9) | Complete comparison table; reproducible scripts |
-| **D9** | Safety rule base | Code + document | M4 (W10) | ≥15 decidable rules citing regulatory sources |
-| **D10** | Information fusion module | Code | M4 (W11) | Three-level fusion runnable; E8 complete |
-| **D11** | TelecomSafe demo system | Running system | M5 (W13) | End-to-end presentable; < 3 s per image |
-| **D12** | Full experimental report | Document | M6 (W15) | E1–E9 plus ablations A1–A7 |
-| **D13** | Paper / technical report | Document | M7 (W16) | Structurally complete; citations verified |
-| **D14** | Defence materials | Slides + demo | M7 (W16) | Rehearsed |
-| **D15** | Archived repository | Git repository | M7 (W16) | README, environment, reproduction scripts complete |
-
----
-
-## 6. Milestone Summary
-
-| Milestone | Weeks | Name | Key deliverables | Gate |
-|-----------|-------|------|-----------------|------|
-| M0 | W1 | Setup and survey | D1 | — |
-| M1 | W2–W3 | Data infrastructure | D2, D3 | **TG1** Data foundation |
-| M2 | W4–W6 | Generation pipeline | D4, D5, D6 | **TG2** Generation quality |
-| M3 | W7–W9 | Perception models | D7, D8 | **TG3** Augmentation effectiveness |
-| M4 | W10–W11 | Fusion and decision | D9, D10 | **TG4** Fusion feasibility |
-| M5 | W12–W13 | System integration | D11 | **TG5** System integration |
-| M6 | W14–W15 | Full evaluation | D12 | — |
-| M7 | W16 | Delivery | D13, D14, D15 | — |
-
-> Detailed schedule: `01-Technical-Plan-and-Milestones-EN.md` §4. Gate criteria and downgrade paths: `05-Technological-Roadmap-EN.md` §3 and §6.
-
----
-
-## 7. Stakeholders
-
-| Stakeholder | Role | Interests | Engagement | Frequency |
-|------------|------|-----------|-----------|-----------|
-| **Supervisor** | Project sponsor, final acceptor | Academic quality, progress, member commitment | Weekly meeting + gate meetings | Weekly (in person) |
-| **Team leader** | Project coordinator | Progress, collaboration, external communication | Throughout | Daily |
-| **Members A–E** | Executors | Technical delivery, visibility of individual contribution | Throughout | Daily |
-| **Course / degree examiners** | Assessors | Completeness of delivery, academic rigour | Defence | Once |
-| **Safety domain experts** (external) | Risk annotation providers | Annotation workload, professional accuracy | 200-image annotation during M4 | As needed |
-| **Potential data providers** (external, if any) | Source of real data | Data compliance, privacy | Data collection phase | As needed |
-
-> **Key note**: the supervisor is the sole sponsor and acceptor, and the project explicitly requires `regular in-person meetings and discussions on campus`. As sole point of contact, the leader must ensure weekly in-person communication is never interrupted.
-
----
-
-## 8. Team and Governance
-
-### 8.1 Team Composition
-
-| ID | Role | Name | Primary layer |
-|----|------|------|--------------|
-| Member A | Data Lead | ______________ | L2 Data |
-| Member B | Generation Lead ★ | ______________ | L2 Generation |
-| Member C | Perception Lead – Workers | ______________ | L3 Workers + Behaviour |
-| Member D | Perception Lead – Scene | ______________ | L3 Machinery/Materials/Terrain |
-| Member E | Fusion & System Lead | ______________ | L4 Fusion + L5 System |
-| **Team Leader** | Project coordinator | ______________ | (elected from A–E) |
-| Deputy Leader | Acts in the leader's absence | ______________ | (runner-up by votes) |
-
-> Names to be filled in after the first team meeting. Role responsibilities: `06-Teamwork-Allocation-EN.md` §2.
-
-### 8.2 How the Leader Is Determined
-
-The leader is **not pre-assigned**. They are elected at the first team meeting following the process in `06-Teamwork-Allocation-EN.md` §3.3:
+## Cover Page
 
 ```
-Nomination criteria (mandatory):
-  ① Can guarantee on-campus attendance — a hard project requirement
-  ② Can guarantee time commitment — an extra 20–25% coordination load
-  ③ Willing to communicate and coordinate
+EE6008 Collaborative Research and Development Project
 
-Process: read responsibilities → nominations → eligibility check → secret ballot → record
-Ties: second round; if still tied, the supervisor decides
+                        Project Charter
+
+        <<Project No. 45>> & TelecomSafe: A Novel Generative
+        Image-based Learning Framework for Enhancing the
+        Construction Safety of Telecommunication Projects
+
+        Students' Names:   <<Member A>>, <<Member B>>, <<Member C>>,
+                           <<Member D>>, <<Member E>>
+        Supervisor's Name: <<XXX>>
+
+        School of Electrical and Electronic Engineering
+        Academic Year 2026/27
+        Semester 1
 ```
 
-### 8.3 Decision-Making
-
-| Decision type | Method | Record |
-|--------------|--------|--------|
-| Technical approach | Decided by the responsible lead; leader informed | Technical alignment minutes |
-| Cross-module interfaces | Agreed by the affected members | Interface contract document (`06` §6) |
-| Gate pass / downgrade | Chaired by the leader, assessed by the team, confirmed by the supervisor | Gate decision record |
-| Scope change | See §13 Change Control | Change request form |
-| Deadlock | Team vote (majority); if still unresolved, the supervisor decides | Meeting minutes |
+> **To confirm**:
+> - Project No.: inferred as **45** from the repository name `AY26S1-45-SPML`; verify with the supervisor
+> - Academic Year / Semester: inferred as **2026/27 Semester 1** from `AY26S1`; verify
+> - Supervisor's Name: to be filled
 
 ---
 
-## 9. Resources and Budget
+## Date Prepared
 
-### 9.1 Compute
-
-| Item | Recommended | Minimum | Status |
-|------|------------|---------|--------|
-| GPU | RTX 4090 24GB × 1–2, or A100 40GB | RTX 3090 24GB / cloud on demand | ⬜ TBC |
-| Storage | ≥ 500 GB | 250 GB | ⬜ TBC |
-| Cloud budget (if needed) | To be estimated | — | ⬜ TBC |
-
-> ⚠️ **Compute is a precondition that must be confirmed at M0.** If single-GPU VRAM is below 16 GB, trigger downgrade path D7 immediately (SD 1.5 instead of SDXL).
-
-### 9.2 Human Resources
-
-5 members × ~10 hours/week × 16 weeks ≈ **800 person-hours**
-
-### 9.3 External Resources
-
-| Resource | Purpose | How obtained | Status |
-|----------|---------|-------------|--------|
-| Public datasets (SODA/MOCS/ACID/CHV/SHEL5K) | Transfer base | Academic request / download | ⬜ Pending |
-| Pretrained model weights | SDXL / YOLOv11 / SAM 2 etc. | Open-source download | ⬜ Pending |
-| Access to telecommunication sites | Real data collection | Requires supervisor coordination | ⬜ TBC |
-| Safety domain experts (2–3) | Risk-level annotation | Requires supervisor introduction | ⬜ TBC |
-| ScienceDirect full-text access | Citation verification | Campus network | ⬜ TBC |
-
-### 9.4 Software and Tools
-
-| Category | Tools | Licence |
-|----------|-------|---------|
-| Deep learning | PyTorch 2.x, Ultralytics, diffusers, transformers | Open source (Ultralytics is AGPL-3.0) |
-| Annotation | CVAT / Label Studio | Open source |
-| Experiment tracking | Weights & Biases / MLflow | Free academic tier |
-| Data versioning | DVC | Open source |
-| Collaboration | GitHub | In place |
+`<<YYYY-MM-DD>>` — suggested: the date of the first team meeting or of charter signature
 
 ---
 
-## 10. Assumptions
+## Project Information
 
-This charter rests on the following assumptions. **If any fails, project scope must be reassessed.**
+| Field | Content |
+|-------|---------|
+| **Project No. & Project Title** | `<<45>>` — TelecomSafe: A Novel Generative Image-based Learning Framework for Enhancing the Construction Safety of Telecommunication Projects |
+| **Project Supervisor** | `<<Supervisor name>>` |
+| **Team Leader** | `<<To be elected>>` — nomination criteria and election process in document [06 §3](06-Teamwork-Allocation-EN.md) |
+| **Names of Team Members** | `<<Member A>>`, `<<Member B>>`, `<<Member C>>`, `<<Member D>>`, `<<Member E>>` (5 in total) |
 
-| # | Assumption | Consequence if false | Verified at |
-|---|-----------|---------------------|------------|
-| A1 | ≥300 real telecommunication images can be collected before W3 | Triggers D1; repositions the project to generic work-at-height scenarios | TG1 (W3) |
-| A2 | The team has access to a GPU with ≥24 GB VRAM | Triggers D7; generation quality declines | M0 (W1) |
-| A3 | All 5 members participate throughout at ≥10 hours/week each | Duties reallocated per `06` §9; may trigger D8 | Weekly |
-| A4 | 2–3 safety experts can annotate 200 images | O5 becomes unverifiable; fusion downgrades to pure rules (D4) | W8 |
-| A5 | All members can meet in person weekly | Violates a hard project requirement; escalate to the supervisor immediately | Weekly |
-| A6 | Public datasets can be obtained without obstruction | Transfer base missing; requires more real or more synthetic data | M1 (W2) |
-| A7 | LoRA fine-tuning yields usable telecommunication imagery | Triggers D2; only the inpainting route survives | TG2 (W6) |
+> **Note**: the Team Leader field must be completed after the election at the first team meeting. The process is defined in document 06 §3.3 (nomination → eligibility check → secret ballot).
 
 ---
 
-## 11. Constraints
+## Project Purpose or Justification
 
-| # | Constraint | Type | Note |
-|---|-----------|------|------|
-| C1 | **In person required**: `absence and remote working on the project are unacceptable` | Mandatory rule | Explicit in the project brief; affects meeting arrangements and member selection |
-| C2 | Fixed 16-week cycle | Time | Semester-bound; cannot be extended |
-| C3 | Fixed team size of 5 | Human resources | No additional members |
-| C4 | No budget for dedicated capture equipment | Resource | Collection limited to phones and existing cameras |
-| C5 | Real worker imagery involves portrait rights | Legal / ethical | Requires de-identification or informed consent; limits public release |
-| C6 | Ultralytics YOLO is AGPL-3.0 | Licence | Commercial licence required if not open-sourced; must be stated in the report |
-| C7 | FLUX.1-dev is non-commercial | Licence | Fine for academic research; switch to the schnell variant if commercialisation is anticipated |
-| C8 | The test set must be entirely real and strictly isolated | Methodological | Violation invalidates every experimental conclusion |
+> *Template requirement: Describe the reason or justification the project is being undertaken.*
 
----
+Telecommunication construction sites present multiple categories of safety risk, including uneven terrain, improperly operated machinery, poorly stored materials, missing personal protective equipment and unsafe worker behaviour. Conventional manual inspection is time-consuming, subjective and difficult to sustain across a whole site.
 
-## 12. High-Level Risks
+Deep-learning-based computer vision offers an effective means of automated safety monitoring, but its application in the telecommunication sector is constrained by one decisive bottleneck: **labelled, sector-specific imagery is both scarce and insufficiently diverse**. This bottleneck has three causes:
 
-The full risk register is in `01-Technical-Plan-and-Milestones-EN.md` §5; technical risks are in `05-Technological-Roadmap-EN.md` §8. Listed here are the risks requiring **charter-level attention**.
+1. **Distribution mismatch.** All existing public construction datasets (SODA, MOCS, ACID and others) originate from building and municipal sites. Telecommunication scenes — lattice towers, monopoles, base-station equipment rooms, cable trenches, rooftop antennas — differ systematically in object morphology, camera viewpoint and working height, so directly transferred general-purpose models degrade substantially.
 
-| ID | Risk | Likelihood | Impact | Response | Owner |
-|----|------|-----------|--------|----------|-------|
-| R1 | Insufficient real telecommunication data | High | High | Public dataset transfer + whole-team collection; downgrade D1 | Member A |
-| R2 | Negative transfer from synthetic data; E3 fails | Medium | **Very high** | Four quality gates + conservative ratio; downgrade D3 narrows the claim | Members B, C |
-| R3 | Scope creep (attempting all four dimensions) | High | High | **Decide at M0 to focus on two dimensions**; downgrade D8 | Leader |
-| R4 | Insufficient member commitment or absence | Medium | High | Traceable contribution records + W8 mid-term review; reallocate per `06` §9 | Leader |
-| R5 | Breach of the in-person attendance requirement | Medium | **Very high** | Fix time and place at the first meeting with commitment from all; escalate any breach to the supervisor | Leader |
-| R6 | Insufficient compute | Medium | Medium | LoRA rather than full fine-tuning; downgrade D7 | Member B |
-| R7 | Expert annotation cannot be arranged | Medium | Medium | Start recruiting at W8; downgrade D4 to pure rule fusion | Member E |
-| R8 | Unverified citations causing academic irregularity | Medium | Medium | Complete every entry per the verification status table in `04` §8 | Leader |
+2. **Long-tail risks cannot be collected.** Genuinely hazardous scenes (for example a worker leaning out from a tower without a fall-arrest harness) are extremely rare in real data; and even when they occur, they are difficult to photograph and publish for ethical, legal and labour-relations reasons. This constitutes a structural deadlock in data acquisition.
 
-> **R2 and R5 are the two "very high impact" risks**: the first undermines the project's core academic claim, the second breaches an explicit project rule. Both should be confirmed as a standing item at every weekly meeting.
+3. **No sector-specific resources exist.** A systematic search of Google Scholar, IEEE Xplore and the ACM Digital Library found **no public annotated dataset or dedicated framework for telecommunication construction safety**. The nearest existing work concerns asset inspection of telecommunication towers, at the commercial-product level, rather than safety during construction.
+
+This project exists to fill that gap. TelecomSafe introduces **generative artificial intelligence** to synthesise training data and break the data-scarcity constraint, and combines deep-learning image processing with information fusion to appraise construction risk across four dimensions — terrain, machinery, materials and workers. The project carries both **academic value** (the relevant literature is concentrated in 2024–2026, making the topic timely, and none of it targets the telecommunication sector) and **engineering value** (transferable to the safety management practice of telecommunication operators and contractors).
 
 ---
 
-## 13. Change Control
+## Project Description
 
-### 13.1 Changes Requiring the Formal Process
+> *Template requirement: Provide a summary description of the project. This section may include information on project deliverables as well as the approach of the project.*
 
-- Addition, removal or adjustment of objectives (§3) or their success criteria
-- Material change to scope (§4), including triggering any downgrade path D1–D8
-- Milestone dates (§6) slipping by more than one week
-- Reduction of deliverables (§5)
-- Change of team roles or the team leader
+### Overview
 
-### 13.2 Change Process
+TelecomSafe is a multi-dimensional intelligent safety risk identification framework for telecommunication construction scenes. Its core innovations are **resolving sector-specific data scarcity through generative data augmentation** and **converting point detections into an interpretable, site-level risk appraisal through hierarchical information fusion**.
+
+### Technical Approach
+
+The system adopts a five-layer architecture:
+
+| Layer | Name | Content |
+|-------|------|---------|
+| **L1** | Input | Handheld photographs and fixed cameras (MVP scope); UAV aerial imagery and tower-mounted recorders (extensions) |
+| **L2** | **Data ★ CORE INNOVATION ★** | Real data collection and annotation + generative augmentation pipeline + four quality gates |
+| **L3** | Perception | Four parallel branches: terrain segmentation, machinery detection, material state judgement, worker detection with PPE attributes |
+| **L4** | **Fusion & Decision ★ SECONDARY CORE ★** | Three-level fusion: entity graph → regulation-derived rule predicates → learnable fusion → risk score |
+| **L5** | Application | Web visualisation dashboard, risk scorecard, hazard report generation |
+
+### Core Method: Generative Data Augmentation
+
+The pipeline uses SDXL with LoRA domain adaptation across four generation routes:
+
+- **ControlNet layout control** — the semantic layout map is both the generation condition and, directly, the segmentation annotation (zero annotation cost)
+- **Inpainting local editing** — remove PPE such as helmets from real images while the bounding-box annotation is inherited unchanged (smallest domain gap)
+- **Text-to-image** — generate rare hazardous scenes entirely absent from the real world
+- **Background replacement** — produce rain, fog and night-time variants for robustness testing
+
+All synthetic data must pass four quality gates (G1 semantic consistency / G2 distributional consistency / G3 annotation reliability / G4 human spot-check), with an expected retention rate of 50–65%.
+
+### Principal Deliverables
+
+| Category | Deliverables |
+|----------|-------------|
+| **Data** | Risk Taxonomy for telecommunication construction, annotation guideline, TelecomSeed (real seed dataset, ≥ 500 images), TelecomSynth (synthetic dataset, ≥ 3,000 images) |
+| **Models** | LoRA domain-adapted generative model, four generation engines, four-branch perception models, three-level information fusion module |
+| **System** | A runnable end-to-end TelecomSafe demo (web interface + risk scorecard) |
+| **Experiments** | Complete E1–E9 results, centred on E3 (validation of augmentation effectiveness) and E7 (robustness) |
+| **Documentation** | EE6008 project report, defence presentation, code repository with reproduction scripts |
+
+### Method of Working and Key Criteria
+
+The project manages technical risk through a **decision-gate mechanism**: at W3, W6, W9, W11 and W13, objective metrics determine whether to continue, adjust or downgrade, with a fallback pre-defined for every gate (see document [05 §3](05-Technological-Roadmap-EN.md)).
+
+The three must-pass gates:
+
+| Gate | Timing | Criterion |
+|------|--------|-----------|
+| **TG1** Data foundation | End W3 | ≥ 300 annotated real telecommunication seed images |
+| **TG2** Generation quality | End W6 | FID(synthetic, real) < 50; human realism rating ≥ 3.0/5 |
+| **TG3** Augmentation effectiveness | End W9 | E3 improves mAP over E2 by ≥ 2.0 — **the project's decisive checkpoint** |
+
+### Scope Note ⚠️
+
+Delivering all four risk dimensions to high quality within a single semester is not realistic. **It is recommended that the first team meeting explicitly resolves to focus on the Workers and Machinery dimensions, keeping Terrain and Materials merely functional**, and to state this scope boundary honestly in the final report. This decision should be confirmed and recorded at project start.
+
+---
+
+## Summary Milestones
+
+> *Template requirement: List significant activities / events in the project. Target completion date of the milestone.*
+
+| Summary Milestones | Target Date |
+|-------------------|-------------|
+| **M0 Project setup and survey** — Risk Taxonomy v1.0, literature survey, role assignment and leader election, charter signature | W1 ｜ `<<YYYY-MM-DD>>` |
+| **M1 Data infrastructure** — annotation guideline and TelecomSeed-v1 (≥ 300 annotated); **Gate TG1** | End W3 ｜ `<<YYYY-MM-DD>>` |
+| **M2 Generation pipeline** — LoRA model, four generation engines, four quality gates, TelecomSynth-v1 (≥ 3,000 images); **Gate TG2** | End W6 ｜ `<<YYYY-MM-DD>>` |
+| **M3 Perception models** — four-branch perception models and core comparison experiments E1/E2/E3; **Gate TG3 (decisive)** | End W9 ｜ `<<YYYY-MM-DD>>` |
+| **M4 Fusion and decision** — safety rule base (≥ 15 rules), three-level fusion module, expert risk annotation set, experiment E8; **Gate TG4** | End W11 ｜ `<<YYYY-MM-DD>>` |
+| **M5 System integration** — runnable TelecomSafe web demo; **Gate TG5** | End W13 ｜ `<<YYYY-MM-DD>>` |
+| **M6 Full evaluation** — experiments E4–E9, robustness test set, all ablation tables | End W15 ｜ `<<YYYY-MM-DD>>` |
+| **M7 Delivery** — project report, defence presentation, curated code repository | W16 ｜ `<<YYYY-MM-DD>>` |
+
+> **To confirm**: whether the project runs 12 or 16 weeks. The table above assumes 16; for 12 weeks, compress M2 and M5 and downgrade UAV input and video behaviour recognition to optional (see document [01 §4](01-Technical-Plan-and-Milestones-EN.md)).
+> **Dates**: once the semester start week is confirmed, convert W1–W16 into calendar dates in the right-hand column.
+
+---
+
+## Team Member Activity
+
+> *Template requirement: Activity in which a team member plays a key role.* ✅ marks a key role; **●** marks the accountable owner.
+
+| Activity | Member 1<br>`<<A Data>>` | Member 2<br>`<<B Generation>>` | Member 3<br>`<<C Perc-Workers>>` | Member 4<br>`<<D Perc-Scene>>` | Member 5<br>`<<E Fusion/System>>` |
+|---------|:---:|:---:|:---:|:---:|:---:|
+| A1 Risk Taxonomy and annotation guideline | ● | ✅ | | | |
+| A2 Real data collection, screening and annotation (TelecomSeed) | ● | | ✅ | ✅ | |
+| A3 Risk scenario specification library | ✅ | ● | | | |
+| A4 LoRA domain adaptation of the generative model | | ● | | | |
+| A5 Four generation engines and automatic annotation | ✅ | ● | | | |
+| A6 Four quality gates and threshold calibration | | ● | | | ✅ |
+| A7 Bulk synthetic dataset generation (TelecomSynth) | ✅ | ● | | | |
+| A8 Workers perception model and PPE attribute recognition | | | ● | | |
+| A9 Behaviour recognition (skeleton action) | | ✅ | ● | | |
+| A10 Machinery / Materials / Terrain perception models | ✅ | | | ● | |
+| A11 **Core experiments E1/E2/E3 (augmentation effectiveness)** | | ✅ | ● | | ✅ |
+| A12 Safety rule base encoding and entity graph construction | | | | ✅ | ● |
+| A13 Three-level fusion module and expert annotation | | | ✅ | ✅ | ● |
+| A14 System integration and web demo development | | | | | ● |
+| A15 Experiment tracking platform and reproduction scripts | | ✅ | ✅ | ✅ | ● |
+| A16 Robustness and generalisation experiments (E7 / E9) | | ✅ | ● | ✅ | |
+| A17 Project report writing and defence presentation | ✅ | ✅ | ✅ | ✅ | ✅ |
+
+> **Notes**:
+> - Members 1–5 correspond one-to-one with Members A–E in document [06 §2](06-Teamwork-Allocation-EN.md); names to be filled after the first meeting
+> - The team leader carries approximately 20–25% additional coordination load on top of their technical role (supervisor liaison, chairing weekly and gate meetings, progress tracking)
+> - A17 is shared by all: **each member drafts the section covering their own module**, with the leader consolidating. This maps directly onto the "Individual Reports from Team Members" section required by the official report template
+
+---
+
+## Summary Budget
+
+> *Template requirement: List the initial range of budget for the project.*
+
+**Expected cash expenditure: S$0 — this is a purely computational project requiring no hardware purchase or consumables.**
+
+| Item | Note | Budget |
+|------|------|--------|
+| Compute | Prefer the school laboratory GPU workstations or cluster (RTX 4090 24GB or A100 40GB recommended) | S$0 (campus resource) |
+| Cloud GPU (contingency) | Only if campus resources are unavailable; estimated 100 GPU-hours × approx. S$1.5–3/hour | S$150–300 (**TBD, requires application**) |
+| Software and frameworks | PyTorch, Ultralytics, diffusers, SDXL, ControlNet, SAM 2 — all open source | S$0 |
+| Experiment tracking | Weights & Biases academic tier / self-hosted MLflow | S$0 |
+| Datasets | SODA, MOCS, ACID, CHV, SHEL5K and others; free for academic use | S$0 |
+| Data collection | Travel costs for on-site photography of telecommunication scenes, if required | `<<To be estimated>>` |
+| Storage | ≥ 500 GB (raw + synthetic data + model weights + experiment artefacts) | S$0 (campus storage) |
+
+**Licensing notes** (no cost implication, but relevant to compliance):
+- Ultralytics YOLO is **AGPL-3.0**; a commercial licence is required if the work is not open-sourced — normally unproblematic for a campus research project, but it should be stated in the report
+- FLUX.1-dev carries a **non-commercial licence**; usable for academic research. If commercialisation is anticipated, switch to FLUX.1-schnell (Apache 2.0)
+- Most public datasets are for academic use; commercial use requires separate application
+
+---
+
+## Risk Assessment
+
+> *Template requirement: List the general risks... assess the probability and potential impacts. Provide solutions and mitigation plans. State whether the training of equipment usage and safety training have been completed.*
+
+### Laboratory Equipment Use and Safety Training Status
+
+| Item | Status |
+|------|--------|
+| **Laboratory equipment used** | Yes — GPU workstations / compute cluster only. **No mechanical, electrical, chemical or high-voltage hazardous equipment is involved** |
+| **Work on live construction sites** | ❌ **Not involved.** The project does not carry out work on real construction sites. If on-site photography of telecommunication scenes is required, it will be conducted **only from outside the safety perimeter** — no tower climbing, no entry to work faces, no approach to operating machinery |
+| **Equipment usage training** | `<<To confirm>>` — confirm whether training and account provisioning for the laboratory GPU cluster/workstations are complete |
+| **General laboratory safety training** | `<<To confirm>>` — if required by the school, to be completed by `<<date>>` |
+| **Field data collection safety** | If on-site photography is confirmed, notify the supervisor of route and timing in advance and comply with the site's safety rules |
+
+### General Project Risks
+
+| ID | Risk | Probability | Impact | Mitigation | Gate |
+|----|------|------------|--------|-----------|------|
+| **R1** | Insufficient real telecommunication data (no public dataset; must be self-collected) | High | High | ① Use public construction datasets as a transfer base ② Web collection with manual screening ③ On-site capture at campus or partner facilities. If < 150 images by end of W3, trigger downgrade path **D1**: reposition to generalised "work-at-height / tower-type construction" | TG1 |
+| **R2** | Generated image quality inadequate, causing negative transfer (synthetic data degrades performance) | Medium | **High** | ① Strict filtering by the four quality gates ② Conservative ratio (start at 25%) ③ Always retain a pure-real baseline for comparison. If FID > 70, trigger **D2**: keep only the inpainting and background-replacement routes that edit real images | TG2 |
+| **R3** | E3 fails to demonstrate augmentation effectiveness (the project's central claim does not hold) | Medium | **High** | ① Diagnose label noise and mixing ratio first ② Switch to class-adaptive ratios. If there is still no gain, trigger **D3**: narrow the conclusion to "improves long-tail rare-class performance" and state honestly that overall performance did not improve | TG3 |
+| **R4** | Insufficient compute (diffusion training and inference are expensive) | Medium | Medium | ① LoRA rather than full fine-tuning ② SDXL-Turbo for >10× faster bulk generation ③ 8-bit quantisation and gradient checkpointing ④ Apply for cloud GPU if necessary. Triggers **D7** | — |
+| **R5** | No video data, so behaviour recognition cannot proceed | High | Medium | Trigger downgrade path **D6**: replace temporal action recognition with single-frame pose estimation plus rules (e.g. arm angle to detect climbing) | — |
+| **R6** | Scope too large (four dimensions cannot all be completed in one semester) | High | High | **Resolve at project start to focus on Workers + Machinery**, keeping Terrain and Materials merely functional. If more than 2 weeks behind, trigger **D8** | — |
+| **R7** | No ground truth for the fusion module (risk level has no objective standard) | Medium | Medium | ① Generate weak labels from the rule base ② Have 2–3 annotators assign risk levels to 200 images and compute agreement Kappa ③ Begin recruiting annotators in W8 rather than deferring to the end | TG4 |
+| **R8** | Teamwork risks: absence, uneven progress, unclear contribution | Medium | Medium | ① Weekly in-person meetings (a hard project requirement) ② Kanban plus a full trail in Git/PR/W&B ③ Document [06 §9](06-Teamwork-Allocation-EN.md) pre-defines handover plans for the loss of any member | — |
+| **R9** | Data privacy and compliance (self-collected data captures worker likeness) | Medium | Medium | ① Face blurring or informed consent ② Internal use only, not published ③ **Synthetic data depicts no real individual and avoids the problem at its root** — an additional advantage of the generative approach | — |
+| **R10** | The in-person attendance requirement cannot be met (the brief prohibits remote work) | Low | **High** | Fix the weekly meeting time and place at the first meeting with written confirmation from all members; leader candidates must confirm they can meet this mandatory requirement first | — |
+
+> **Full definitions of downgrade paths D1–D8** are given in document [05 §6](05-Technological-Roadmap-EN.md). Each path has been assessed for its effect on final outcomes, ensuring that no single risk trigger causes overall project failure.
+
+---
+
+## Appendix A: Supplementary Internal Management Material (Not in the Official Template)
+
+> The following is outside the official charter template's fields but retains practical value for project management, and is kept for internal team reference.
+
+### A.1 Explicit Non-Objectives (Out of Scope)
+
+The following are explicitly **excluded** to prevent scope creep:
+
+- ❌ Production-grade real-time video stream deployment and edge device (Jetson) optimisation
+- ❌ Integration with operators' existing safety management systems
+- ❌ Commercial product development, UI polish, multi-user permission management
+- ❌ Work on live construction sites or long-term deployed monitoring
+- ❌ Sensor modalities beyond vision (IoT sensors, wearables, BIM data)
+- ❌ Quality inspection and asset auditing of telecommunication equipment itself (an inspection problem, not a construction safety problem)
+
+### A.2 Key Assumptions
+
+| # | Assumption | Response if it fails |
+|---|-----------|---------------------|
+| 1 | At least 300 usable real telecommunication images can be obtained | Trigger D1; reposition to generalised work-at-height scenes |
+| 2 | The team has access to at least one 24 GB GPU | Trigger D7; reduce model scale |
+| 3 | Public datasets (SODA/MOCS/CHV etc.) can be requested and downloaded normally | Increase the self-collected share; extend M1 |
+| 4 | 2–3 annotators can be found for 200 risk-level annotations | Team members cross-annotate per the guideline; report agreement Kappa |
+| 5 | All members can meet the weekly in-person meeting requirement | Escalate to the supervisor; reassess team composition |
+
+### A.3 Principal Stakeholders
+
+| Stakeholder | Role | Interest | Communication frequency |
+|------------|------|----------|------------------------|
+| Project supervisor | Decision and acceptance | Academic contribution, progress, methodological rigour | Weekly (in person, via the leader) |
+| Team members (5) | Execution | Fair allocation, traceable contribution | Daily asynchronous + weekly meeting |
+| EE6008 assessors | Grading | Completeness of deliverables, report and defence quality | At milestones |
+| Potential adopters (operators / contractors) | Indirect beneficiaries | Practicality, transferability | After project completion |
+
+### A.4 Change Control (Internal Convention)
+
+Changes requiring the formal process: any change of scope, milestone slippage beyond one week, triggering of any downgrade path D1–D8, or major reassignment of member responsibilities.
+
+Process: **written proposal (change, reason, impact) → discussion at the weekly or gate meeting → team vote → supervisor approval where scope or milestones are affected → recorded in the change log and reflected in the relevant documents**.
+
+Changes not requiring the process: implementation details, hyperparameter and model configuration changes, documentation wording, and task reordering that does not affect delivery dates.
+
+### A.5 Change Log
+
+| Version | Date | Change | Author |
+|---------|------|--------|--------|
+| v1.0 | 2026-08-19 | Initial version (generic PMBOK structure, 15 sections) | — |
+| v2.0 | 2026-08-22 | **Restructured to the official template `EE6008_Project_Charter_Template.docx`**; content outside the official template moved to Appendix A | — |
+| `<<v2.1>>` | `<<date>>` | `<<Fill in names, team leader, Project No., supervisor and specific dates>>` | `<<Team leader>>` |
+
+---
+
+## Appendix B: Companion Document Index
+
+The official charter template is deliberately brief; the following documents provide full argumentation:
+
+| Document | Which part of this charter it supports |
+|----------|--------------------------------------|
+| [00 Requirements Analysis](00-Requirements-Analysis-EN.md) | Detailed argumentation for Project Purpose or Justification |
+| [01 Technical Plan & Milestones](01-Technical-Plan-and-Milestones-EN.md) | Full technical approach behind Project Description; detailed task breakdown behind Summary Milestones |
+| [02 Datasets & Pretrained Models](02-Datasets-and-Pretrained-Models-EN.md) | Technology selection rationale; licensing notes for Summary Budget |
+| [03 Generative Augmentation Pipeline](03-Generative-Augmentation-Pipeline-EN.md) | Complete design of the core method |
+| [04 Literature Survey](04-Literature-Survey-EN.md) | Academic grounding for the justification (50 references, five research gaps) |
+| [05 Technological Roadmap](05-Technological-Roadmap-EN.md) | Full definitions of gates TG1–TG5 and downgrade paths D1–D8 cited in Risk Assessment |
+| [06 Teamwork Allocation](06-Teamwork-Allocation-EN.md) | Detailed responsibilities behind the Team Member Activity matrix; leader election; contingency plans |
+
+---
+
+## ✅ Pre-Submission Checklist
 
 ```
-1. Raise      Any member submits a change request (background / change / impact / alternatives)
-2. Assess     Leader organises assessment of impact on schedule, deliverables and other modules
-3. Vote       Team vote at the weekly meeting (majority)
-4. Approve    Changes to scope or objectives require written supervisor confirmation
-5. Record     Increment this charter's version; log the change in §15
-6. Notify     Leader informs all members and the supervisor
+□ Project No. verified with the supervisor (inferred as 45)
+□ Academic Year / Semester verified (inferred as 2026/27 Semester 1)
+□ Supervisor name filled in
+□ Real names of all five members entered in the information table and activity matrix
+□ Team Leader elected and recorded
+□ Date Prepared filled in
+□ W1–W16 in Summary Milestones converted to calendar dates
+□ Project duration (12 or 16 weeks) confirmed
+□ Scope confirmed (whether to focus on Workers + Machinery)
+□ Laboratory equipment and safety training status confirmed and recorded
+□ Decided whether a cloud GPU budget application is needed
+□ Content pasted into the Word template and formatting checked
 ```
-
-### 13.3 Changes Not Requiring the Process
-
-- Adjustments to technical implementation detail (e.g. switching detector)
-- Reordering tasks within a week
-- Internal interface changes that do not affect deliverables (but downstream members must be notified)
-
----
-
-## 14. Approval and Signature
-
-This charter takes effect upon signature by the parties below. Signing indicates acceptance of the project's objectives, scope, role allocation and governance rules.
-
-| Role | Name | Signature | Date |
-|------|------|-----------|------|
-| **Supervisor** | ______________ | ______________ | ______ |
-| **Team Leader** | ______________ | ______________ | ______ |
-| Member A (Data Lead) | ______________ | ______________ | ______ |
-| Member B (Generation Lead) | ______________ | ______________ | ______ |
-| Member C (Perception – Workers) | ______________ | ______________ | ______ |
-| Member D (Perception – Scene) | ______________ | ______________ | ______ |
-| Member E (Fusion & System) | ______________ | ______________ | ______ |
-
-**Confirmations required before signature**:
-
-```
-□ Project duration confirmed (12 or 16 weeks)
-□ Scope confirmed (all four dimensions / focus on two)
-□ Available compute confirmed
-□ Telecommunication sub-scenarios confirmed (towers / cable / equipment rooms)
-□ Team leader and deputy elected
-□ All members have confirmed they can meet the in-person requirement (constraint C1)
-□ Weekly meeting time and place fixed
-```
-
----
-
-## 15. Change Log
-
-| Version | Date | Change | Raised by | Approved by |
-|---------|------|--------|-----------|------------|
-| v1.0 | 2026-08-19 | Initial charter draft created | — | — |
-| | | | | |
-| | | | | |
-
----
-
-## Appendix: Companion Document Index
-
-| Document | Content | Relation to this charter |
-|----------|---------|------------------------|
-| `00-Requirements-Analysis-EN.md` | Requirements breakdown, four dimensions, three pillars | Source of §2 business case |
-| `01-Technical-Plan-and-Milestones-EN.md` | Five-layer architecture, experiment matrix, 16-week schedule | Detailed version of §6 |
-| `02-Datasets-and-Pretrained-Models-EN.md` | Dataset inventory, model selection, licensing | Basis for §9 resources |
-| `03-Generative-Augmentation-Pipeline-EN.md` | Full generation pipeline | Technical specification for D4/D5 |
-| `04-Literature-Survey-EN.md` | 50 references, 5 research gaps | Basis for §2.1 problem statement |
-| `05-Technological-Roadmap-EN.md` | Three horizons, decision gates, downgrade paths | Basis for §12 risk responses |
-| `06-Teamwork-Allocation-EN.md` | Five roles, RACI, leader election | Detailed version of §8 governance |

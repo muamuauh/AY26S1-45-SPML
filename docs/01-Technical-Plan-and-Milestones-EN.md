@@ -261,16 +261,126 @@ Based on a **16-week** semester. For a 12-week variant, compress M2/M5 and downg
 
 ## 7. Writing and Presentation Guidance
 
-Recommended paper/report structure, mapped one-to-one onto the project's contributions:
+### ⚠️ Important Correction: The School Report Template Is Not an Academic Paper Structure
 
-1. **Introduction** — industry pain points in telecommunication construction safety + the data scarcity problem
-2. **Related Work** — see `04-Literature-Survey-EN.md` (three strands: CV for construction safety / generative data augmentation / information fusion for risk assessment)
-3. **Risk Taxonomy for Telecom Construction** — 🌟 Contribution 1: a sector-specific risk system
-4. **Generative Data Augmentation Pipeline** — 🌟 Contribution 2: the core innovation
-5. **Multi-dimensional Perception** — implementation of the four branches
-6. **Hierarchical Information Fusion** — 🌟 Contribution 3: interpretable risk appraisal
-7. **Experiments** — E1–E9
-8. **Discussion & Limitations** — state honestly the domain gap, class coverage, and compliance boundaries
-9. **Conclusion**
+Version 1.0 of this section recommended an academic paper structure (Introduction / Related Work / Method / Experiments / Conclusion). **On checking the official school template `template/EE6008-Project ReportTemplate.docx`, the EE6008 project report turns out to be a project management report, not an academic paper.**
+
+The two differ substantially, and the official template governs:
+
+| Academic paper (original suggestion) | EE6008 official report template |
+|-------------------------------------|--------------------------------|
+| Introduction | 1. Purpose / Project Objectives |
+| **Related Work (standalone chapter)** | ❌ **No standalone literature review chapter** |
+| Method (several technical chapters) | 2. Project Summary (merged into one chapter) |
+| Experiments | Folded into 2. Project Summary and 6. Outcomes / Benefits |
+| — | 3. Scope (deliverables, activities, **changes to scope**) |
+| — | 4. Schedule (planned vs **actual** milestone dates) |
+| — | 5. Cost (planned vs actual) |
+| Discussion & Limitations | Folded into 6. Outcomes / Benefits |
+| — | 7. **Individual Reports from Team Members** (written individually + reflection) |
+| References | 8. References |
+| — | Appendix — Project Members Information (contribution table) |
+
+**The three most consequential differences**:
+
+1. **There is no Related Work chapter.** The literature survey in document 04 cannot be transplanted wholesale. Compress it into §1 Purpose/Objectives as the project justification, and list the sources under §8 References.
+2. **Planned vs actual comparison is required.** Both §4 Schedule and §5 Cost have "Planned" and "Actual" columns. **This means actual completion dates must be recorded throughout the project**, not reconstructed at the end. Record each milestone's actual completion date on the kanban from M0 onwards.
+3. **Every member must write an individual report and reflection.** §7 is written individually and covers "engineering knowledge learned, problem analysis, design/development of solutions, anything to share." This cannot be ghost-written and bears directly on individual grades.
+
+---
+
+### 7.1 EE6008 Report Chapter Mapping
+
+Organised by the official template's eight sections plus appendix, with the source of each:
+
+| Official section | Template requirement | Source material | Suggested length |
+|-----------------|---------------------|----------------|-----------------|
+| **1. Purpose / Project Objectives** | Overview and objectives | Document 07 Project Purpose; document 00 §1/§4; the research gaps G1–G5 from document 04 (compressed to 1–2 paragraphs) | 1–2 pages |
+| **2. Project Summary** | Work done / problems solved / achievements | **The technical core of the report**: document 01 §1 five-layer architecture, document 03 generation pipeline, document 01 §3 results E1–E9 | 8–15 pages |
+| **3. Scope** | Final total scope, deliverables, activity summary, **changes** | Document 07 deliverables; **if any downgrade path D1–D8 was triggered, the change must be documented here** | 2–3 pages |
+| **4. Schedule** | Milestones: planned vs actual dates | Document 07 Summary Milestones plus actual completion dates recorded throughout | 1 page (table) |
+| **5. Cost** | Cost items: planned vs actual | Document 07 Summary Budget (expected S$0 for this project; report it as such) | 0.5 page |
+| **6. Outcomes / Benefits** | Outcomes and benefits | Experimental conclusions, system demo, dataset outputs; **limitations and honest caveats also belong here** | 2–4 pages |
+| **7. Individual Reports** | Per member: name, contributions, reflection | **Written by each member individually**; the leader does not ghost-write | 1–2 pages each |
+| **8. References** | References | The 50 references in document 04 §7, filtered to those actually cited | 1–2 pages |
+| **Appendix** | Member table: name / project contributions / report contributions | The RACI matrix in document 06 plus the activity matrix in document 07 | 0.5 page |
+
+### 7.2 Suggested Internal Structure for §2 Project Summary
+
+This is the most technically substantial chapter. The template does not prescribe an internal structure; the following retains the logic of the academic layout while compressing it into a single chapter:
+
+```
+2.1 Problem and technical challenges   ← three causes of data scarcity (doc 07 Purpose)
+2.2 System architecture overview       ← five-layer architecture (doc 01 §1)
+2.3 Telecom construction risk taxonomy ← 🌟 Contribution 1
+2.4 Generative data augmentation       ← 🌟 Contribution 2, the report's most important section (doc 03)
+    · Risk scenario specification library
+    · Four generation engines
+    · Four quality gates
+2.5 Multi-dimensional perception       ← four branches (doc 01 §2 L3)
+2.6 Hierarchical information fusion    ← 🌟 Contribution 3 (doc 01 §2 L4)
+2.7 Experimental setup and results     ← E1–E9, centred on E3 and E7 (doc 01 §3)
+2.8 Ablation studies                   ← A1–A7 (doc 03 §9)
+```
+
+### 7.3 Guidance for §7 Individual Reports
+
+The template requires each member to cover four points. This section **must be written by the member personally** and is direct evidence for individual grading:
+
+| Template requirement | How to write it | Material to draw on |
+|---------------------|----------------|-------------------|
+| Engineering knowledge learned | Be specific to a technique; avoid generalities. E.g. "LoRA fine-tuning taught me how low-rank adaptation avoids overfitting on only 500 samples" | Your own module |
+| Problem Analysis | Describe a problem you actually encountered and analysed. E.g. "I found prompt disobedience in generated images and used CLIP-Score to isolate the 15% that were semantically inconsistent" | Failure mode table (doc 03 §11) |
+| Design/development of solutions | The design you chose and the trade-off. E.g. "I chose the inpainting route over T2I because annotations are inherited and the domain gap is smaller" | Alternatives matrix (doc 05 §7) |
+| Anything to share | Collaboration experience, time management, reflections on the project | Periodic contribution statements (doc 06 §8) |
+
+> **Recommendation**: each member writes a 200-word summary at W4 / W8 / W12 / W16 (already recommended in doc 06 §8). At M7 these four notes assemble into the individual report, avoiding reliance on recall.
+
+### 7.4 What Must Be Recorded Throughout (Otherwise It Cannot Be Reconstructed)
+
+The official template requires planned-versus-actual comparisons and individual contribution statements. These **must be captured as the project runs**:
+
+```
+□ Actual completion date of every milestone   → §4 Schedule, Actual column
+□ Date and reason for every downgrade trigger → §3 Scope, Changes
+□ Costs actually incurred (e.g. cloud GPU)    → §5 Cost, Actual column
+□ Each member's modules and main outputs      → §7 + Appendix
+□ Report sections and page ranges per member  → Appendix, Report Contribution column
+□ Weekly minutes and decision records         → evidence base for §3 Changes
+```
+
+**Recommendation**: create a `progress/` directory in the repository with `milestones.md` for actual dates and `changes.md` for scope changes, updated by the leader after each weekly meeting.
+
+### 7.5 Example Appendix Member Table
+
+Following the template's own examples (`e.g., Team Leader`, `e.g. Pages 3-6, 24-25, Chapter 2, Appendix A`):
+
+| # | Name | Project contributions | Report Contribution |
+|---|------|----------------------|-------------------|
+| 1 | `<<Name>>` | Team Leader; Data Lead; Risk Taxonomy, annotation guideline, TelecomSeed dataset | Chapters 1, 3, 4; Pages xx–xx |
+| 2 | `<<Name>>` | Generation Lead; LoRA fine-tuning, four generation engines, quality gates, TelecomSynth dataset | Chapter 2.4; Pages xx–xx |
+| 3 | `<<Name>>` | Perception Lead (Workers); Workers model, behaviour recognition, core experiments E1–E3 | Chapters 2.5, 2.7; Pages xx–xx |
+| 4 | `<<Name>>` | Perception Lead (Scene); Machinery/Materials/Terrain models, experiment E9 | Chapter 2.5; Pages xx–xx |
+| 5 | `<<Name>>` | Fusion & System Lead; rule base, three-level fusion, web demo, experiment tracking | Chapters 2.6, 6; Pages xx–xx |
+
+> The template's own example mentions a "team project video". **Confirm with the supervisor whether a project video must be submitted.** If so, reserve recording time during M5–M6.
+
+---
+
+### 7.6 If Submitting to a Journal Later (Optional, Post-Project)
+
+The EE6008 report and an academic paper serve different purposes. To pursue submission to *Automation in Construction* as described in roadmap horizon H3, rewrite separately along academic lines:
+
+```
+1. Introduction         ← industry pain points + data scarcity
+2. Related Work         ← document 04 (three strands)
+3. Risk Taxonomy        ← 🌟 Contribution 1
+4. Generative Pipeline  ← 🌟 Contribution 2
+5. Multi-dim Perception ← four branches
+6. Hierarchical Fusion  ← 🌟 Contribution 3
+7. Experiments          ← E1–E9
+8. Discussion & Limitations
+9. Conclusion
+```
 
 > **Bonus**: release the TelecomSynth synthetic dataset and the Risk Taxonomy publicly. A dataset is itself a citable academic contribution, and synthetic data avoids the privacy problems of real imagery.

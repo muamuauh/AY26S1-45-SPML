@@ -18,7 +18,11 @@
 | 04 | [文献综述](04-文献综述-CN.md) | [Literature Survey](04-Literature-Survey-EN.md) | 四条文献主线、50 条参考文献、5 个研究空白（G1–G5）、定位陈述、引文核实状态表 |
 | 05 | [技术路线图](05-技术路线图-CN.md) | [Technological Roadmap](05-Technological-Roadmap-EN.md) | 三视野 H1–H3、五层技术演进泳道、TG1–TG5 决策门、关键路径、技术成熟度、D1–D8 降级路径、备选矩阵 |
 | 06 | [团队分工](06-团队分工-CN.md) | [Teamwork Allocation](06-Teamwork-Allocation-EN.md) | 5 人角色定义、队长提名标准与选举流程、RACI 矩阵、工作量分布、接口约定、协作机制、应急预案 |
-| 07 | [项目章程](07-项目章程-CN.md) | [Project Charter](07-Project-Charter-EN.md) | 立项依据、O1–O8 目标与成功标准、范围界定、D1–D15 交付物、干系人、资源、假设、约束、变更控制、签署页 |
+| 07 | [项目章程](07-项目章程-CN.md) | [Project Charter](07-Project-Charter-EN.md) | ⭐ **已按学校官方模板重构**：立项依据、项目描述、里程碑摘要、成员活动矩阵、预算、风险评估（含实验室安全培训）；模板外内容移至附录 A |
+
+> 📄 **学校官方模板**存放于 [`template/`](../template/)：`EE6008_Project_Charter_Template.docx`（项目章程）与 `EE6008-Project ReportTemplate.docx`（项目报告）。
+> 文档 07 已严格按 Charter 模板重构；文档 01 §7 与 04 §9 已按 Report 模板校准。
+> *Official school templates live in [`template/`](../template/). Document 07 now follows the Charter template exactly; documents 01 §7 and 04 §9 are calibrated to the Report template.*
 
 > 中文版 04 的参考文献额外附了中文标题译名，方便撰写中文报告时引用。
 > The Chinese version of document 04 additionally provides Chinese translations of reference titles.
@@ -53,7 +57,7 @@
 
 **队长 / 项目管理 · Team leader & project management**
 ```
-07（章程：目标、范围、干系人、约束） → 06 §3（队长职责与选举） → 06 §4（RACI）
+07（章程：官方模板 8 个字段） → 06 §3（队长职责与选举） → 06 §4（RACI）
 → 05 §3（TG1–TG5 决策门） → 05 §6（D1–D8 降级路径）
 07 (charter) → 06 §3 (leader role and election) → 06 §4 (RACI)
 → 05 §3 (decision gates) → 05 §6 (downgrade paths)
@@ -77,7 +81,11 @@ Follow the agenda in 06 §10 directly (90 min: role claiming → leader election
    不得参与生成模型微调，不得混入合成数据。这条一旦破坏，所有实验结论作废。
    *The test set must contain only real telecommunication imagery, strictly isolated — never used in generative fine-tuning, never mixed with synthetic data. Breaking this invalidates every experimental conclusion.*
 
-3. **不要四个维度平均用力**
+3. **报告要「计划 vs 实际」对照，必须全程记录**
+   学校报告模板的 Schedule 与 Cost 都有 Planned / Actual 两列，且每人须写个人报告与反思。这些无法最后补——建议建 `progress/` 目录，每周例会后更新实际完成日期与范围变更。详见 [01 §7.4](01-技术方案与里程碑-CN.md)。
+   *The report template requires planned-vs-actual columns and individual reflections. These cannot be reconstructed at the end — record them weekly.*
+
+4. **不要四个维度平均用力**
    一学期内四维全做到高质量几乎不可能。建议主攻 Workers + Machinery，Terrain 与 Materials 做到可用即可，并在报告中诚实说明范围界定。
    *Do not spread effort evenly across all four dimensions. Focus on Workers + Machinery; keep Terrain and Materials merely functional, and state the scope boundary honestly in the report.*
 

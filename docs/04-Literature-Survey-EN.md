@@ -382,6 +382,30 @@ Bibliographic details in this survey were obtained via web search and fall into 
 
 ## 9. Writing Guidance
 
+### ⚠️ Read This First: The EE6008 Report Has No Related Work Chapter
+
+The official school template `template/EE6008-Project ReportTemplate.docx` is structured as: Purpose/Objectives → Project Summary → Scope → Schedule → Cost → Outcomes/Benefits → Individual Reports → References → Appendix. **There is no standalone literature review or related work chapter.**
+
+This document's content therefore lands in the EE6008 report as follows:
+
+| Content here | Destination in the EE6008 report | Compression |
+|-------------|---------------------------------|-------------|
+| §3.2 The data gap (no telecom-specific dataset) | **§1 Purpose / Project Objectives** — the central evidence for the justification | Compress to one paragraph |
+| §6 Research gaps G1–G5 | **§1 Purpose / Project Objectives** — what the project sets out to fill | One paragraph + optionally one table |
+| §4.3 Most relevant work (Kim & Yi, Lee et al.) | The method sections of **§2 Project Summary** — cited as the basis for technology choices | Cited in situ |
+| §7 References | **§8 References** — filtered to those actually cited | Retain 15–30 entries |
+| §2 / §5 Per-strand surveys | One or two opening sentences of the corresponding subsection of **§2 Project Summary** | Heavily compressed |
+
+> **Practical advice**: do not attempt to force a 40-page survey into the project report. The EE6008 report asks what you did and how it turned out; the literature serves only to support the justification and the technology choices. **Keep the full survey in this document as internal material and as the basis for a later submission.**
+
+The detailed report chapter mapping is in document [01 §7](01-Technical-Plan-and-Milestones-EN.md).
+
+---
+
+### 9.1 If Submitting to a Journal Later: Writing the Related Work Chapter
+
+The following applies to an academic journal submission (e.g. *Automation in Construction*) as described in roadmap horizon H3, and **not to the EE6008 report**.
+
 To adapt this document into the paper's Related Work section, compress it into four subsections of roughly 1,200–1,500 words:
 
 | Subsection | Content | Citations | Function of closing sentence |
