@@ -13,7 +13,7 @@
 |---|--------|---------|---------------|
 | 00 | [项目需求分析](00-项目需求分析-CN.md) | [Requirements Analysis](00-Requirements-Analysis-EN.md) | 项目本质拆解、四个风险维度、三大技术支柱、创新点定位、交付物要求、非技术约束、三大难点 |
 | 01 | [技术方案与里程碑](01-技术方案与里程碑-CN.md) | [Technical Plan & Milestones](01-Technical-Plan-and-Milestones-EN.md) | 五层架构、分层技术选型、三级信息融合设计、E1–E9 实验矩阵、16 周里程碑、风险登记表、算力配置 |
-| 02 | [数据集与预训练模型调研](02-数据集与预训练模型调研-CN.md) | [Datasets & Pretrained Models](02-Datasets-and-Pretrained-Models-EN.md) | 公开数据集清单与评级、生成模型选型对比、感知模型选型、许可证合规、M1 行动清单 |
+| 02 | [数据集与预训练模型调研](02-数据集与预训练模型调研-CN.md) | [Datasets & Pretrained Models](02-Datasets-and-Pretrained-Models-EN.md) | ⭐ **v2.0：取消现场采集**。T1–T4 四层纯公开来源策略、社区数据集平台、开放许可图像库整编、生成与感知模型选型、许可证合规、M1 行动清单 |
 | 03 | [生成式数据增广 Pipeline 设计](03-生成式数据增广Pipeline设计-CN.md) | [Generative Augmentation Pipeline](03-Generative-Augmentation-Pipeline-EN.md) | 六阶段 pipeline、风险场景规格库、四路生成引擎、四道质量闸门、混合训练策略、失败模式对策 |
 | 04 | [文献综述](04-文献综述-CN.md) | [Literature Survey](04-Literature-Survey-EN.md) | 四条文献主线、50 条参考文献、5 个研究空白（G1–G5）、定位陈述、引文核实状态表 |
 | 05 | [技术路线图](05-技术路线图-CN.md) | [Technological Roadmap](05-Technological-Roadmap-EN.md) | 三视野 H1–H3、五层技术演进泳道、TG1–TG5 决策门、关键路径、技术成熟度、D1–D8 降级路径、备选矩阵 |
@@ -77,9 +77,9 @@ Follow the agenda in 06 §10 directly (90 min: role claiming → leader election
    后续所有标注、生成、评估都依赖它。M0 第一周必须产出。
    *Define the Risk Taxonomy first. All subsequent annotation, generation and evaluation depend on it; deliver it in week 1 of M0.*
 
-2. **测试集只用真实电信图像，且严格隔离**
-   不得参与生成模型微调，不得混入合成数据。这条一旦破坏，所有实验结论作废。
-   *The test set must contain only real telecommunication imagery, strictly isolated — never used in generative fine-tuning, never mixed with synthetic data. Breaking this invalidates every experimental conclusion.*
+2. **TelecomEval 测试集只用真实图像，划出后立即冻结**
+   不得参与 LoRA 微调，不得参与生成条件构建，不得混入合成数据。取消现场采集后真实数据更少，这条**反而更关键**——若破坏，「电信专用」的结论完全失去支撑。
+   *TelecomEval must contain only real imagery and be frozen once carved out — never used in LoRA fine-tuning, generation conditioning, or mixed with synthetic data. With less real data after cancelling field collection, this matters more, not less.*
 
 3. **报告要「计划 vs 实际」对照，必须全程记录**
    学校报告模板的 Schedule 与 Cost 都有 Planned / Actual 两列，且每人须写个人报告与反思。这些无法最后补——建议建 `progress/` 目录，每周例会后更新实际完成日期与范围变更。详见 [01 §7.4](01-技术方案与里程碑-CN.md)。

@@ -45,6 +45,12 @@ Full documentation lives in **[docs/](docs/)**, available in Chinese and English
 
 📋 **规划阶段（M0）** — 已完成需求分析、技术方案、数据调研、增广 pipeline 设计、文献综述、技术路线图、团队分工与项目章程草案；尚未开始实现。
 
+> 🔄 **2026-08-24 数据策略变更**：经与导师沟通，**取消一切现场数据采集**（安全风险与成本过高），改为纯公开来源的四层策略：
+> **T1** 学术公开数据集 → **T2** 社区数据集平台（Roboflow Universe / Kaggle）→ **T3** 开放许可图像库整编（Wikimedia Commons / Openverse）→ **T4** 生成式合成。
+> 详见 [docs/02](docs/02-数据集与预训练模型调研-CN.md)。
+>
+> *Data strategy change (2026-08-24): all field collection is cancelled; real data now comes from public sources only (T1 academic datasets, T2 community platforms, T3 openly licensed repositories), expanded by T4 generative synthesis.*
+
 *Planning phase (M0). Requirements analysis, technical plan, dataset survey, augmentation pipeline design, literature survey, technological roadmap, teamwork allocation and the draft project charter are complete; implementation has not started.*
 
 ### 待办 / Open items
@@ -54,7 +60,8 @@ Full documentation lives in **[docs/](docs/)**, available in Chinese and English
 - [ ] 确定风险分类体系 Risk Taxonomy（M0 首要交付物，关键路径起点）
 - [ ] 确认项目周期、范围界定与可用算力
 - [ ] 核实文献引用（见 [docs/04 §8](docs/04-文献综述-CN.md) 核实状态表）
-- [ ] 采集电信场景种子数据（≥300 张，TG1 判据）
+- [ ] 整编公开数据：T2 社区数据集 + T3 开放许可图像，得到 TelecomSeed（≥200 张）与 🔒 TelecomEval（≥150 张，冻结）—— TG1 判据
+- [ ] 建立 `licence_manifest.csv` 逐张记录开放许可图像的来源、许可与署名（CC BY / CC BY-SA 的硬性义务，事后补记几乎不可能）
 - [ ] 建立 `progress/` 目录记录里程碑**实际**完成日期与范围变更 —— 报告模板要求 Planned vs Actual 对照（见 [docs/01 §7.4](docs/01-技术方案与里程碑-CN.md)）
 - [ ] 向导师确认是否需要提交 team project video（报告模板附录提及）
 

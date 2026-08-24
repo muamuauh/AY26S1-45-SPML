@@ -113,7 +113,7 @@ The second paragraph of the brief is unusually explicit:
 
 | Role | Responsibilities |
 |------|-----------------|
-| A ｜ Data & Generation | Real data collection and annotation, generative model fine-tuning, synthetic data pipeline, quality filtering |
+| A ｜ Data & Generation | Public dataset curation and annotation, openly licensed image screening, generative model fine-tuning, synthetic data pipeline, quality filtering |
 | B ｜ Perception Models | Detection / segmentation / PPE model training and tuning, robustness experiments |
 | C ｜ Behaviour & Fusion | Action recognition, safety rule base, information fusion and risk scoring module |
 | D ｜ System & Evaluation | System integration, visualisation interface, experiment management, report and paper writing |
@@ -126,7 +126,9 @@ The second paragraph of the brief is unusually explicit:
 
 Even obtaining real benchmark data is hard, and the generative model itself needs seed material for fine-tuning.
 
-- **Mitigation**: use public building-site datasets as a transfer base → web collection plus manual screening of telecommunication imagery (a few hundred images suffice for LoRA fine-tuning) → on-site capture at campus or partner facilities
+- **Mitigation (revised in v2.0)**: ❌ **Field collection has been ruled out** (safety risk and cost too high; confirmed with the supervisor). Replaced by a four-tier public-source strategy:
+  T1 academic public datasets (SODA/CHV/SHEL5K etc., transfer base) → T2 community dataset platforms (Roboflow Universe telecom tower and safety harness sets) → T3 curation of openly licensed repositories (Wikimedia Commons / Openverse, forming TelecomSeed and the isolated TelecomEval test set) → T4 generative synthesis
+- **Read it the other way**: the fact that the team cannot bear the cost of collection **demonstrates the project's founding premise first-hand** — telecommunication-specific data really is hard to obtain. Generative AI is thereby elevated from a convenience to the only viable route, which is a strong argument for the report
 
 ### 🔴 Difficulty 2: Quality and trustworthiness of generated data
 

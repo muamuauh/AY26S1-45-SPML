@@ -1,6 +1,6 @@
 # EE6008 Project Charter
 
-> Document version: v2.0 ｜ Generated: 2026-08-22
+> Document version: **v2.1** ｜ Generated: 2026-08-22 ｜ Revised: 2026-08-24 (data strategy change: field collection cancelled)
 > Chinese counterpart: [07-项目章程-CN.md](07-项目章程-CN.md)
 > **This document follows the fields and tables of the official school template `template/EE6008_Project_Charter_Template.docx` exactly, and can be copied section by section into the Word template.**
 
@@ -80,6 +80,9 @@ Deep-learning-based computer vision offers an effective means of automated safet
 
 3. **No sector-specific resources exist.** A systematic search of Google Scholar, IEEE Xplore and the ACM Digital Library found **no public annotated dataset or dedicated framework for telecommunication construction safety**. The nearest existing work concerns asset inspection of telecommunication towers, at the commercial-product level, rather than safety during construction.
 
+> **Note added in v2.1**: following discussion with the supervisor, **this project performs no field data collection** — the safety risk and cost of on-site capture are too high. All real data is drawn from public online datasets and openly licensed image repositories.
+> This constraint in fact **corroborates causes 2 and 3 above**: the team, unable to bear the cost of collection, must rely on generative methods, thereby demonstrating first-hand the founding premise that telecommunication-specific data is hard to obtain. Generative AI is thus elevated from a convenience to **the only viable route**.
+
 This project exists to fill that gap. TelecomSafe introduces **generative artificial intelligence** to synthesise training data and break the data-scarcity constraint, and combines deep-learning image processing with information fusion to appraise construction risk across four dimensions — terrain, machinery, materials and workers. The project carries both **academic value** (the relevant literature is concentrated in 2024–2026, making the topic timely, and none of it targets the telecommunication sector) and **engineering value** (transferable to the safety management practice of telecommunication operators and contractors).
 
 ---
@@ -99,7 +102,7 @@ The system adopts a five-layer architecture:
 | Layer | Name | Content |
 |-------|------|---------|
 | **L1** | Input | Handheld photographs and fixed cameras (MVP scope); UAV aerial imagery and tower-mounted recorders (extensions) |
-| **L2** | **Data ★ CORE INNOVATION ★** | Real data collection and annotation + generative augmentation pipeline + four quality gates |
+| **L2** | **Data ★ CORE INNOVATION ★** | Curation and annotation of public data (T1 academic sets / T2 community sets / T3 openly licensed imagery) + generative augmentation pipeline + four quality gates. **No field collection whatsoever** |
 | **L3** | Perception | Four parallel branches: terrain segmentation, machinery detection, material state judgement, worker detection with PPE attributes |
 | **L4** | **Fusion & Decision ★ SECONDARY CORE ★** | Three-level fusion: entity graph → regulation-derived rule predicates → learnable fusion → risk score |
 | **L5** | Application | Web visualisation dashboard, risk scorecard, hazard report generation |
@@ -115,11 +118,23 @@ The pipeline uses SDXL with LoRA domain adaptation across four generation routes
 
 All synthetic data must pass four quality gates (G1 semantic consistency / G2 distributional consistency / G3 annotation reliability / G4 human spot-check), with an expected retention rate of 50–65%.
 
+### Data Sources (revised in v2.1: public sources only, zero field collection)
+
+| Tier | Source | Content | Scale |
+|------|--------|---------|-------|
+| **T1** | Academic public datasets | SODA, MOCS, ACID, CHV, SHEL5K, SHWD, Pictor-v3 | 20,000+ images (transfer base) |
+| **T2** | Community dataset platforms | Roboflow Universe (telecom tower set, safety harness sets), Kaggle construction safety set (includes NO-Hardhat negatives) | 2,000–5,000 images |
+| **T3** | Openly licensed repositories | Wikimedia Commons, Openverse, Flickr CC — manually searched and screened, with source and attribution recorded per image | 200–500 images (source of sector specificity) |
+| **T4** | Generative synthesis | TelecomSynth, the core output of this project | 3,000–10,000 images |
+
+> 🔒 **Test set discipline**: TelecomEval (150–300 real images drawn from T2/T3) stays frozen throughout and never participates in LoRA fine-tuning or generation conditioning. Every experimental conclusion depends on this.
+> ⚖️ **Licence compliance**: CC BY and CC BY-SA require attribution; `licence_manifest.csv` must accompany the report.
+
 ### Principal Deliverables
 
 | Category | Deliverables |
 |----------|-------------|
-| **Data** | Risk Taxonomy for telecommunication construction, annotation guideline, TelecomSeed (real seed dataset, ≥ 500 images), TelecomSynth (synthetic dataset, ≥ 3,000 images) |
+| **Data** | Risk Taxonomy for telecommunication construction, annotation guideline, **TelecomSeed** (real seed set from public sources, 200–500 images), 🔒 **TelecomEval** (isolated test set, 150–300 images), **TelecomSynth** (synthetic dataset, ≥ 3,000 images), `licence_manifest.csv` (open-licence attribution manifest) |
 | **Models** | LoRA domain-adapted generative model, four generation engines, four-branch perception models, three-level information fusion module |
 | **System** | A runnable end-to-end TelecomSafe demo (web interface + risk scorecard) |
 | **Experiments** | Complete E1–E9 results, centred on E3 (validation of augmentation effectiveness) and E7 (robustness) |
@@ -133,7 +148,7 @@ The three must-pass gates:
 
 | Gate | Timing | Criterion |
 |------|--------|-----------|
-| **TG1** Data foundation | End W3 | ≥ 300 annotated real telecommunication seed images |
+| **TG1** Data foundation | End W3 | TelecomSeed ≥ 200 annotated; TelecomEval ≥ 150 images carved out and frozen |
 | **TG2** Generation quality | End W6 | FID(synthetic, real) < 50; human realism rating ≥ 3.0/5 |
 | **TG3** Augmentation effectiveness | End W9 | E3 improves mAP over E2 by ≥ 2.0 — **the project's decisive checkpoint** |
 
@@ -150,7 +165,7 @@ Delivering all four risk dimensions to high quality within a single semester is 
 | Summary Milestones | Target Date |
 |-------------------|-------------|
 | **M0 Project setup and survey** — Risk Taxonomy v1.0, literature survey, role assignment and leader election, charter signature | W1 ｜ `<<YYYY-MM-DD>>` |
-| **M1 Data infrastructure** — annotation guideline and TelecomSeed-v1 (≥ 300 annotated); **Gate TG1** | End W3 ｜ `<<YYYY-MM-DD>>` |
+| **M1 Data infrastructure** — curate public data (T1/T2/T3); deliver the annotation guideline, TelecomSeed-v1 (≥ 200 annotated), TelecomEval-v1 (≥ 150, frozen) and `licence_manifest.csv`; **Gate TG1** | End W3 ｜ `<<YYYY-MM-DD>>` |
 | **M2 Generation pipeline** — LoRA model, four generation engines, four quality gates, TelecomSynth-v1 (≥ 3,000 images); **Gate TG2** | End W6 ｜ `<<YYYY-MM-DD>>` |
 | **M3 Perception models** — four-branch perception models and core comparison experiments E1/E2/E3; **Gate TG3 (decisive)** | End W9 ｜ `<<YYYY-MM-DD>>` |
 | **M4 Fusion and decision** — safety rule base (≥ 15 rules), three-level fusion module, expert risk annotation set, experiment E8; **Gate TG4** | End W11 ｜ `<<YYYY-MM-DD>>` |
@@ -170,7 +185,7 @@ Delivering all four risk dimensions to high quality within a single semester is 
 | Activity | Member 1<br>`<<A Data>>` | Member 2<br>`<<B Generation>>` | Member 3<br>`<<C Perc-Workers>>` | Member 4<br>`<<D Perc-Scene>>` | Member 5<br>`<<E Fusion/System>>` |
 |---------|:---:|:---:|:---:|:---:|:---:|
 | A1 Risk Taxonomy and annotation guideline | ● | ✅ | | | |
-| A2 Real data collection, screening and annotation (TelecomSeed) | ● | | ✅ | ✅ | |
+| A2 Public data curation, licence records and annotation (TelecomSeed / TelecomEval) | ● | | ✅ | ✅ | |
 | A3 Risk scenario specification library | ✅ | ● | | | |
 | A4 LoRA domain adaptation of the generative model | | ● | | | |
 | A5 Four generation engines and automatic annotation | ✅ | ● | | | |
@@ -207,7 +222,7 @@ Delivering all four risk dimensions to high quality within a single semester is 
 | Software and frameworks | PyTorch, Ultralytics, diffusers, SDXL, ControlNet, SAM 2 — all open source | S$0 |
 | Experiment tracking | Weights & Biases academic tier / self-hosted MLflow | S$0 |
 | Datasets | SODA, MOCS, ACID, CHV, SHEL5K and others; free for academic use | S$0 |
-| Data collection | Travel costs for on-site photography of telecommunication scenes, if required | `<<To be estimated>>` |
+| ~~Data collection~~ | ❌ **Field collection cancelled**; no travel or fieldwork costs | **S$0** |
 | Storage | ≥ 500 GB (raw + synthetic data + model weights + experiment artefacts) | S$0 (campus storage) |
 
 **Licensing notes** (no cost implication, but relevant to compliance):
@@ -226,16 +241,16 @@ Delivering all four risk dimensions to high quality within a single semester is 
 | Item | Status |
 |------|--------|
 | **Laboratory equipment used** | Yes — GPU workstations / compute cluster only. **No mechanical, electrical, chemical or high-voltage hazardous equipment is involved** |
-| **Work on live construction sites** | ❌ **Not involved.** The project does not carry out work on real construction sites. If on-site photography of telecommunication scenes is required, it will be conducted **only from outside the safety perimeter** — no tower climbing, no entry to work faces, no approach to operating machinery |
+| **Work on live construction sites** | ❌ **Not involved at all.** Following discussion with the supervisor, the safety risk and cost of field collection were judged too high, and **all on-site data collection has been cancelled**. Every real image comes from public online datasets and openly licensed repositories; the team enters no construction site, climbs no tower, and approaches no operating machinery |
 | **Equipment usage training** | `<<To confirm>>` — confirm whether training and account provisioning for the laboratory GPU cluster/workstations are complete |
 | **General laboratory safety training** | `<<To confirm>>` — if required by the school, to be completed by `<<date>>` |
-| **Field data collection safety** | If on-site photography is confirmed, notify the supervisor of route and timing in advance and comply with the site's safety rules |
+| **Field data collection safety** | ❌ **Not applicable.** The project involves no off-campus data collection activity, so the associated personal safety risk is zero |
 
 ### General Project Risks
 
 | ID | Risk | Probability | Impact | Mitigation | Gate |
 |----|------|------------|--------|-----------|------|
-| **R1** | Insufficient real telecommunication data (no public dataset; must be self-collected) | High | High | ① Use public construction datasets as a transfer base ② Web collection with manual screening ③ On-site capture at campus or partner facilities. If < 150 images by end of W3, trigger downgrade path **D1**: reposition to generalised "work-at-height / tower-type construction" | TG1 |
+| **R1** | Insufficient real telecommunication data (no dedicated public dataset, and **field collection cancelled**) | High | High | Four-tier public-source strategy: ① **T1** academic public datasets (SODA/CHV/SHEL5K) as transfer base ② **T2** community platforms (Roboflow Universe telecom tower and safety harness sets; Kaggle construction safety set with NO-Hardhat negatives) ③ **T3** curation of openly licensed repositories (Wikimedia Commons / Openverse, target 200–500 images) ④ **T4** generative synthesis for the long tail. If TelecomSeed < 100 images by end of W3, trigger downgrade path **D1**: reposition to generalised work-at-height / tower-type construction | TG1 |
 | **R2** | Generated image quality inadequate, causing negative transfer (synthetic data degrades performance) | Medium | **High** | ① Strict filtering by the four quality gates ② Conservative ratio (start at 25%) ③ Always retain a pure-real baseline for comparison. If FID > 70, trigger **D2**: keep only the inpainting and background-replacement routes that edit real images | TG2 |
 | **R3** | E3 fails to demonstrate augmentation effectiveness (the project's central claim does not hold) | Medium | **High** | ① Diagnose label noise and mixing ratio first ② Switch to class-adaptive ratios. If there is still no gain, trigger **D3**: narrow the conclusion to "improves long-tail rare-class performance" and state honestly that overall performance did not improve | TG3 |
 | **R4** | Insufficient compute (diffusion training and inference are expensive) | Medium | Medium | ① LoRA rather than full fine-tuning ② SDXL-Turbo for >10× faster bulk generation ③ 8-bit quantisation and gradient checkpointing ④ Apply for cloud GPU if necessary. Triggers **D7** | — |
@@ -261,7 +276,7 @@ The following are explicitly **excluded** to prevent scope creep:
 - ❌ Production-grade real-time video stream deployment and edge device (Jetson) optimisation
 - ❌ Integration with operators' existing safety management systems
 - ❌ Commercial product development, UI polish, multi-user permission management
-- ❌ Work on live construction sites or long-term deployed monitoring
+- ❌ Work on live construction sites, field data collection, or long-term deployed monitoring (**explicitly cancelled in v2.1**)
 - ❌ Sensor modalities beyond vision (IoT sensors, wearables, BIM data)
 - ❌ Quality inspection and asset auditing of telecommunication equipment itself (an inspection problem, not a construction safety problem)
 
@@ -269,7 +284,7 @@ The following are explicitly **excluded** to prevent scope creep:
 
 | # | Assumption | Response if it fails |
 |---|-----------|---------------------|
-| 1 | At least 300 usable real telecommunication images can be obtained | Trigger D1; reposition to generalised work-at-height scenes |
+| 1 | At least 200 usable real telecommunication images can be obtained from public sources (T2/T3) | Trigger D1; reposition to generalised work-at-height scenes |
 | 2 | The team has access to at least one 24 GB GPU | Trigger D7; reduce model scale |
 | 3 | Public datasets (SODA/MOCS/CHV etc.) can be requested and downloaded normally | Increase the self-collected share; extend M1 |
 | 4 | 2–3 annotators can be found for 200 risk-level annotations | Team members cross-annotate per the guideline; report agreement Kappa |
@@ -298,7 +313,8 @@ Changes not requiring the process: implementation details, hyperparameter and mo
 |---------|------|--------|--------|
 | v1.0 | 2026-08-19 | Initial version (generic PMBOK structure, 15 sections) | — |
 | v2.0 | 2026-08-22 | **Restructured to the official template `EE6008_Project_Charter_Template.docx`**; content outside the official template moved to Appendix A | — |
-| `<<v2.1>>` | `<<date>>` | `<<Fill in names, team leader, Project No., supervisor and specific dates>>` | `<<Team leader>>` |
+| v2.1 | 2026-08-24 | **Data strategy change**: following discussion with the supervisor, all field collection is cancelled in favour of public sources only (T1 academic / T2 community / T3 openly licensed / T4 generative synthesis). Project description, budget (collection costs zeroed) and risk assessment (R1 rewritten, site-work risk zeroed) updated accordingly | `<<Team leader>>` |
+| `<<v2.2>>` | `<<date>>` | `<<Fill in names, team leader, Project No., supervisor and specific dates>>` | `<<Team leader>>` |
 
 ---
 

@@ -48,7 +48,10 @@
 - Define the **Risk Taxonomy** (4 categories × 20–30 sub-classes), specifying **decidable, quantitative criteria** for every risk
 - Write the annotation guideline, including edge-case adjudication rules
 - Organise public dataset download, format normalisation and class mapping
-- Collect and screen real telecommunication scene imagery (target ≥ 500 images)
+- **T2**: download and verify community datasets (Roboflow Universe telecom tower set, safety harness sets, Kaggle construction safety set)
+- **T3**: search Openverse / Wikimedia Commons and manually screen openly licensed telecommunication imagery (target 200–500), recording source, licence and attribution per image (`licence_manifest.csv`)
+- 🔒 Carve out and freeze the **TelecomEval test set** (150–300 images)
+- ❌ ~~Field collection~~ — cancelled in v2.0 (safety risk and cost too high; confirmed with the supervisor)
 - Pre-label with Grounding DINO, correct manually, and produce TelecomSeed-v1
 - Maintain DVC data version control, recording provenance and licence of every subset
 - **Deputy role**: the Stage 0 risk scenario specification library (with B)
@@ -59,7 +62,7 @@
 |------------|-----|------|
 | Risk Taxonomy v1.0 | End W1 | TG1 |
 | Annotation guideline | Mid W2 | — |
-| TelecomSeed-v1 (≥ 300 annotated) | End W3 | **TG1** |
+| TelecomSeed-v1 (≥ 200 annotated) + 🔒 TelecomEval-v1 (150–300, frozen) + licence_manifest.csv | End W3 | **TG1** |
 | Data split and isolation scheme | End W3 | — |
 | Risk Taxonomy v2.0 (terrain/material refinement) | W10 | — |
 
@@ -251,7 +254,7 @@ Step 5  Confirmation and recording (5 min)
 | Risk Taxonomy definition | C | **A/R** | C | C | C | C |
 | Annotation guideline | I | **A/R** | C | C | C | I |
 | Public dataset curation | I | **A/R** | I | C | C | I |
-| Real telecom data collection | C | **A/R** | I | I | I | I |
+| T2/T3 public data curation and licence records | C | **A/R** | I | I | I | I |
 | Seed data annotation | I | **A/R** | I | R | R | I |
 | Risk scenario spec library | I | R | **A/R** | C | C | C |
 | LoRA fine-tuning | I | C | **A/R** | I | I | I |
@@ -305,11 +308,11 @@ Step 5  Confirmation and recording (5 min)
 
 ### 5.2 Early-phase Rebalancing
 
-During W1–W3, A carries the heaviest load (taxonomy + guideline + collection) while C/D/E are relatively idle. Recommended:
+During W1–W3, A carries the heaviest load (taxonomy + guideline + public data curation) while C/D/E are relatively idle. Recommended:
 
 - **C and D support annotation in W2–W3** (50–100 images each) while familiarising themselves with the data distribution — directly useful for later training and tuning
 - **E stands up the experiment tracking platform in W2**, preparing the ground for everyone's experiments
-- **Data collection is parallelisable manual work**: everyone should contribute photographs and collection, with A responsible for screening and standards
+- **Searching and screening T3 openly licensed imagery is parallelisable manual work**: everyone should contribute searches, with A responsible for screening standards and licence-record consistency. ⚠️ Source URL and licence type **must be recorded at the moment of collection**; reconstructing them later is close to impossible
 
 ---
 
@@ -415,7 +418,7 @@ The most common source of conflict in group projects is that contribution cannot
 
 | Member lost | Handover plan | Downgrade triggered |
 |------------|--------------|-------------------|
-| A (Data) | Taxonomy → Leader + E; annotation → split between C and D; collection → everyone | Reduced data scale; may trigger D1 |
+| A (Data) | Taxonomy → Leader + E; annotation → split between C and D; T2/T3 curation → everyone | Reduced data scale; may trigger D1 |
 | B (Generation) | Generation → A (already deputy); gates → E | **D2** (inpainting route only) |
 | C (Perception-Workers) | Workers → D; behaviour recognition → dropped | **D6** (single-frame pose substitute) |
 | D (Perception-Scene) | Machinery → C; Terrain/Materials → dropped | **D8** (reduce to two dimensions) |

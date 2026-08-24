@@ -87,10 +87,10 @@ Decision gates are the core mechanism of this roadmap: **on reaching a given poi
 
 | Item | Content |
 |------|---------|
-| **Criteria** | ≥ 300 annotated real telecommunication seed images; Risk Taxonomy v1.0 finalised |
+| **Criteria** | TelecomSeed (from public sources T2/T3) ≥ 200 annotated; TelecomEval carved out and frozen at ≥ 150 images; Risk Taxonomy v1.0 finalised |
 | ✅ Pass | Proceed to generation pipeline development as planned |
-| ⚠️ Partial (150–300 images) | Reduce the Risk Taxonomy to 4 categories × 12 sub-classes; rely more on ControlNet than T2I during generation |
-| ❌ Fail (< 150 images) | **Downgrade path D1**: abandon the "telecommunication-specific" positioning; reframe as "work-at-height and tower-type construction" and use public datasets plus a small set of telecommunication images for style transfer |
+| ⚠️ Partial (100–200 images) | Reduce the Risk Taxonomy to 4 categories × 12 sub-classes; rely more on ControlNet and inpainting than T2I; lower the test set floor to 100 images and state this in the report |
+| ❌ Fail (< 100 images) | **Downgrade path D1**: abandon the "telecommunication-specific" positioning; reframe as "work-at-height and tower-type construction". The test set then draws on work-at-height subsets filtered from T1/T2 (e.g. the safety harness datasets), with the scope explicitly redefined in the report |
 
 ### TG2 ｜ End of W6 — Generation Quality Gate ★ Most Critical ★
 
@@ -160,7 +160,7 @@ Expert risk annotation ───────────────────
 Any delay on this chain delays the whole project. Three notes:
 
 1. **The Risk Taxonomy is the start of the critical path and the most underestimated item.** It is not "a list of categories" but a definition of **decidable criteria** for each risk (what counts as "poorly stored"? which height-to-width ratio?). Without this, annotation, generation and evaluation will each mean something different.
-2. **Seed data collection is the only step that compute cannot accelerate.** Start it in parallel in W1; do not wait for the taxonomy to be finalised.
+2. **Searching and screening T3 openly licensed imagery is the only step compute cannot accelerate** (field collection is cancelled, but manual search and screening remains labour). Start it in parallel in W1 rather than waiting for the taxonomy, and **record licence and attribution per image as you go** — reconstructing it later is close to impossible.
 3. **Expert risk annotation (fusion ground truth) can be done early in parallel.** It is not on the critical path, but it is routinely deferred until the end, leaving TG4 unmeasurable. Start recruiting annotators in W8.
 
 ---

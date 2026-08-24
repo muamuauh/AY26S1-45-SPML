@@ -1,8 +1,35 @@
 # Public Datasets and Pretrained Models — Survey
 
-> Document version: v1.0 ｜ Generated: 2026-08-18
+> Document version: **v2.0** ｜ Generated: 2026-08-18 ｜ Revised: 2026-08-24
 > Chinese counterpart: [02-数据集与预训练模型调研-CN.md](02-数据集与预训练模型调研-CN.md)
 > Purpose: selection basis for TelecomSafe M1 (data infrastructure) and M3 (perception models)
+
+---
+
+## 🔄 Major Change in v2.0: Field Collection Cancelled — Public Sources Only
+
+**Confirmed with the supervisor: the safety risk and cost of on-site data collection are too high, so this project performs no field data collection whatsoever.** All real data comes from publicly available datasets and openly licensed image repositories, on top of which generative AI expands the corpus.
+
+| | v1.0 (original) | **v2.0 (current)** |
+|---|---|---|
+| Source of real data | Public datasets + web collection + **on-site capture at campus/partner facilities** | **Public sources only**: academic datasets + community dataset platforms + openly licensed image repositories |
+| Site work | Photography from outside the safety perimeter | ❌ **Not involved at all** |
+| Collection cost | Travel + labour + coordination | **S$0** |
+| Privacy risk | Required handling of worker likeness and informed consent | **Substantially reduced** (openly licensed imagery) |
+| Acquisition timeline | Dependent on site coordination; uncontrollable | Controllable; completable within W2–W3 |
+
+### Effect on the Project's Positioning — Actually an Improvement
+
+At first glance this looks like a reduction in capability. In fact it **strengthens the project's central argument**:
+
+> The project's founding premise is that labelled, telecommunication-specific imagery is scarce and hard to obtain. The team itself, unable to bear the cost and risk of collection, must rely on generative methods — **thereby demonstrating that premise first-hand**. Generative AI is elevated from a convenience to the only viable route.
+
+The contribution statement should be adjusted accordingly:
+
+- ❌ Original: "We collected and annotated the first telecommunication construction safety dataset."
+- ✅ **Revised**: "Under a strict **no-field-collection** constraint, we construct the first usable data benchmark and recognition framework for telecommunication construction safety, by curating public sources and generative synthesis."
+
+The revised statement is more honest, more reproducible (others need no site access to replicate it), and internally consistent with the very problem the project addresses.
 
 ---
 
@@ -12,17 +39,32 @@
 
 This is both the project's central difficulty and its justification — precisely the `limited availability and diversity of labelled, sector-specific images` named in the project brief.
 
-The data strategy must therefore be three-staged:
+Under the **no-field-collection** constraint, the data strategy becomes four-tiered:
 
 ```
-Public generic construction datasets (transfer base, large volume)
+T1  Academic public datasets (transfer base, large volume, high annotation quality)
+    SODA / MOCS / ACID / CHV / SHEL5K / SHWD / Pictor-v3
         ↓
-Real telecommunication seed data (self-collected, small but critical → LoRA fine-tuning + test set)
+T2  Community dataset platforms (telecom and work-at-height specifics)
+    Roboflow Universe / Kaggle — small dedicated sets: telecom tower, safety harness, etc.
         ↓
-Generatively synthesised data (this project's innovation, closing the long tail at scale)
+T3  Openly licensed image repositories (★ the source of sector specificity ★)
+    Wikimedia Commons / Openverse / Flickr CC — manual screening + team annotation
+    → forms TelecomSeed (LoRA fine-tuning seeds) and TelecomEval (isolated test set)
+        ↓
+T4  Generatively synthesised data (this project's innovation, closing the long tail)
+    → TelecomSynth
 ```
 
-**The test set must consist 100% of real telecommunication imagery**, or every experimental conclusion becomes untrustworthy. Fix this at M1.
+### Test Set Discipline (The One Non-Negotiable Rule)
+
+**The TelecomEval test set must satisfy three conditions**:
+
+1. 100% **real imagery** (no synthetic data whatsoever)
+2. As close as possible to telecommunication construction scenes (from T2/T3)
+3. **Never used in LoRA fine-tuning; never used to build generation conditions**
+
+> ⚠️ This rule matters **more**, not less, now that field collection is cancelled. If T1's generic construction data serves as both training and test data, the "sector-specific" conclusion loses all support. The test set must be carved out of T2/T3 separately and frozen, targeting **150–300 images**.
 
 ---
 
@@ -85,6 +127,58 @@ Generatively synthesised data (this project's innovation, closing the long tail 
 - Encroachment beyond a demarcated zone (requires site boundary annotation)
 - Obstruction of passageways or escape routes
 - Presence or absence of strapping/securing
+
+---
+
+### 1.6 T2 — Community Dataset Platforms (new in v2.0)
+
+Beyond academic datasets, Roboflow Universe and Kaggle host many community-contributed sets. They are typically smaller with variable annotation quality, but **highly targeted by class** and exportable directly to YOLO/COCO format.
+
+| Resource | Scale | Content | Value to this project |
+|----------|-------|---------|---------------------|
+| **Telecom Tower Object Detection** (Roboflow Universe) | ~128 images | Telecommunication tower detection | ⭐⭐⭐⭐ **One of the few directly telecom resources.** Small, but usable as a telecom appearance anchor for LoRA and as part of TelecomEval |
+| **Construction Site Safety Image Dataset** (Kaggle / Roboflow, YOLOv8 format) | Thousands | 10 classes: Hardhat / **NO-Hardhat** / Safety Vest / **NO-Safety Vest** / Mask / NO-Mask / Person / Safety Cone / machinery / vehicle | ⭐⭐⭐⭐⭐ **Includes NO-* negative classes** — exactly the violation samples this project needs, saving the work of defining negatives |
+| **Safety Harness datasets** (Roboflow Universe, several) | Hundreds to thousands | Safety harness / lanyard detection | ⭐⭐⭐⭐⭐ **The key PPE for work at height**, highly relevant to tower climbing; publicly available and previously overlooked |
+| Roboflow Universe searches such as `class:safety` | Numerous | Assorted site safety objects | ⭐⭐⭐ Supplement scarce classes |
+
+> **Cautions**:
+> - Community annotation quality **must be spot-checked** (randomly verify 50 images per dataset); where it fails, take the images only and re-annotate
+> - Confirm licence terms per dataset (Roboflow Universe is often CC BY 4.0, but not always)
+> - Class naming is inconsistent and must be folded into the **class mapping table** owned by Member A
+
+### 1.7 T3 — Curating Openly Licensed Image Repositories (★ Core Source of Sector Specificity ★)
+
+With field collection cancelled, this is **the only route to real telecommunication construction imagery**, and the principal source for the TelecomEval test set.
+
+| Source | Note | Entry point |
+|--------|------|------------|
+| **Wikimedia Commons** | Dedicated categories; all images freely licensed with complete metadata | `Category:Communications towers`, `Category:Construction workers`, `Category:Telecommunications infrastructure` |
+| **Openverse** | Aggregates Flickr, Wikimedia and more; indexes 700M+ openly licensed images, **filterable by licence** | wordpress.org/openverse |
+| **Flickr (CC filter)** | High photographic quality, rich in engineering and construction imagery | Advanced search → filter by CC licence |
+| Operator / tower company press releases and annual reports | Often contain real construction photographs, but **usually all rights reserved** — usable only for observing visual style, never for inclusion in the dataset | — |
+
+**Suggested search terms**:
+```
+cell tower technician / tower climber / antenna installation
+telecommunication mast construction / fiber optic cable laying
+base station installation / rooftop antenna work
+```
+
+**Curation workflow (executed during M1)**:
+
+```
+1. Search Openverse / Wikimedia with the terms above, filtering by licence
+   (CC0 / CC BY / CC BY-SA / Public Domain)
+2. Screen manually: discard diagrams, renders, logos and empty scenes
+3. Record source URL, licence type and author attribution per image
+   → licence_manifest.csv (mandatory for compliance)
+4. Pre-label with Grounding DINO → correct manually in CVAT
+5. Split: TelecomEval (150–300 images, frozen) ｜ TelecomSeed (remainder, for LoRA)
+```
+
+> ⚠️ **Compliance requirement**: CC BY and CC BY-SA require **attribution**. Author and licence must be recorded per image, and `licence_manifest.csv` must accompany the report and any data release. This is a hard obligation of using openly licensed imagery and cannot be skipped.
+
+> **Realistic expectation**: T3 will yield a limited number of telecommunication construction images (optimistically 200–500, weighted towards tower exteriors with few close-ups of workers). **That limitation is exactly what generative augmentation exists to address**, and should be stated plainly in the report.
 
 ---
 
@@ -179,35 +273,61 @@ Generatively synthesised data (this project's innovation, closing the long tail 
 | SDXL | CreativeML Open RAIL++-M; permits research and most commercial use, but prohibits unlawful/infringing content |
 | FLUX.1-dev | **Non-commercial licence**; usable for academic research. If commercialisation is anticipated, switch to FLUX.1-schnell (Apache 2.0) |
 | Ultralytics YOLO | **AGPL-3.0**; a commercial licence is required if the work is not open-sourced. Usually not an issue for a campus research project, but state it in the report |
-| Self-collected data | Involves **worker likeness**; handle privacy via face blurring, informed consent, or internal-only use |
-| Generated data | Synthetic persons involve no real individual's privacy. **This is an additional advantage of the generative approach and worth emphasising in the paper** |
+| ~~Self-collected data~~ | ❌ **Field collection cancelled in v2.0**; no self-captured likeness issues remain |
+| **Openly licensed imagery (T3)** ★ | **CC BY / CC BY-SA require attribution.** Record source URL, licence type and author per image, and ship `licence_manifest.csv` with the report and any data release. CC BY-SA is **copyleft** (derivatives must carry the same licence), so prefer CC0 / CC BY / Public Domain if a public dataset release is planned |
+| **Community datasets (T2)** ★ | Roboflow Universe is often CC BY 4.0 but not always — **confirm individually**; Kaggle licences vary more widely |
+| Generated data | Synthetic persons involve no real individual's privacy. **An additional advantage of the generative approach, worth emphasising in the paper** — and more prominent still now that field collection is cancelled |
 
 ---
 
 ## 5. Action Checklist (Directly Executable at M1)
 
 ```
-□ 1. Request/download SODA, MOCS, ACID, CHV, SHEL5K, SHWD
+[T1 Academic public datasets]
+□ 1. Request/download SODA, MOCS, ACID, CHV, SHEL5K, SHWD, Pictor-v3
 □ 2. Clone the ConstructionActionRecognition repository; assess video data usability
-□ 3. Convert everything to COCO format; build a class mapping table (merge synonyms, e.g. helmet/hardhat)
-□ 4. Collect ≥500 telecommunication scene images; screen manually for quality
-□ 5. Pre-label with Grounding DINO → correct in CVAT → produce TelecomSeed-v1
-□ 6. Generate ground-region proposals with SAM 2 → assign classes manually → produce the terrain segmentation subset
-□ 7. Split data strictly: the test set contains only real telecommunication imagery and never participates in generative fine-tuning
-□ 8. Download SDXL 1.0 + the full ControlNet suite + CLIP ViT-L/14 weights
-□ 9. Download YOLOv11-m/pose, SegFormer-B2, SAM 2, Grounding DINO weights
-□ 10. Set up DVC data version control; record the provenance and licence of every subset
+
+[T2 Community dataset platforms]  * new in v2.0 *
+□ 3. Download Roboflow Universe "Telecom Tower Object Detection" (~128 images)
+□ 4. Download the Kaggle/Roboflow "Construction Site Safety Image Dataset" (includes NO-Hardhat etc.)
+□ 5. Search and download the Roboflow Universe safety harness datasets
+□ 6. Spot-check 50 random images per community dataset; where quality fails, take images only and re-annotate
+□ 7. Confirm and record licence terms per dataset
+
+[T3 Curating openly licensed repositories]  * new in v2.0 - source of sector specificity *
+□ 8. Search Openverse / Wikimedia Commons by keyword, filtering by open licence
+□ 9. Screen manually (discard diagrams, renders, empty scenes); target 200-500 images
+□ 10. Build licence_manifest.csv: source URL, licence type and author per image (mandatory)
+
+[Annotation and splitting]
+□ 11. Convert everything to COCO format; build a class mapping table (merge synonyms, e.g. helmet/hardhat)
+□ 12. Pre-label with Grounding DINO -> correct in CVAT -> produce TelecomSeed-v1
+□ 13. Generate ground-region proposals with SAM 2 -> assign classes manually -> terrain segmentation subset
+□ 14. Carve out TelecomEval (150-300 real images) and FREEZE it; never used in LoRA
+      fine-tuning or generation conditioning
+
+[Model weights]
+□ 15. Download SDXL 1.0 + the full ControlNet suite + CLIP ViT-L/14 weights
+□ 16. Download YOLOv11-m/pose, SegFormer-B2, SAM 2, Grounding DINO weights
+
+[Version control]
+□ 17. Set up DVC; record provenance, licence and split membership for every subset
 ```
+
+> ❌ **Cancelled** (present in v1.0): on-site photography of telecommunication scenes. This project performs no field collection.
 
 ---
 
 ## 6. Data Scale Targets
 
-| Data category | Target scale | Purpose |
-|--------------|-------------|---------|
-| Public generic data (transfer) | 20,000+ images | Backbone pretraining / transfer base |
-| Real telecommunication seed data | 500–1,000 images | LoRA fine-tuning + real training set |
-| **Real telecommunication test set** | **200–300 images (strictly isolated)** | **The sole yardstick for all evaluation** |
-| Synthetic data | 3,000–10,000 images | Augmented training set; long-tail completion |
-| Video clips (behaviour) | 200–500 clips | Action recognition training |
-| Expert risk-level annotation | 200 images | Fusion module ground truth |
+| Data category | Tier | Target scale | Purpose | Attainability |
+|--------------|------|-------------|---------|--------------|
+| Academic public data | T1 | 20,000+ images | Backbone pretraining / transfer base | 🟢 High (direct download) |
+| Community specialist data | T2 | 2,000–5,000 images | Telecom towers / harnesses / PPE negatives | 🟢 High (direct download) |
+| **Openly licensed telecom imagery** | **T3** | **200–500 images** | LoRA seeds + real training set | 🟡 Medium (search and screening; limited volume) |
+| 🔒 **TelecomEval test set** | **T3 (+T2)** | **150–300 images (isolated, frozen)** | **The sole yardstick for all evaluation** | 🟡 Medium |
+| Synthetic data | T4 | 3,000–10,000 images | Augmented training set; long-tail completion | 🟢 High (this project's core output) |
+| Video clips (behaviour) | T1 | 200–500 clips | Action recognition training | 🔴 Low (triggers D6 if unavailable) |
+| Expert risk-level annotation | Team | 200 images | Fusion module ground truth | 🟡 Medium |
+
+> **Difference from v1.0**: "Real telecommunication seed data 500–1,000 images (incl. field capture)" is reduced to "200–500 images (openly licensed sources only)". The test set target moves from 200–300 to 150–300. **Less real data means greater reliance on generative augmentation — which is precisely the proposition this project sets out to test.**

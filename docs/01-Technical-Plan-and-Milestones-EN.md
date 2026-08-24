@@ -33,7 +33,7 @@ TelecomSafe adopts a **five-layer architecture** in which each layer has a singl
                               ▲
 ┌──────────────────────────────────────────────────────────────┐
 │  L2  Data   ★ CORE INNOVATION ★                               │
-│      Real data capture/annotation ── Generative augmentation  │
+│      Public data curation/annotation ── Generative augment.   │
 │      pipeline ── Quality gates                                │
 └──────────────────────────────────────────────────────────────┘
                               ▲
@@ -181,11 +181,13 @@ Based on a **16-week** semester. For a 12-week variant, compress M2/M5 and downg
 
 #### M1 ｜ W2–W3 — Data Infrastructure
 - [ ] Download and normalise public datasets (SODA / MOCS / CHV / SHEL5K — see document 02)
-- [ ] Collect and manually screen **≥500** telecommunication scene images (base stations, towers, trenching, equipment rooms)
+- [ ] **T2 community datasets**: download the Roboflow Universe telecom tower set, the safety harness sets, and the Kaggle construction safety set (includes NO-Hardhat negatives)
+- [ ] **T3 open-licence curation**: search Openverse / Wikimedia Commons and manually screen **200–500** telecommunication scene images, building `licence_manifest.csv` with source and attribution as you go
+- [ ] ❌ ~~Field collection~~ — cancelled in v2.0; this project performs no on-site capture
 - [ ] Write an **annotation guideline** including edge-case adjudication rules, to prevent inconsistency across annotators
-- [ ] Annotate **≥300** seed images (Label Studio / CVAT; pre-label with Grounding DINO then correct manually — saves roughly 60% of the effort)
-- [ ] Split train/val/test; **the test set must consist entirely of real images and be strictly isolated**
-- [ ] **Deliverable**: TelecomSeed-v1 dataset + annotation guideline
+- [ ] Annotate **≥200** seed images (Label Studio / CVAT; pre-label with Grounding DINO then correct manually — saves roughly 60% of the effort)
+- [ ] 🔒 Carve out and **freeze the TelecomEval test set (150–300 real images)** — never used in LoRA fine-tuning or generation conditioning
+- [ ] **Deliverable**: TelecomSeed-v1 + TelecomEval-v1 + annotation guideline + `licence_manifest.csv`
 
 #### M2 ｜ W4–W6 — Generation Pipeline ★ CORE ★
 - [ ] Comparative selection of the base model (SDXL vs SD3.5 vs FLUX, small-scale trials)
@@ -234,7 +236,7 @@ Based on a **16-week** semester. For a 12-week variant, compress M2/M5 and downg
 
 | ID | Risk | Likelihood | Impact | Mitigation | Trigger threshold |
 |----|------|-----------|--------|-----------|------------------|
-| R1 | Insufficient real telecommunication data | High | High | Transfer from public datasets + web collection + on-site capture; if necessary downgrade to "telecommunication-styled" scenes | < 300 seed images by end of W3 |
+| R1 | Insufficient real telecommunication data (**field collection cancelled**; entirely dependent on public sources) | High | High | T1 academic dataset transfer + T2 community specialist sets + T3 open-licence curation; volume is inherently limited, hence greater reliance on T4 synthesis. Downgrade to generalised "work-at-height / tower-type" scenes if needed (D1) | TelecomSeed < 150 images by end of W3 |
 | R2 | Generated image quality inadequate; negative transfer | Medium | High | Strict quality gates; conservative ratio (start at 25%); retain the pure-real baseline | FID > 60, or E3 below E2 |
 | R3 | Insufficient compute (diffusion training is expensive) | Medium | Medium | Use LoRA rather than full fine-tuning; SDXL-Turbo for speed; rent cloud GPUs; generate in batches | Single GPU < 16 GB |
 | R4 | No video data for behaviour recognition | High | Medium | **Fallback**: replace video action recognition with single-frame pose plus rule-based judgement | No usable video by end of W9 |

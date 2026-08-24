@@ -138,7 +138,7 @@ mixed_precision = "fp16"
 
 | Point | Approach |
 |-------|----------|
-| Data source | **Only real telecommunication images outside the test set** (200–500 images) |
+| Data source | **TelecomSeed only** (public sources T2/T3, 200–500 images); 🔒 the TelecomEval test set must never enter the fine-tuning set |
 | Caption generation | Auto-caption with BLIP-2 or Qwen2-VL, then correct key terminology by hand |
 | Trigger word | Set a rare trigger token (e.g. `tlcmsite`) and include it at inference to activate the domain style |
 | Overfitting monitoring | Generate a sample batch every 500 steps and check visually whether the model has begun reproducing training images |
@@ -236,7 +236,9 @@ new_image = sd_inpaint(
 # Annotation change: person box unchanged; helmet instance deleted; label: no_helmet
 ```
 
-> **Why this route deserves the most investment**: it preserves the real image's background, illumination and noise distribution, minimising the domain gap, while precisely producing the hardest-to-obtain **violation samples**. Photographs of workers in violation are both rare and legally difficult to capture — the generative approach solves the data problem and the ethical problem at once, which is a powerful argument in the paper.
+> **Why this route deserves the most investment**: it preserves the real image's background, illumination and noise distribution, minimising the domain gap, while precisely producing the hardest-to-obtain **violation samples**.
+>
+> **Added in v2.0**: with field collection cancelled, the project holds only 200–500 real images in total, so the inpainting route's ability to derive many violation samples from few real images becomes more critical still. Raise this route's share of output from 30% to **40–50%**, reducing the pure T2I share accordingly. Photographs of workers in violation are both rare and legally difficult to capture — the generative approach solves the data problem and the ethical problem at once, which is a powerful argument in the paper.
 
 ### Route ④ Background Replacement / Environment Transfer
 
