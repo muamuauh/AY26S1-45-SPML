@@ -1,295 +1,244 @@
 # TelecomSafe — Technological Roadmap
 
-> Document version: v1.0 ｜ Generated: 2026-08-19
+> Document version: **v2.0 (simplified)** ｜ Generated: 2026-08-19 ｜ Revised: 2026-08-24
 > Chinese counterpart: [05-技术路线图-CN.md](05-技术路线图-CN.md)
-> Companion documents: `01-Technical-Plan-and-Milestones-EN.md` (schedule), `06-Teamwork-Allocation-EN.md` (people)
+> Roles: [06 Teamwork Allocation](06-Teamwork-Allocation-EN.md) ｜ Detailed schedule: [01 Technical Plan & Milestones](01-Technical-Plan-and-Milestones-EN.md)
+
+**This document governs technology choices and fallbacks; `01` governs the schedule.** Use them together.
 
 ---
 
-## 0. How This Differs from the Milestone Document
+## One-Page Summary
 
-| | `01-Technical-Plan-and-Milestones` | **This document (roadmap)** |
+| | |
+|---|---|
+| **Innovation bets** | L2 generative augmentation (core) + L4 information fusion (secondary) |
+| **Kept conservative** | L3 perception and L5 system layers use mature solutions only — no technical adventures |
+| **Three must-pass gates** | TG1 data foundation (W3) → TG2 generation quality (W6) → TG3 augmentation effectiveness (W9) |
+| **Critical path** | Risk Taxonomy → public data curation → LoRA → generation engines → **experiment E3** |
+| **Largest risks** | ① only 200–500 real telecom images ② negative transfer from synthetic data ③ four-dimension scope too large |
+| **Safest bet** | The inpainting route: inherited annotation + minimal domain gap; it does not fail under any circumstances |
+
+---
+
+## 1. Master Technical Flow
+
+```mermaid
+flowchart TB
+    classDef data fill:#bbdefb,stroke:#1565c0,stroke-width:1px,color:#0d1b2a
+    classDef core fill:#ffe0b2,stroke:#e65100,stroke-width:2px,color:#3e2723
+    classDef perc fill:#c8e6c9,stroke:#2e7d32,stroke-width:1px,color:#1b3a1e
+    classDef fuse fill:#e1bee7,stroke:#6a1b9a,stroke-width:1px,color:#2e1437
+    classDef gate fill:#ffcdd2,stroke:#c62828,stroke-width:2px,color:#3e1416
+    classDef app fill:#cfd8dc,stroke:#455a64,stroke-width:1px,color:#1c2529
+    classDef eval fill:#fff9c4,stroke:#f9a825,stroke-width:2px,color:#3e3000
+
+    TAX["<b>Risk Taxonomy</b><br/>Sector risk classification<br/><i>Head of critical path · W1</i>"]:::data
+
+    subgraph SRC["L2 Data Sources · Public only · Zero field collection"]
+        direction LR
+        T1["<b>T1</b> Academic datasets<br/>SODA · CHV · SHEL5K<br/>20,000+ images"]:::data
+        T2["<b>T2</b> Community datasets<br/>Roboflow · Kaggle<br/>2,000–5,000 images"]:::data
+        T3["<b>T3</b> Open-licence imagery<br/>Wikimedia · Openverse<br/>200–500 images"]:::data
+    end
+
+    SEED["<b>TelecomSeed</b><br/>200–500 real images"]:::data
+    EVAL["<b>TelecomEval</b> 🔒<br/>150–300 images · frozen on carve-out<br/><i>Sole yardstick</i>"]:::eval
+
+    subgraph GEN["L2 Generation ★ CORE INNOVATION ★"]
+        direction TB
+        LORA["LoRA domain adaptation"]:::core
+        ENG["Four generation engines<br/>ControlNet layout · Inpainting edit<br/>T2I new scenes · Background swap"]:::core
+        QG["Four quality gates<br/>G1 semantic → G2 distribution<br/>→ G3 annotation → G4 human"]:::core
+        LORA --> ENG --> QG
+    end
+
+    SYNTH["<b>TelecomSynth</b><br/>3,000–10,000 synthetic images"]:::core
+
+    subgraph PERC["L3 Perception · four branches"]
+        direction LR
+        PW["<b>Workers</b><br/>Detect + PPE + pose"]:::perc
+        PM["<b>Machinery</b><br/>Detect + state"]:::perc
+        PT["Terrain<br/>Segmentation"]:::perc
+        PMT["Materials<br/>Stacking judgement"]:::perc
+    end
+
+    FUSE["<b>L4 Three-level fusion</b> ★ SECONDARY CORE ★<br/>Entity graph → regulation predicates → learnable fusion<br/>Interpretable risk score"]:::fuse
+    APP["<b>L5 Application</b><br/>Risk scorecard · Web demo · Hazard report"]:::app
+
+    TG1{{"<b>TG1</b> · W3<br/>Data foundation"}}:::gate
+    TG2{{"<b>TG2</b> · W6<br/>Generation quality"}}:::gate
+    TG3{{"<b>TG3</b> · W9<br/>Augmentation effect<br/><i>Decisive checkpoint</i>"}}:::gate
+    TG4{{"<b>TG4</b> · W11<br/>Fusion feasibility"}}:::gate
+
+    TAX --> SRC
+    SRC --> SEED
+    SRC --> EVAL
+    SEED --> TG1
+    TG1 -->|pass| GEN
+    QG --> SYNTH
+    SYNTH --> TG2
+    TG2 -->|pass| PERC
+    SEED -.real training set.-> PERC
+    T1 -.transfer base.-> PERC
+    PERC --> TG3
+    TG3 -->|pass| FUSE
+    FUSE --> TG4
+    TG4 -->|pass| APP
+    EVAL -.evaluation only.-> TG3
+```
+
+**How to read it**
+
+- 🟠 **Orange is where the innovation lives**: the L2 generation layer, and the only part that must be built from scratch
+- 🟡 **Yellow TelecomEval has exactly one outgoing edge**: evaluation only, never flowing back into training or generation. Every experimental conclusion depends on this
+- 🔴 **Red diamonds are decision gates**: failing one triggers a downgrade path (§3) rather than forcing ahead
+- Dashed edges are **auxiliary data flows**; solid edges are the **main chain**
+
+---
+
+## 2. Three Horizons
+
+| | H1 · MVP loop<br/>W1–W9 | H2 · Full framework<br/>W10–W16 | H3 · Extension<br/>Post-project |
+|---|---|---|---|
+| **Goal** | "It runs" | "It can be evaluated" | "It can be published / deployed" |
+| **Data** | T1+T2 transfer · T3 curation 200–500 | + terrain/material subsets | + public dataset release |
+| **Generation** | SDXL+LoRA · T2I+Inpainting · gates G1+G3 | + full ControlNet · gates G1–G4 | + video generation |
+| **Perception** | Single Workers branch | Four branches + skeleton action | + two-stream fusion |
+| **Fusion** | 5 hard rules, direct | Three-level fusion + GNN | + D-S evidence theory control |
+| **System** | CLI scripts | FastAPI + web demo | + edge deployment |
+
+> ⚠️ **Do not enter H2 if H1 has not been met.** If E3 at W9 shows no gain from synthetic data, adding four-dimension perception only magnifies the problem. Better to spend two more weeks in H1.
+
+---
+
+## 3. Decision Gates and Downgrade Paths
+
+```mermaid
+flowchart LR
+    classDef gate fill:#ffcdd2,stroke:#c62828,stroke-width:2px,color:#3e1416
+    classDef pass fill:#c8e6c9,stroke:#2e7d32,stroke-width:1px,color:#1b3a1e
+    classDef down fill:#eceff1,stroke:#78909c,stroke-width:1px,color:#263238
+
+    TG1{{"TG1 · W3<br/>Seed ≥ 200<br/>Eval ≥ 150 frozen"}}:::gate
+    TG2{{"TG2 · W6<br/>FID &lt; 50<br/>Realism ≥ 3.0"}}:::gate
+    TG3{{"TG3 · W9<br/>E3 − E2 ≥ 2.0 mAP"}}:::gate
+    TG4{{"TG4 · W11<br/>Risk-level Acc ≥ 0.70"}}:::gate
+    TG5{{"TG5 · W13<br/>End-to-end &lt; 3s"}}:::gate
+    DONE["M7 · W16 Delivery"]:::pass
+
+    D1["<b>D1</b> Reframe as work-at-height /<br/>tower-type construction"]:::down
+    D2["<b>D2</b> Keep only Inpainting<br/>+ background swap"]:::down
+    D3["<b>D3</b> Narrow claim to<br/>long-tail class gains"]:::down
+    D4["<b>D4</b> Drop learnable layer<br/>pure rule fusion"]:::down
+    D5["<b>D5</b> Scripts + screen recording<br/>instead of web UI"]:::down
+
+    TG1 -->|pass| TG2 -->|pass| TG3 -->|pass| TG4 -->|pass| TG5 -->|pass| DONE
+    TG1 -.fail.-> D1 -.continue.-> TG2
+    TG2 -.fail.-> D2 -.continue.-> TG3
+    TG3 -.fail.-> D3 -.continue.-> TG4
+    TG4 -.fail.-> D4 -.continue.-> TG5
+    TG5 -.fail.-> D5 -.continue.-> DONE
+```
+
+**Every gate has a fallback, so there is no single point of failure.** Criteria and actions:
+
+| Gate | Timing | Criteria | Action on failure |
+|---|---|---|---|
+| **TG1** Data foundation | End W3 | TelecomSeed ≥ 200 annotated; TelecomEval ≥ 150 carved out and frozen | < 100 images → **D1**: abandon the sector-specific positioning; reframe as work-at-height / tower-type construction, with the test set drawn from work-at-height subsets of T1/T2 |
+| **TG2** Generation quality | End W6 | FID(synthetic, real) < 50; human realism ≥ 3.0/5; gate retention ≥ 40% | FID > 70 → **D2**: keep only inpainting and background replacement — the two routes that edit real images, whose domain gap is inherently minimal and which almost never fail |
+| **TG3** Augmentation effect | End W9 | E3 improves mAP over E2 by ≥ 2.0 | No gain → **D3**: first check label noise and mixing ratio; if still ineffective, narrow the claim to "improves long-tail rare-class performance" and state honestly that overall performance did not improve |
+| **TG4** Fusion feasibility | End W11 | Risk-level accuracy ≥ 0.70 against 200 expert-annotated images | < 0.55 → **D4**: first check inter-annotator agreement (Kappa < 0.5 means the annotation, not the model, is the problem); otherwise drop level 3 and keep pure rules, which are steadier and fully interpretable |
+| **TG5** System integration | End W13 | End-to-end runs; single-image inference < 3 s | Fail → **D5**: scripts, rendered output and a screen recording instead of a web interface (affects only the defence presentation, not the academic conclusions) |
+
+**Three further fallbacks** (not tied to a gate):
+
+| ID | Trigger | Action |
 |---|---|---|
-| Perspective | **Time**: what is done when | **Technology**: how capability evolves |
-| Unit | Weeks, deliverables, checkpoints | Technology layers, maturity, decision gates |
-| Answers | "What is due in week 7?" | "Where do we fall back if this technology fails?" |
+| **D6** | No video data | Replace action recognition with single-frame pose + rules (e.g. arm angle for climbing) |
+| **D7** | VRAM < 16 GB | SD 1.5 instead of SDXL; YOLOv11-s instead of -m; 8-bit quantisation |
+| **D8** | More than 2 weeks behind | Drop Terrain + Materials; deliver Workers + Machinery only |
 
-Use both together: the milestone document governs schedule, the roadmap governs technology choices and fallbacks.
-
----
-
-## 1. Roadmap Principles
-
-### 1.1 Three Design Rules
-
-| # | Rule | Meaning |
-|---|------|---------|
-| 1 | **Every layer has a minimum working version** | The first version of any technology layer must run end to end, however crude. Close the loop first, optimise accuracy second |
-| 2 | **Every decision gate has a fallback** | A technology with no alternative is not allowed on the critical path. Every TG gate defines a downgrade path |
-| 3 | **Concentrate the innovation, keep the engineering conservative** | The entire innovation budget goes to generative augmentation (L2) and information fusion (L4). Perception (L3) and system (L5) layers use mature, proven solutions only — no technical adventures |
-
-### 1.2 Three Horizons
-
-```
-H1  MVP closed loop    W1–W9    "It runs"
-    └─ Single dimension (Workers) + basic generation + detection output
-       Goal: prove generative augmentation works (judged by experiment E3)
-
-H2  Full framework     W10–W16  "It can be evaluated"
-    └─ Four-dimension perception + three-level fusion + integration + full experiments
-       Goal: deliver a defensible, complete TelecomSafe
-
-H3  Extensions         Post-project  "It can be published / deployed"
-    └─ Video behaviour, UAV viewpoint, edge deployment, dataset release, journal submission
-       Goal: academic and engineering value beyond the course requirement
-```
-
-> ⚠️ **Do not enter H2 if H1 has not been met.** If experiment E3 at W9 shows that synthetic data delivers no improvement, adding four-dimension perception will only magnify the problem. Better to spend two more weeks in H1.
+> 💡 **On D3**: this is not failure but confining the claim to what is actually true. Kim & Yi (2024) reached only ~64% mAP with purely synthetic data, so the domain gap is real. A limited but honest finding is far more credible than a forced claim of across-the-board improvement.
+>
+> 💡 **On D8**: document [01 §5 R7](01-Technical-Plan-and-Milestones-EN.md) already recommends focusing on two dimensions from the outset. Follow that and D8 becomes unnecessary.
 
 ---
 
-## 2. Layered Technology Evolution
+## 4. Timeline
 
-The following swimlane chart shows how each of the five technology layers evolves. Each cell states the technology form for that phase.
+```mermaid
+gantt
+    title TelecomSafe milestones (week positions indicative; calendar dates pending semester start)
+    dateFormat YYYY-MM-DD
+    axisFormat %m/%d
 
-```
-        │ H1 MVP (W1–W9)          │ H2 Full (W10–W16)         │ H3 Extension (post)
-────────┼─────────────────────────┼───────────────────────────┼──────────────────────
-        │ Public dataset transfer │ + Real telecom data growth│ + Multi-site, seasons
-L2 Data │ 300 annotated seeds     │ + Terrain/material subsets│ + Crowdsourced/partner
-        │ Risk Taxonomy v1.0      │ Risk Taxonomy v2.0        │ Industry standard prop.
-────────┼─────────────────────────┼───────────────────────────┼──────────────────────
-L2 Gen  │ SDXL + LoRA             │ + Layered LoRA composition│ + SD3.5/FLUX upgrade
- ★CORE★ │ T2I + Inpainting        │ + ControlNet Seg/Pose/Dep.│ + Video gen (behaviour)
-        │ Gates G1+G3             │ Full gates G1–G4          │ Adaptive gate thresholds
-        │ 3,000 synthetic images  │ 8,000–10,000              │ Public dataset release
-────────┼─────────────────────────┼───────────────────────────┼──────────────────────
-        │ YOLOv11, one branch     │ Four branches in parallel │ + RT-DETR control
-L3 Perc.│ Detection + PPE labels  │ + Segmentation (Terrain)  │ + Open-vocab (GDINO)
-        │ Single-frame pose       │ + Skeleton act (ST-GCN++) │ + Two-stream fusion
-────────┼─────────────────────────┼───────────────────────────┼──────────────────────
-L4 Fuse │ Direct rules (if-then)  │ Three-level fusion        │ + D-S evidence control
- ★CORE★ │ 5 hard rules            │ 15+ rules + graph + GNN   │ + Temporal risk evolution
-        │ Four risk levels        │ Continuous score + attrib.│ + Interpretability viz
-────────┼─────────────────────────┼───────────────────────────┼──────────────────────
-        │ CLI scripts             │ FastAPI + Gradio web demo │ + Edge deploy (Jetson)
-L5 Sys. │ JSON result output      │ + Overlays + scorecard    │ + Real-time video stream
-        │ Manual experiment runs  │ W&B tracking + repro scripts│ + VLM narrative reports
+    section Data
+    M0 Setup · Risk Taxonomy        :m0, 2026-09-07, 7d
+    M1 Public data curation · TG1   :crit, m1, after m0, 14d
+
+    section Generation (core)
+    M2 Generation pipeline · TG2    :crit, m2, after m1, 21d
+
+    section Perception & Fusion
+    M3 Perception · E1E2E3 · TG3    :crit, m3, after m2, 21d
+    M4 Fusion & decision · TG4      :m4, after m3, 14d
+
+    section Integration & Delivery
+    M5 System integration · TG5     :m5, after m4, 14d
+    M6 Full evaluation E4–E9        :m6, after m5, 14d
+    M7 Report & defence             :milestone, m7, after m6, 0d
 ```
 
----
-
-## 3. Technology Decision Gates
-
-Decision gates are the core mechanism of this roadmap: **on reaching a given point in time, use objective metrics to decide whether to continue, adjust, or downgrade.** Every gate must be formally reviewed in a team meeting, with the conclusion recorded in the minutes.
-
-### TG1 ｜ End of W3 — Data Foundation Gate
-
-| Item | Content |
-|------|---------|
-| **Criteria** | TelecomSeed (from public sources T2/T3) ≥ 200 annotated; TelecomEval carved out and frozen at ≥ 150 images; Risk Taxonomy v1.0 finalised |
-| ✅ Pass | Proceed to generation pipeline development as planned |
-| ⚠️ Partial (100–200 images) | Reduce the Risk Taxonomy to 4 categories × 12 sub-classes; rely more on ControlNet and inpainting than T2I; lower the test set floor to 100 images and state this in the report |
-| ❌ Fail (< 100 images) | **Downgrade path D1**: abandon the "telecommunication-specific" positioning; reframe as "work-at-height and tower-type construction". The test set then draws on work-at-height subsets filtered from T1/T2 (e.g. the safety harness datasets), with the scope explicitly redefined in the report |
-
-### TG2 ｜ End of W6 — Generation Quality Gate ★ Most Critical ★
-
-| Item | Content |
-|------|---------|
-| **Criteria** | FID(synthetic, real) < 50; human realism rating ≥ 3.0/5; post-gate retention ≥ 40% |
-| ✅ Pass | Bulk-generate 3,000 images and proceed to perception model training |
-| ⚠️ Partial (FID 50–70) | Raise the inpainting route's share to 50% (smallest domain gap) and reduce pure T2I |
-| ❌ Fail (FID > 70 or rating < 2.5) | **Downgrade path D2**: abandon T2I novel-scene generation; keep only inpainting and background replacement — the two routes that edit real images. Their domain gap is inherently minimal and they almost never fail |
-
-### TG3 ｜ End of W9 — Augmentation Effectiveness Gate ★ Project Make-or-Break ★
-
-| Item | Content |
-|------|---------|
-| **Criteria** | E3 (generative augmentation) improves mAP by ≥ 2.0 over E2 (conventional augmentation) |
-| ✅ Pass | Enter H2; expand to four-dimension perception and fusion |
-| ⚠️ Gain of 0–2.0 | Diagnose in order: ① check label noise (is the consistency check active?) ② reduce synthetic ratio to 25% ③ switch to class-adaptive ratios, supplying data only to long-tail classes |
-| ❌ No gain or a decline | **Downgrade path D3**: narrow the research question from "synthetic data improves overall performance" to **"synthetic data improves long-tail class performance"** — report rare-class AP only. The narrower claim usually still holds and retains academic value. State honestly that overall performance did not improve |
-
-> **On D3**: this is not failure but confining the conclusion to what is actually true. Kim & Yi (2024) achieved only ~64% mAP with purely synthetic data, which shows the domain gap is real. Reporting a limited but honest finding is far more credible than forcing a claim of across-the-board improvement.
-
-### TG4 ｜ End of W11 — Fusion Feasibility Gate
-
-| Item | Content |
-|------|---------|
-| **Criteria** | Risk-level classification accuracy ≥ 0.70 against 200 expert-annotated images |
-| ✅ Pass | Retain the three-level fusion; proceed to system integration |
-| ⚠️ 0.55–0.70 | Drop level 3 (learnable fusion) and keep only L1 entity graph + L2 rule layer (pure rules are usually steadier and fully interpretable) |
-| ❌ < 0.55 | **Downgrade path D4**: check inter-annotator agreement (Kappa < 0.5 means the annotation itself is unreliable and the problem is not the model). If the annotation is reliable, simplify to the conservative rule "overall risk = highest single-source risk" |
-
-### TG5 ｜ End of W13 — System Integration Gate
-
-| Item | Content |
-|------|---------|
-| **Criteria** | End-to-end pipeline runs; single-image inference < 3 s; demo interface presentable |
-| ✅ Pass | Proceed to full evaluation |
-| ❌ Fail | **Downgrade path D5**: drop the web interface in favour of scripts, rendered output images and a screen recording. Slightly weaker for the defence, but the academic conclusions are unaffected |
+> Dates in the chart express **relative week positions only**; the start week is a placeholder. Once the academic calendar is confirmed, substitute real dates and update the Summary Milestones table in [07 Project Charter](07-Project-Charter-EN.md).
+> The critical items M1 → M2 → M3 are marked in red: a delay in any of them delays everything downstream.
 
 ---
 
-## 4. Technology Dependencies and Critical Path
+## 5. Critical Path and Risk Concentration
 
-```
-Risk Taxonomy ──┬──> Annot. guideline ──> Seed dataset ──┬──> LoRA ──> Gen engines ──┐
-   [TG1]        │                                        │    [TG2]                  │
-                │                                        │                           ▼
-                └──> Spec library (Stage 0) ─────────────┘                  Synthetic dataset
-                                                                                     │
-                                                                                     ▼
-Public datasets ──> Pretrain/transfer ──> Perception baseline (E1) ──> Mixed training (E3) [TG3]
-                                                │                                 │
-                                                ▼                                 ▼
-                                      Four-branch output ──────────────> Entity graph
-                                                                                     │
-Safety regulations ──> Rule predicate base ─────────────────────────────> Rule layer [TG4]
-                                                                                     │
-Expert risk annotation ────────────────────────────────────────────> Learnable fusion
-                                                                                     │
-                                                                                     ▼
-                                                                        System integration [TG5]
-```
+**Critical path**: `Risk Taxonomy → annotation guideline → public data curation → LoRA → generation engines → synthetic data → experiment E3`
 
-### Critical Path
+Three commonly underestimated points:
 
-**Risk Taxonomy → annotation guideline → seed data → LoRA → generation engines → synthetic data → experiment E3**
+1. **The Risk Taxonomy is not "a list of categories"** but a definition of **decidable criteria** per risk (what counts as "poorly stored"? which height-to-width ratio?). Without this, annotation, generation and evaluation each mean something different.
+2. **Searching and screening T3 openly licensed imagery is the only step compute cannot accelerate.** Start it in parallel in W1. ⚠️ **Source URL and licence attribution must be recorded at the moment of collection** — reconstructing them later is close to impossible, and it is a hard obligation of CC BY / CC BY-SA.
+3. **Expert risk annotation (the ground truth for TG4) can be done early in parallel.** It is not on the critical path but is routinely deferred until TG4 becomes unmeasurable. Start recruiting annotators in W8.
 
-Any delay on this chain delays the whole project. Three notes:
+**Technology maturity and where to put your strongest people**:
 
-1. **The Risk Taxonomy is the start of the critical path and the most underestimated item.** It is not "a list of categories" but a definition of **decidable criteria** for each risk (what counts as "poorly stored"? which height-to-width ratio?). Without this, annotation, generation and evaluation will each mean something different.
-2. **Searching and screening T3 openly licensed imagery is the only step compute cannot accelerate** (field collection is cancelled, but manual search and screening remains labour). Start it in parallel in W1 rather than waiting for the taxonomy, and **record licence and attribution per image as you go** — reconstructing it later is close to impossible.
-3. **Expert risk annotation (fusion ground truth) can be done early in parallel.** It is not on the critical path, but it is routinely deferred until the end, leaving TG4 unmeasurable. Start recruiting annotators in W8.
+| Confidence | Technology | Allocation |
+|---|---|---|
+| 🟢 **Mature** | YOLOv11 detection, SDXL+LoRA, SD Inpainting, SAM 2, Grounding DINO | Assign to less experienced members; use off-the-shelf solutions directly |
+| 🟡 **Medium** | ControlNet-Seg layout control, ST-GCN++ skeleton action, gate threshold calibration, rule predicate base | Reserve debugging time; the effort of programmatically generating ControlNet layout maps is routinely underestimated |
+| 🔴 **Novel** | Three-level information fusion, terrain segmentation, material storage judgement | **Put the strongest people here**; the latter two have no public data and subjective class definitions, and are the first candidates for D8 |
 
 ---
 
-## 5. Technology Maturity Assessment
+## 6. Post-Project Extensions (H3)
 
-A TRL-like reading of how well-understood each technology is within this project, used to guide risk allocation.
+Ordered by return on effort:
 
-| Technology | Maturity | Risk | Note |
-|-----------|----------|------|------|
-| YOLOv11 object detection | 🟢 Mature | Low | Industrial-grade, fully documented, essentially cannot fail |
-| SDXL + LoRA fine-tuning | 🟢 Mature | Low | Abundant community recipes and tutorials |
-| SD Inpainting editing | 🟢 Mature | Low | Annotations inherited; the steadiest generation route |
-| SAM 2 segmentation | 🟢 Mature | Low | Works out of the box |
-| Grounding DINO pre-labelling | 🟢 Mature | Low | Large efficiency gain, no technical risk |
-| ControlNet-Seg layout control | 🟡 Medium | Medium | Requires programmatic layout-map generation; the engineering effort is widely underestimated |
-| ST-GCN++ skeleton action | 🟡 Medium | Medium | **Depends on video data**; without it the whole line is infeasible (see D6) |
-| Quality gate threshold calibration | 🟡 Medium | Medium | No off-the-shelf standard; must be determined experimentally, consuming much of W6 |
-| Three-level information fusion | 🔴 Novel | High | Original to this project, no mature precedent; reserve debugging time |
-| Rule predicate base construction | 🟡 Medium | Medium | Technically easy, but requires regulatory research and expert confirmation — time-consuming |
-| Terrain semantic segmentation | 🔴 Novel | High | **No public data**; class definitions subjective; the most likely candidate for downgrade |
-| Material storage state judgement | 🔴 Novel | High | As above; "improper" lacks an objective definition |
-
-**Risk allocation conclusion**: put the strongest people on the 🔴 items (fusion, terrain, materials); the 🟢 items can go to less experienced members or use off-the-shelf solutions directly.
-
----
-
-## 6. Consolidated Downgrade Paths
-
-All fallbacks are collected here for quick reference during gate meetings.
-
-| ID | Trigger | Downgrade action | Effect on outcomes |
-|----|---------|-----------------|-------------------|
-| **D1** | < 150 real telecommunication images | Reposition to "work-at-height / tower-type construction" | Weakens sector specificity (gap G1) but does not affect the core generative augmentation contribution |
-| **D2** | Generation quality FID > 70 | Keep only inpainting and background replacement | Less synthetic diversity, but smaller domain gap — E3 may even improve |
-| **D3** | E3 shows no gain | Narrow the claim to "improves long-tail class performance" | Narrower selling point but still valid; must be stated honestly |
-| **D4** | Fusion accuracy < 0.55 | Remove the learnable layer; pure rule-based fusion | Loses the learning-based novelty of L4, but interpretability improves |
-| **D5** | System integration fails | Scripts + screen recording instead of a web interface | Affects only the defence presentation, not the academic conclusions |
-| **D6** | No video data | Replace action recognition with **single-frame pose + rules** (e.g. arm angle for climbing) | No temporal actions, but PPE + pose still covers most unsafe behaviours |
-| **D7** | Insufficient compute (< 16 GB VRAM) | SD 1.5 instead of SDXL; YOLOv11-s instead of -m; 8-bit quantisation | Slight accuracy loss; the full pipeline still runs |
-| **D8** | More than 2 weeks behind schedule | Drop the Terrain and Materials dimensions; deliver Workers + Machinery only | "Four-dimension" becomes "two-dimension"; scope must be redefined in the report |
-
-> **D8 is the last line of insurance.** Document 01 §5 R7 already recommends focusing on two dimensions from the outset; if that recommendation is followed, D8 becomes unnecessary.
-
----
-
-## 7. Technology Selection Alternatives Matrix
-
-A/B/C options for the key technology decisions, to enable rapid switching.
-
-| Decision point | Option A (preferred) | Option B (alternative) | Option C (last resort) |
-|---------------|---------------------|----------------------|----------------------|
-| Generative base | SDXL 1.0 | SD 3.5 Medium | SD 1.5 |
-| Bulk generation speed | SDXL-Turbo | LCM-LoRA | Full SDXL (slow but workable) |
-| Domain adaptation | LoRA rank 32 | LoRA rank 16 | Textual Inversion |
-| Layout control | ControlNet-Seg | ControlNet-Canny | No control; pure T2I + auto-annotation |
-| Detector | YOLOv11-m | RT-DETRv2 | YOLOv8-s |
-| Segmentation | SegFormer-B2 | YOLOv11-seg | SAM 2 + classification head |
-| Pose | YOLOv11-pose | RTMPose | No pose; boxes only |
-| Action recognition | ST-GCN++ | VideoMAE V2 | Single-frame pose rules (D6) |
-| Fusion | Three-level hierarchy | Rule layer + weighting | Highest single-source risk |
-| Auto-annotation | Grounding DINO + SAM 2 | Grounding DINO only | Manual annotation |
-| Experiment tracking | Weights & Biases | MLflow | CSV + Git |
-
----
-
-## 8. Technology Risks and Mitigation
-
-| Risk | Layer | Likelihood | Impact | Mitigation | Related gate |
-|------|-------|-----------|--------|-----------|-------------|
-| Structural hallucination in generated images (distorted towers) | L2 | High | Medium | Lock structure with ControlNet-Canny + negative prompts + G4 spot-checks | TG2 |
-| Label noise in synthetic data causing negative transfer | L2 | Medium | **High** | Consistency checking + G3 gate + loss down-weighting | TG3 |
-| Gates too strict, retention too low | L2 | Medium | Medium | Calibrate thresholds in stages, loose before tight; log rejection rate per gate | TG2 |
-| Repeated redefinition of terrain/material classes | L3 | High | Medium | Fix quantitative criteria at the taxonomy stage; avoid subjective descriptions | TG1 |
-| Resource contention across four training branches | L3 | Medium | Medium | Time-share training + shared backbone; prioritise Workers/Machinery | — |
-| Inconsistent expert annotation (low Kappa) | L4 | Medium | High | Train annotators beforehand; align on a 20-image pilot | TG4 |
-| Fusion module overfits a small sample | L4 | Medium | Medium | Rules primary, learning secondary; cross-validation | TG4 |
-| End-to-end latency too high | L5 | Low | Low | ONNX export + branch parallelism + lower resolution | TG5 |
-
----
-
-## 9. H3 Extension Directions (Post-Project)
-
-Ordered by return on effort, for teams with capacity to spare:
-
-| Priority | Direction | Note | Estimated effort |
-|----------|-----------|------|-----------------|
-| ⭐⭐⭐⭐⭐ | **Release the TelecomSynth dataset** | Synthetic data involves no real individual's privacy, so release is unobstructed; a dataset is itself a citable contribution | 1–2 weeks (curation + documentation) |
+| Priority | Direction | Note | Effort |
+|---|---|---|---|
+| ⭐⭐⭐⭐⭐ | **Release the TelecomSynth dataset** | Synthetic data involves no real individual's privacy, so release is unobstructed; a dataset is itself a citable contribution | 1–2 weeks |
 | ⭐⭐⭐⭐⭐ | **Submit to *Automation in Construction*** | The field's principal venue, already hosting comparable work by Kim & Yi and Lee et al.; strong topical match | 4–6 weeks |
-| ⭐⭐⭐⭐ | Complete video behaviour recognition | Restores what was cut if D6 was taken during H2 | 3–4 weeks (incl. data collection) |
 | ⭐⭐⭐⭐ | VLM natural-language risk reports | Integrate Qwen2.5-VL; strong demonstration value, low effort | 1 week |
-| ⭐⭐⭐ | UAV viewpoint extension | Clear advantage for tower scenes, but needs extra data and equipment | 4 weeks |
-| ⭐⭐⭐ | Edge deployment (Jetson) | High engineering value, limited academic contribution | 3 weeks |
-| ⭐⭐ | Temporal risk evolution modelling | From per-frame risk to risk trend prediction; academically novel but difficult | 6+ weeks |
+| ⭐⭐⭐⭐ | Complete video behaviour recognition | Restores what was cut if D6 was taken | 3–4 weeks |
+| ⭐⭐⭐ | UAV viewpoint / edge deployment | High engineering value, limited academic contribution | 3–4 weeks |
 
 ---
 
-## 10. Roadmap Checklist
+## 7. Gate Meeting Checklist
 
-Before each gate meeting, the team should self-check against this list:
+Self-check before every TG meeting:
 
 ```
 □ Have the gate criteria been measured (not estimated)?
-□ Are the actions for all three outcomes (pass / partial / downgrade) agreed by the team?
-□ If a downgrade is triggered, has the effort for the corresponding D path been assessed?
+□ Are the actions for both outcomes (pass / fail) agreed by the team?
+□ If a downgrade is triggered, has the effort of the corresponding D path been assessed?
 □ Is any task on the critical path delayed? By how long?
-□ Are there new technical risks to add to §8?
-□ Have the meeting conclusions been minuted and pushed to the repository?
-```
-
----
-
-## 11. One-Page Summary
-
-```
-Innovation bets:  L2 generative augmentation (core) + L4 information fusion (secondary)
-Conservative:     L3 perception and L5 system layers use mature solutions only
-
-Three must-pass gates:  TG1 data foundation (W3) → TG2 generation quality (W6)
-                        → TG3 augmentation effectiveness (W9)
-                        Any failure triggers its downgrade path; do not force ahead
-
-Critical path:    Risk Taxonomy → annotation guideline → seed data → LoRA
-                  → generation engines → E3
-
-Largest risks:    ① Insufficient real telecom data   → D1
-                  ② Negative transfer from synthetic → D2/D3
-                  ③ Four-dimension scope too large   → D8 (better: do two from the start)
-
-Safest bet:       The inpainting route (inherited annotation + minimal domain gap)
-                  — it does not fail under any circumstances
+□ Have the conclusions been minuted and pushed to the repository?
+□ Has the milestone's ACTUAL completion date been recorded?
+  (the report template requires planned vs actual)
 ```
