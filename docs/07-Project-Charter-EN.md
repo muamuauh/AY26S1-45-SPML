@@ -142,7 +142,7 @@ All synthetic data must pass four quality gates (G1 semantic consistency / G2 di
 
 ### Method of Working and Key Criteria
 
-The project manages technical risk through a **decision-gate mechanism**: at W3, W6, W9, W11 and W13, objective metrics determine whether to continue, adjust or downgrade, with a fallback pre-defined for every gate (see document [05 §3](05-Technological-Roadmap-EN.md)).
+The project manages technical risk through a **decision-gate mechanism**: at W3, W6, W9, W11 and W13, objective metrics determine whether to continue, adjust or downgrade, with a fallback pre-defined for every gate (see document [05 §4](05-Technological-Roadmap-EN.md)).
 
 The three must-pass gates:
 
@@ -261,7 +261,7 @@ Delivering all four risk dimensions to high quality within a single semester is 
 | **R9** | Data privacy and compliance (self-collected data captures worker likeness) | Medium | Medium | ① Face blurring or informed consent ② Internal use only, not published ③ **Synthetic data depicts no real individual and avoids the problem at its root** — an additional advantage of the generative approach | — |
 | **R10** | The in-person attendance requirement cannot be met (the brief prohibits remote work) | Low | **High** | Fix the weekly meeting time and place at the first meeting with written confirmation from all members; leader candidates must confirm they can meet this mandatory requirement first | — |
 
-> **Full definitions of downgrade paths D1–D8** are given in document [05 §6](05-Technological-Roadmap-EN.md). Each path has been assessed for its effect on final outcomes, ensuring that no single risk trigger causes overall project failure.
+> **Full definitions of downgrade paths D1–D8** are given in document [05 §4](05-Technological-Roadmap-EN.md). Each path has been assessed for its effect on final outcomes, ensuring that no single risk trigger causes overall project failure.
 
 ---
 

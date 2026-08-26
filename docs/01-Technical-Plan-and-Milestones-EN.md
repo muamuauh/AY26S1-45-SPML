@@ -333,7 +333,7 @@ The template requires each member to cover four points. This section **must be w
 |---------------------|----------------|-------------------|
 | Engineering knowledge learned | Be specific to a technique; avoid generalities. E.g. "LoRA fine-tuning taught me how low-rank adaptation avoids overfitting on only 500 samples" | Your own module |
 | Problem Analysis | Describe a problem you actually encountered and analysed. E.g. "I found prompt disobedience in generated images and used CLIP-Score to isolate the 15% that were semantically inconsistent" | Failure mode table (doc 03 §11) |
-| Design/development of solutions | The design you chose and the trade-off. E.g. "I chose the inpainting route over T2I because annotations are inherited and the domain gap is smaller" | Alternatives matrix (doc 05 §7) |
+| Design/development of solutions | The design you chose and the trade-off. E.g. "I chose the inpainting route over T2I because annotations are inherited and the domain gap is smaller" | Technology selection rationale (doc [02](02-Datasets-and-Pretrained-Models-EN.md)) and downgrade paths (doc [05 §4](05-Technological-Roadmap-EN.md)) |
 | Anything to share | Collaboration experience, time management, reflections on the project | Periodic contribution statements (doc 06 §8) |
 
 > **Recommendation**: each member writes a 200-word summary at W4 / W8 / W12 / W16 (already recommended in doc 06 §8). At M7 these four notes assemble into the individual report, avoiding reliance on recall.
