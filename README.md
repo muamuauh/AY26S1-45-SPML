@@ -36,14 +36,21 @@ Full documentation lives in **[docs/](docs/)**, available in Chinese and English
 
 **学校官方模板 / Official templates** — [`template/`](template/)
 `EE6008_Project_Charter_Template.docx`（项目章程）｜ `EE6008-Project ReportTemplate.docx`（项目报告）
-文档 07 已严格按 Charter 模板重构；文档 01 §7 与 04 §9 已按 Report 模板校准结构建议。
-*Document 07 follows the Charter template exactly; documents 01 §7 and 04 §9 are calibrated to the Report template.*
+文档 07 按 Charter 模板组织；文档 01 §7 与 04 §9 按 Report 模板校准。
+*Document 07 follows the Charter template; documents 01 §7 and 04 §9 are calibrated to the Report template.*
 
 ---
 
 ## 当前状态 / Status
 
-📋 **规划阶段（M0）** — 已完成需求分析、技术方案、数据调研、增广 pipeline 设计、文献综述、技术路线图、团队分工与项目章程草案；尚未开始实现。
+🚧 **阶段一 · Baseline** — ① Risk Taxonomy 与 ② 公开数据整编已于线下完成，正在进入 ③ 训练 baseline 模型。
+
+> 🔄 **2026-09-28 流程调整（v3.0）**：按导师建议改为**两阶段**：
+> **阶段一** 只用已整编的公开数据，训练 baseline 感知模型 + 规则风险判断 + 小型 Demo（目标 W7）；
+> **阶段二** 再引入生成式增广，在同一测试集、同一训练配置下与 baseline 对比。
+> 详见 [docs/05](docs/05-技术路线图-CN.md)。
+>
+> *Flow change (2026-09-28): on the supervisor's advice, phase 1 builds a baseline demo from the curated public data only (target W7); phase 2 then adds generative augmentation and compares against the baseline on the same test set and training configuration.*
 
 > 🔄 **2026-08-24 数据策略变更**：经与导师沟通，**取消一切现场数据采集**（安全风险与成本过高），改为纯公开来源的四层策略：
 > **T1** 学术公开数据集 → **T2** 社区数据集平台（Roboflow Universe / Kaggle）→ **T3** 开放许可图像库整编（Wikimedia Commons / Openverse）→ **T4** 生成式合成。
@@ -51,19 +58,27 @@ Full documentation lives in **[docs/](docs/)**, available in Chinese and English
 >
 > *Data strategy change (2026-08-24): all field collection is cancelled; real data now comes from public sources only (T1 academic datasets, T2 community platforms, T3 openly licensed repositories), expanded by T4 generative synthesis.*
 
-*Planning phase (M0). Requirements analysis, technical plan, dataset survey, augmentation pipeline design, literature survey, technological roadmap, teamwork allocation and the draft project charter are complete; implementation has not started.*
+*Phase 1 · Baseline. The Risk Taxonomy and public data curation were completed offline; baseline model training is starting.*
 
 ### 待办 / Open items
 
-- [ ] 召开首次团队会议：认领 A–E 角色、**选举队长**（议程见 [docs/06 §10](docs/06-团队分工-CN.md)）
+**组建与行政**
+- [ ] 召开阶段一启动会议：确认 A–E 角色、**选举队长**（若尚未完成），议程见 [docs/06 §10](docs/06-团队分工-CN.md)
 - [ ] 核对 Project No.（推测 45）、学年学期、导师姓名，填入 [docs/07](docs/07-项目章程-CN.md) 并誊入 Word 模板（附提交前检查清单）
-- [ ] 确定风险分类体系 Risk Taxonomy（M0 首要交付物，关键路径起点）
-- [ ] 确认项目周期、范围界定与可用算力
-- [ ] 核实文献引用（见 [docs/04 §8](docs/04-文献综述-CN.md) 核实状态表）
-- [ ] 整编公开数据：T2 社区数据集 + T3 开放许可图像，得到 TelecomSeed（≥200 张）与 🔒 TelecomEval（≥150 张，冻结）—— TG1 判据
-- [ ] 建立 `licence_manifest.csv` 逐张记录开放许可图像的来源、许可与署名（CC BY / CC BY-SA 的硬性义务，事后补记几乎不可能）
-- [ ] 建立 `progress/` 目录记录里程碑**实际**完成日期与范围变更 —— 报告模板要求 Planned vs Actual 对照（见 [docs/01 §7.4](docs/01-技术方案与里程碑-CN.md)）
+- [ ] 确认项目周期（12 / 16 周）、学期 W1 的真实日期与可用算力
 - [ ] 向导师确认是否需要提交 team project video（报告模板附录提及）
+
+**阶段一（W4–W7）**
+- [x] 确定风险分类体系 Risk Taxonomy（线下完成）—— 待提交到仓库（建议 `data/taxonomy.yaml`）
+- [x] 整编公开数据（线下完成）—— 待补记 TelecomSeed / TelecomEval 实际张数与 TelecomEval 文件列表哈希
+- [ ] 确认 `licence_manifest.csv` 覆盖全部 T3 开放许可图像（CC BY / CC BY-SA 的署名义务）
+- [ ] 写类别映射表：把各公开数据集的标签名对齐到 Taxonomy 类别（阶段一第一件事，见 [docs/02 §5](docs/02-数据集与预训练模型调研-CN.md)）
+- [ ] 训练 baseline（E1 / E2），提交 `configs/baseline.yaml` —— 阶段二的 E3 必须沿用同一份
+- [ ] 规则风险判断 + Gradio Demo v1，W7 末 TGB 会议验收
+
+**贯穿全程**
+- [ ] 建立 `progress/` 目录记录里程碑**实际**完成日期与范围变更 —— 报告模板要求 Planned vs Actual 对照（见 [docs/01 §7.4](docs/01-技术方案与里程碑-CN.md)）
+- [ ] 核实文献引用（见 [docs/04 §8](docs/04-文献综述-CN.md) 核实状态表）
 
 ---
 

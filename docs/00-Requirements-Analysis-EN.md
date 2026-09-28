@@ -1,7 +1,7 @@
 # TelecomSafe — Project Requirements Analysis
 
 > Full title: **A Novel Generative Image-based Learning Framework for Enhancing the Construction Safety of Telecommunication Projects (TelecomSafe)**
-> Document version: v1.0 ｜ Generated: 2026-08-18 ｜ Source: `project.txt`
+> Document version: v1.1 ｜ Generated: 2026-08-18 ｜ Revised: 2026-09-28 ｜ Source: `project.txt`
 > Chinese counterpart: [00-项目需求分析-CN.md](00-项目需求分析-CN.md)
 
 ---
@@ -88,15 +88,9 @@ The verb pair `develop and evaluate` implies two categories of deliverable:
 | **Develop** | A runnable **framework / system** | The word "framework" implies a complete pipeline, not merely model weights; an interactive demonstration interface is recommended |
 | **Evaluate** | Rigorous evaluation experiments | **The core experiment**: an ablation with and without generated data, proving that generated data genuinely improves performance |
 
-**Recommended mandatory experiment list**:
+**Delivery rhythm**: on the supervisor's advice, delivery comes in two phases — phase 1 ships a Baseline Demo built from public data (a minimal "develop" plus the E1/E2 baselines), and phase 2 proves the gain from generative augmentation (the core "evaluate" experiment, E3). See [05 Technological Roadmap](05-Technological-Roadmap-EN.md).
 
-1. Baseline: trained on real data only
-2. + conventional augmentation (flip / crop / Mosaic)
-3. + generative augmentation (this project's method)
-4. Trained on synthetic data only → tested on real data (measures the domain gap)
-5. Curve over varying synthetic-to-real ratios
-6. Robustness testing: low light, rain and fog, motion blur, small targets
-7. Fusion module ablation: single dimension vs. multi-dimensional fusion
+The full E1–E9 experiment matrix is in [01 §3](01-Technical-Plan-and-Milestones-EN.md); the three that matter most are the E1/E2 baselines, **E3 generative augmentation** and E7 robustness.
 
 ---
 
@@ -106,17 +100,8 @@ The second paragraph of the brief is unusually explicit:
 
 - ⚠️ **On-campus attendance is mandatory**: `regular in-person meetings and discussions on campus are required`; the brief states plainly that `absence and remote working on the project are unacceptable`
 - 👥 **Team collaboration**: `This project is of a complex nature and requires close collaboration among team members`
-  - This indicates a **multi-person project**; a suggested division of labour follows
+  - This is a five-person team; see [06 Teamwork Allocation](06-Teamwork-Allocation-EN.md) for roles
 - ⏰ **High time commitment**: `substantial time commitment`, requiring students who are `very self-motivated` and `willing to learn new things`
-
-**Suggested division of labour (3–4 people)**:
-
-| Role | Responsibilities |
-|------|-----------------|
-| A ｜ Data & Generation | Public dataset curation and annotation, openly licensed image screening, generative model fine-tuning, synthetic data pipeline, quality filtering |
-| B ｜ Perception Models | Detection / segmentation / PPE model training and tuning, robustness experiments |
-| C ｜ Behaviour & Fusion | Action recognition, safety rule base, information fusion and risk scoring module |
-| D ｜ System & Evaluation | System integration, visualisation interface, experiment management, report and paper writing |
 
 ---
 
@@ -126,7 +111,7 @@ The second paragraph of the brief is unusually explicit:
 
 Even obtaining real benchmark data is hard, and the generative model itself needs seed material for fine-tuning.
 
-- **Mitigation (revised in v2.0)**: ❌ **Field collection has been ruled out** (safety risk and cost too high; confirmed with the supervisor). Replaced by a four-tier public-source strategy:
+- **Mitigation**: confirmed with the supervisor that there is **no field collection** (safety risk and cost too high); a four-tier public-source strategy is used instead (curation completed offline):
   T1 academic public datasets (SODA/CHV/SHEL5K etc., transfer base) → T2 community dataset platforms (Roboflow Universe telecom tower and safety harness sets) → T3 curation of openly licensed repositories (Wikimedia Commons / Openverse, forming TelecomSeed and the isolated TelecomEval test set) → T4 generative synthesis
 - **Read it the other way**: the fact that the team cannot bear the cost of collection **demonstrates the project's founding premise first-hand** — telecommunication-specific data really is hard to obtain. Generative AI is thereby elevated from a convenience to the only viable route, which is a strong argument for the report
 
@@ -141,14 +126,3 @@ If generated images deviate substantially from the real distribution, they will 
 The four dimensions produce heterogeneous outputs (segmentation maps / bounding boxes / attribute labels / action classes). How should these be fused into a convincing risk appraisal?
 
 - **Mitigation**: adopt a layered "rule constraints + learnable weights" fusion, aligned to real safety regulations (OSHA, GB 26859, etc.), so that the score is both interpretable and grounded in compliance
-
----
-
-## 8. Companion Documents
-
-| Document | Content |
-|----------|---------|
-| `01-Technical-Plan-and-Milestones-EN.md` | System architecture, technology selection, 12/16-week milestones and delivery checkpoints |
-| `02-Datasets-and-Pretrained-Models-EN.md` | Public dataset inventory, pretrained model comparison, licensing notes |
-| `03-Generative-Augmentation-Pipeline-EN.md` | End-to-end generation pipeline design, prompting strategy, quality gates, experiment design |
-| `04-Literature-Survey-EN.md` | Literature survey and references |

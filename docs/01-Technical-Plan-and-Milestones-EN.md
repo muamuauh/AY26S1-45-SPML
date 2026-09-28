@@ -1,6 +1,6 @@
 # TelecomSafe — Technical Plan and Milestones
 
-> Document version: v1.0 ｜ Generated: 2026-08-18
+> Document version: v2.0 ｜ Generated: 2026-08-18 ｜ Revised: 2026-09-28 (milestones re-planned for the v3.0 two-phase flow)
 > Chinese counterpart: [01-技术方案与里程碑-CN.md](01-技术方案与里程碑-CN.md)
 > Companion documents: `00-Requirements-Analysis-EN.md`, `02-Datasets-and-Pretrained-Models-EN.md`, `03-Generative-Augmentation-Pipeline-EN.md`
 
@@ -56,7 +56,7 @@ TelecomSafe adopts a **five-layer architecture** in which each layer has a singl
 | UAV aerial | Whole-tower views, site terrain | Unusual viewpoint; requires dedicated data (see the AIDCON dataset) |
 | Tower-mounted recorder | Work-at-height PPE / harness | The **most distinctive** input source for the telecommunication sector; a differentiation highlight |
 
-> **Recommendation**: restrict the MVP to handheld photos plus fixed cameras. Treat UAV and tower-mounted recorders as extensions, to avoid over-extending the project.
+> **Scope**: phase 1 handles **still images only** (all public data is imagery); video streams, UAV and tower-mounted recorders are extensions, to avoid over-extending the project.
 
 ### L2 Data Layer (see `03-Generative-Augmentation-Pipeline-EN.md`)
 
@@ -111,7 +111,7 @@ Level 3 ｜ Learnable fusion
 ### L5 Application Layer
 
 - **Web demonstration dashboard**: upload image/video → overlaid four-dimension detection visualisation → risk scorecard → list of triggered rules
-- **Suggested stack**: FastAPI (backend) + Gradio or React (frontend); model serving via ONNX Runtime / TensorRT
+- **Stack**: phase 1 uses a single-page **Gradio** demo (a few dozen lines); phase 2 adds a FastAPI backend only if needed. Deployment acceleration (ONNX / TensorRT) earns no marks and is out of scope
 - **Risk report**: optionally integrate a VLM (e.g. Qwen2.5-VL) to produce natural-language hazard descriptions and remediation advice — low cost, high demonstration value
 
 ---
@@ -122,9 +122,9 @@ Level 3 ｜ Learnable fusion
 
 | ID | Experiment | Purpose | Key metrics |
 |----|-----------|---------|-------------|
-| E1 | Real-data baseline | Establish the baseline | mAP@50, mAP@50-95 |
-| E2 | + conventional augmentation (flip/crop/Mosaic/HSV) | Rule out "any extra data helps" | Δ mAP vs E1 |
-| E3 | **+ generative augmentation (this method)** | **Core contribution validation** | Δ mAP vs E2 |
+| E1 | Real-data baseline (YOLO built-in augmentation **off**) · phase 1 | Establish the baseline | mAP@50, mAP@50-95, per-class AP |
+| E2 | + conventional augmentation (YOLO default Mosaic/flip/HSV, etc.) · phase 1 | Rule out "any extra data helps"; **what phase 2 must beat** | Δ mAP vs E1 |
+| E3 | **+ generative augmentation (this method) · phase 2, same config as E1/E2** | **Core contribution validation** | Δ mAP vs E2 (overall + weak classes) |
 | E4 | Synthetic-only training → real testing | Quantify the sim-to-real gap | mAP retention |
 | E5 | Synthetic/real ratio sweep (0/25/50/100/200%) | Find the optimal ratio; plot the curve | mAP–ratio curve |
 | E6 | Long-tail class study | Show larger gains on rare risk classes | Rare-class AP improvement |
@@ -132,7 +132,7 @@ Level 3 ｜ Learnable fusion
 | E8 | Fusion module ablation | Validate the L4 design | Risk-level accuracy / macro-F1 / Kappa |
 | E9 | Cross-site generalisation | Train on site A → test on site B | Cross-domain mAP drop |
 
-> **E3 and E6 are the two strongest cards**: generative augmentation yields its most pronounced gains on **rare hazard classes** — scenes that essentially cannot be photographed in reality. This is the most persuasive evidence available.
+> **E3 and E6 are the two strongest cards**: generative augmentation yields its most pronounced gains on **rare hazard classes** — scenes that essentially cannot be photographed in reality. This is the most persuasive evidence available. In v3.0, phase 2 already generates data targeted at the baseline's weak-class list, so E6 follows directly from it.
 
 ### 3.2 Metric Definitions
 
@@ -156,79 +156,79 @@ Level 3 ｜ Learnable fusion
 
 ## 4. Milestone Plan
 
-Based on a **16-week** semester. For a 12-week variant, compress M2/M5 and downgrade UAV input and video behaviour recognition to optional.
+Based on a **16-week** semester and organised around the v3.0 **two-phase** flow (flow and technical detail in [05 Technological Roadmap](05-Technological-Roadmap-EN.md)). For a 12-week variant, compress M3 and M5–M6, and make video behaviour recognition and Terrain / Materials optional.
 
 ### Phase Overview
 
-| Phase | Weeks | Name | Key deliverables |
-|-------|-------|------|-----------------|
-| M0 | W1 | Project setup and survey | Requirements document, literature survey, role assignment |
-| M1 | W2–W3 | Data infrastructure | Seed dataset + annotation guideline + risk taxonomy |
-| M2 | W4–W6 | Generation pipeline | Fine-tuned generative model + synthetic data v1 + quality report |
-| M3 | W7–W9 | Perception models | Four branches + E1/E2/E3 results |
-| M4 | W10–W11 | Fusion and decision | Rule base + fusion module + E8 results |
-| M5 | W12–W13 | System integration | Runnable demo system |
-| M6 | W14–W15 | Full evaluation | E4–E9 complete + ablation tables |
-| M7 | W16 | Delivery | Paper/report + defence slides + code repository |
+| Stage | Milestone | Weeks | Name | Key deliverables | Gate | Status |
+|-------|-----------|-------|------|-----------------|------|--------|
+| Preparation | M0 | W1 | Setup and Risk Taxonomy | Risk Taxonomy v1.0, roles | — | ✅ Done offline |
+| Preparation | M1 | W2–W3 | Public data curation | TelecomSeed + 🔒 TelecomEval + `licence_manifest.csv` | TG1 | ✅ Done offline |
+| **Phase 1** | **M2** | **W4–W7** | **Baseline Demo** | Baseline weights + E1/E2 + rule judgement + Demo v1 | **TGB** | 🚧 In progress |
+| Phase 2 | M3 | W8–W10 | Generative augmentation | TelecomSynth + generation quality report | TG2 | |
+| Phase 2 | M4 | W11–W12 | Retrain with the same config | E3 comparison table + Demo v2 | TG3 | |
+| Phase 2 | M5 | W13–W14 | Fusion upgrade | Level-3 fusion + E8 | TG4 | |
+| Phase 2 | M6 | W13–W15 | Full evaluation | E4–E9 + final Demo v2 | TG5 | |
+| Delivery | M7 | W16 | Delivery | Project report + defence + code repository | — | |
 
 ### Detailed Milestones
 
-#### M0 ｜ W1 — Project Setup and Survey
-- [ ] Define the telecommunication construction **Risk Taxonomy** — the single most important first step; all subsequent annotation, generation and evaluation depend on it
-- [ ] Complete the first draft of the literature survey (see `04-Literature-Survey-EN.md`)
-- [ ] Fix roles and collaboration conventions (Git + DVC, experiment tracking via Weights & Biases or MLflow)
-- [ ] **Deliverable**: Risk Taxonomy v1.0 (suggested: 4 major categories × 20–30 sub-classes)
+#### M0 ｜ W1 — Setup and Risk Taxonomy ✅
+- [x] Risk Taxonomy v1.0 (done offline)
+- [x] First draft of the literature survey (see `04-Literature-Survey-EN.md`)
+- [ ] Commit the taxonomy to the repository (suggested `data/taxonomy.yaml`, with every class name and its decision criterion)
 
-#### M1 ｜ W2–W3 — Data Infrastructure
-- [ ] Download and normalise public datasets (SODA / MOCS / CHV / SHEL5K — see document 02)
-- [ ] **T2 community datasets**: download the Roboflow Universe telecom tower set, the safety harness sets, and the Kaggle construction safety set (includes NO-Hardhat negatives)
-- [ ] **T3 open-licence curation**: search Openverse / Wikimedia Commons and manually screen **200–500** telecommunication scene images, building `licence_manifest.csv` with source and attribution as you go
-- [ ] ❌ ~~Field collection~~ — cancelled in v2.0; this project performs no on-site capture
-- [ ] Write an **annotation guideline** including edge-case adjudication rules, to prevent inconsistency across annotators
-- [ ] Annotate **≥200** seed images (Label Studio / CVAT; pre-label with Grounding DINO then correct manually — saves roughly 60% of the effort)
-- [ ] 🔒 Carve out and **freeze the TelecomEval test set (150–300 real images)** — never used in LoRA fine-tuning or generation conditioning
-- [ ] **Deliverable**: TelecomSeed-v1 + TelecomEval-v1 + annotation guideline + `licence_manifest.csv`
+#### M1 ｜ W2–W3 — Public Data Curation ✅
+- [x] T1 academic datasets, T2 community datasets and T3 openly licensed imagery curated (done offline; see document 02)
+- [x] TelecomSeed and 🔒 TelecomEval carved out
+- [ ] Record the actual counts in the repository (TG1 criteria: TelecomSeed ≥ 200, TelecomEval ≥ 150), plus a hash of the TelecomEval file list
+- [ ] Confirm `licence_manifest.csv` covers every T3 image
 
-#### M2 ｜ W4–W6 — Generation Pipeline ★ CORE ★
-- [ ] Comparative selection of the base model (SDXL vs SD3.5 vs FLUX, small-scale trials)
-- [ ] LoRA fine-tuning to inject telecommunication construction domain characteristics
-- [ ] Implement four generation routes: text-to-image / ControlNet layout control / inpainting / background replacement
-- [ ] Implement the quality gates (CLIP + FID + detector filtering)
+#### M2 ｜ W4–W7 — Baseline Demo (Phase 1)
+- [ ] **Class mapping table**: align every dataset's labels to the taxonomy classes (first job of W4)
+- [ ] Convert all data to a single YOLO / COCO format and fix the train / val split
+- [ ] Train a single YOLOv11 detector covering Workers + Machinery
+- [ ] Run E1 (built-in augmentation off) and E2 (YOLO default conventional augmentation)
+- [ ] Report per-class AP and the confusion matrix on TelecomEval, and list the 3–5 weakest classes
+- [ ] Commit `configs/baseline.yaml` (read-only from then on; reused in phase 2)
+- [ ] Encode 5–10 hard rules (each citing its regulatory source) that output a low / medium / high risk level
+- [ ] Gradio Demo v1: upload → detection boxes → risk-level card → triggered rules
+- [ ] **Deliverable**: baseline weights + E1/E2 results + weak-class list + Demo v1
+- [ ] ⚠️ **TGB (end W7)**: demo runs end-to-end, E1/E2 recorded, configuration committed; otherwise take DB
+
+#### M3 ｜ W8–W10 — Generative Augmentation ★ CORE ★
+- [ ] Stage 0 specification library: cover the M2 weak-class list first
+- [ ] LoRA fine-tuning (environment and trial runs prepared by Member B during W4–W7)
+- [ ] Advance generation routes from lowest to highest risk: inpainting → background swap → T2I / ControlNet
+- [ ] Four quality gates (G3 reuses the M2 baseline detector directly)
 - [ ] Generate **≥3,000** synthetic images; record the post-gate retention rate
 - [ ] **Deliverable**: TelecomSynth-v1 + generation quality report
-- [ ] ⚠️ **Risk checkpoint**: if FID > 60 or the human realism rating < 3.0, roll back and adjust immediately — do not enter M3 with a defective dataset
+- [ ] ⚠️ **TG2 (end W10)**: FID < 50, human realism ≥ 3.0; otherwise take D2 — do not enter M4 with a defective dataset
 
-#### M3 ｜ W7–W9 — Perception Models
-- [ ] Train the four branches (the two highest-value branches, Workers and Machinery, may be done first)
-- [ ] Run experiments E1 / E2 / E3 — **the decisive checkpoint for the project**
-- [ ] Implement and tune the Workers multi-head structure
-- [ ] **Deliverable**: model weights + E1–E3 comparison table
-- [ ] ⚠️ **Decision point**: if E3 improves on E2 by less than 2 mAP, diagnose the cause (generation quality? ratio? class selection?) and adjust rather than pressing ahead
+#### M4 ｜ W11–W12 — Retrain with the Same Configuration ★ Decisive checkpoint ★
+- [ ] Run E3 with the same `configs/baseline.yaml`, changing only the training data
+- [ ] Compare E1 / E2 / E3 on the same TelecomEval, focusing on the weak classes
+- [ ] Swap the new weights into the demo to obtain Demo v2
+- [ ] **Deliverable**: E1–E3 comparison table + Demo v2
+- [ ] ⚠️ **TG3 (end W12)**: E3 improves on E2 by ≥ 2.0 mAP (overall or on weak classes); otherwise diagnose the cause (generation quality? ratio? class selection?) and take D3 rather than pressing ahead
 
-#### M4 ｜ W10–W11 — Fusion and Decision
-- [ ] Encode the safety rule base (≥15 decidable rules, each citing its regulatory source)
-- [ ] Implement entity-graph construction and three-level fusion
-- [ ] Have 2–3 safety experts (or trained annotators following the regulations) assign risk levels to 200 test images as fusion ground truth
+#### M5 ｜ W13–W14 — Fusion Upgrade
+- [ ] Extend the rule base to ≥ 15 decidable rules
+- [ ] Entity-graph construction + level-3 learnable fusion (optional)
+- [ ] Expert risk annotation of 200 images (recruit from W10, finish by W12) as fusion ground truth
 - [ ] Run experiment E8
-- [ ] **Deliverable**: fusion module + risk rule base documentation
+- [ ] ⚠️ **TG4 (end W14)**: risk-level accuracy ≥ 0.70; otherwise keep the phase 1 pure-rule judgement (D4)
 
-#### M5 ｜ W12–W13 — System Integration
-- [ ] Complete the end-to-end inference pipeline
-- [ ] Build the web demo interface (upload → visualisation → scorecard → rule list)
-- [ ] Export and accelerate models (ONNX / TensorRT)
-- [ ] **Deliverable**: runnable TelecomSafe demo
-
-#### M6 ｜ W14–W15 — Full Evaluation
+#### M6 ｜ W13–W15 — Full Evaluation
 - [ ] Run experiments E4–E9 in full
 - [ ] Build the robustness test set (synthetic degradation: low light, rain/fog, motion blur, occlusion, small targets)
 - [ ] Finalise all ablation tables and figures
-- [ ] **Deliverable**: complete experimental report
+- [ ] ⚠️ **TG5 (end W15)**: Demo v2 runs end-to-end, single image < 3 s; otherwise reuse Demo v1 plus a screen recording (D5)
 
 #### M7 ｜ W16 — Delivery
-- [ ] Finalise the paper / technical report
+- [ ] Finalise the project report (following the official template structure in §7)
 - [ ] Defence slides + live demo rehearsal
 - [ ] Tidy the code repository (README, environment, reproduction scripts, data documentation)
-- [ ] **Deliverable**: all final outputs
 
 ---
 
@@ -236,15 +236,18 @@ Based on a **16-week** semester. For a 12-week variant, compress M2/M5 and downg
 
 | ID | Risk | Likelihood | Impact | Mitigation | Trigger threshold |
 |----|------|-----------|--------|-----------|------------------|
-| R1 | Insufficient real telecommunication data (**field collection cancelled**; entirely dependent on public sources) | High | High | T1 academic dataset transfer + T2 community specialist sets + T3 open-licence curation; volume is inherently limited, hence greater reliance on T4 synthesis. Downgrade to generalised "work-at-height / tower-type" scenes if needed (D1) | TelecomSeed < 150 images by end of W3 |
-| R2 | Generated image quality inadequate; negative transfer | Medium | High | Strict quality gates; conservative ratio (start at 25%); retain the pure-real baseline | FID > 60, or E3 below E2 |
-| R3 | Insufficient compute (diffusion training is expensive) | Medium | Medium | Use LoRA rather than full fine-tuning; SDXL-Turbo for speed; rent cloud GPUs; generate in batches | Single GPU < 16 GB |
-| R4 | No video data for behaviour recognition | High | Medium | **Fallback**: replace video action recognition with single-frame pose plus rule-based judgement | No usable video by end of W9 |
-| R5 | No ground truth for the fusion module | Medium | Medium | Generate weak labels from the rule base, calibrated with a small expert-annotated set | W10 |
-| R6 | Team coordination / schedule imbalance | Medium | Medium | Weekly in-person meetings (a hard project requirement) + kanban + code review | Any milestone slips > 1 week |
-| R7 | Scope creep (all four dimensions is too much) | High | High | MVP prioritises Workers + Machinery; simplified Terrain and Materials | W7 |
+| R1 | Source datasets name labels inconsistently, so merged labels contradict each other | High | High | Write the class mapping table first thing in M2; spot-check 50 annotations per community dataset | Mapping table not done by end of W4 |
+| R2 | Baseline configuration or TelecomEval changes mid-project, so phase 2 cannot be compared fairly | Medium | High | Commit `configs/baseline.yaml` and a TelecomEval hash; treat both as read-only | Any change to either |
+| R3 | Limited telecom-specific real data leaves the baseline weak on telecom classes | High | Medium | This is exactly phase 2's rationale: the weak-class list drives targeted generation | Weak-class AP well below overall at TGB |
+| R4 | Generated image quality inadequate; negative transfer | Medium | High | Strict quality gates; conservative ratio (start at 25%); inpainting route first | FID > 60, or E3 below E2 |
+| R5 | The team slows down after Demo v1 and phase 2 starts late | Medium | High | Settle the weak-class list and M3 start date at the TGB meeting; Member B prepares the generation environment during phase 1 | Generation not started by end of W8 |
+| R6 | Insufficient compute (diffusion training is expensive) | Medium | Medium | Use LoRA rather than full fine-tuning; SDXL-Turbo for speed; rent cloud GPUs; generate in batches | Single GPU < 16 GB |
+| R7 | No ground truth for the fusion module | Medium | Medium | Weak labels from the rule base, calibrated with a small expert-annotated set; recruit from W10 | Still no annotation by W12 |
+| R8 | No video data for behaviour recognition | High | Low | Not in phase 1; in phase 2 use single-frame pose plus rules instead (D6) | — |
+| R9 | Team coordination / schedule imbalance | Medium | Medium | Weekly in-person meetings (a hard project requirement) + kanban + code review | Any milestone slips > 1 week |
+| R10 | Scope creep (all four dimensions is too much) | High | High | Phase 1 covers Workers + Machinery only (D8 applied by default); add Terrain / Materials in phase 2 if time allows | — |
 
-> **The most important entry is R7.** Delivering all four dimensions to high quality within a single semester is close to impossible. **Decide at M0 to focus on Workers + Machinery, with Terrain and Materials merely functional**, and state the scope boundary honestly in the report.
+> **R1 and R2 matter most**: R1 decides whether the baseline can be trained at all, and R2 decides whether phase 2's conclusions will hold up. Both must be settled in the first week of M2.
 
 ---
 
@@ -263,33 +266,11 @@ Based on a **16-week** semester. For a 12-week variant, compress M2/M5 and downg
 
 ## 7. Writing and Presentation Guidance
 
-### ⚠️ Important Correction: The School Report Template Is Not an Academic Paper Structure
-
-Version 1.0 of this section recommended an academic paper structure (Introduction / Related Work / Method / Experiments / Conclusion). **On checking the official school template `template/EE6008-Project ReportTemplate.docx`, the EE6008 project report turns out to be a project management report, not an academic paper.**
-
-The two differ substantially, and the official template governs:
-
-| Academic paper (original suggestion) | EE6008 official report template |
-|-------------------------------------|--------------------------------|
-| Introduction | 1. Purpose / Project Objectives |
-| **Related Work (standalone chapter)** | ❌ **No standalone literature review chapter** |
-| Method (several technical chapters) | 2. Project Summary (merged into one chapter) |
-| Experiments | Folded into 2. Project Summary and 6. Outcomes / Benefits |
-| — | 3. Scope (deliverables, activities, **changes to scope**) |
-| — | 4. Schedule (planned vs **actual** milestone dates) |
-| — | 5. Cost (planned vs actual) |
-| Discussion & Limitations | Folded into 6. Outcomes / Benefits |
-| — | 7. **Individual Reports from Team Members** (written individually + reflection) |
-| References | 8. References |
-| — | Appendix — Project Members Information (contribution table) |
-
-**The three most consequential differences**:
+The EE6008 project report follows the official school template `template/EE6008-Project ReportTemplate.docx`. It is a **project management report**, not an academic paper, and three points need particular attention:
 
 1. **There is no Related Work chapter.** The literature survey in document 04 cannot be transplanted wholesale. Compress it into §1 Purpose/Objectives as the project justification, and list the sources under §8 References.
-2. **Planned vs actual comparison is required.** Both §4 Schedule and §5 Cost have "Planned" and "Actual" columns. **This means actual completion dates must be recorded throughout the project**, not reconstructed at the end. Record each milestone's actual completion date on the kanban from M0 onwards.
-3. **Every member must write an individual report and reflection.** §7 is written individually and covers "engineering knowledge learned, problem analysis, design/development of solutions, anything to share." This cannot be ghost-written and bears directly on individual grades.
-
----
+2. **Planned vs actual comparison is required.** Both §4 Schedule and §5 Cost have "Planned" and "Actual" columns. **Actual completion dates must be recorded throughout the project**, not reconstructed at the end.
+3. **Every member must write an individual report and reflection.** §7 is written individually (engineering knowledge learned, problem analysis, design/development of solutions, anything to share). It cannot be ghost-written and bears directly on individual grades.
 
 ### 7.1 EE6008 Report Chapter Mapping
 
@@ -298,8 +279,8 @@ Organised by the official template's eight sections plus appendix, with the sour
 | Official section | Template requirement | Source material | Suggested length |
 |-----------------|---------------------|----------------|-----------------|
 | **1. Purpose / Project Objectives** | Overview and objectives | Document 07 Project Purpose; document 00 §1/§4; the research gaps G1–G5 from document 04 (compressed to 1–2 paragraphs) | 1–2 pages |
-| **2. Project Summary** | Work done / problems solved / achievements | **The technical core of the report**: document 01 §1 five-layer architecture, document 03 generation pipeline, document 01 §3 results E1–E9 | 8–15 pages |
-| **3. Scope** | Final total scope, deliverables, activity summary, **changes** | Document 07 deliverables; **if any downgrade path D1–D8 was triggered, the change must be documented here** | 2–3 pages |
+| **2. Project Summary** | Work done / problems solved / achievements | **The technical core of the report**: document 01 §1 five-layer architecture, document 05 two-phase flow (baseline → augmentation), document 03 generation pipeline, document 01 §3 results E1–E9 | 8–15 pages |
+| **3. Scope** | Final total scope, deliverables, activity summary, **changes** | Document 07 deliverables; **the cancellation of field collection (v2.1), the switch to the two-phase flow (v3.0) and any downgrade path triggered must all be documented here** | 2–3 pages |
 | **4. Schedule** | Milestones: planned vs actual dates | Document 07 Summary Milestones plus actual completion dates recorded throughout | 1 page (table) |
 | **5. Cost** | Cost items: planned vs actual | Document 07 Summary Budget (expected S$0 for this project; report it as such) | 0.5 page |
 | **6. Outcomes / Benefits** | Outcomes and benefits | Experimental conclusions, system demo, dataset outputs; **limitations and honest caveats also belong here** | 2–4 pages |
@@ -313,13 +294,12 @@ This is the most technically substantial chapter. The template does not prescrib
 
 ```
 2.1 Problem and technical challenges   ← three causes of data scarcity (doc 07 Purpose)
-2.2 System architecture overview       ← five-layer architecture (doc 01 §1)
+2.2 Architecture and two-phase flow    ← five-layer architecture (doc 01 §1) + two-phase flow (doc 05)
 2.3 Telecom construction risk taxonomy ← 🌟 Contribution 1
-2.4 Generative data augmentation       ← 🌟 Contribution 2, the report's most important section (doc 03)
-    · Risk scenario specification library
-    · Four generation engines
-    · Four quality gates
-2.5 Multi-dimensional perception       ← four branches (doc 01 §2 L3)
+2.4 Baseline system                    ← public data curation, baseline detector, rule judgement, Demo v1 (phase 1)
+2.5 Generative data augmentation       ← 🌟 Contribution 2, the report's most important section (doc 03)
+    · Risk scenario library driven by the baseline's weak classes
+    · Generation routes and four quality gates
 2.6 Hierarchical information fusion    ← 🌟 Contribution 3 (doc 01 §2 L4)
 2.7 Experimental setup and results     ← E1–E9, centred on E3 and E7 (doc 01 §3)
 2.8 Ablation studies                   ← A1–A7 (doc 03 §9)
@@ -360,29 +340,9 @@ Following the template's own examples (`e.g., Team Leader`, `e.g. Pages 3-6, 24-
 | # | Name | Project contributions | Report Contribution |
 |---|------|----------------------|-------------------|
 | 1 | `<<Name>>` | Team Leader; Data Lead; Risk Taxonomy, annotation guideline, TelecomSeed dataset | Chapters 1, 3, 4; Pages xx–xx |
-| 2 | `<<Name>>` | Generation Lead; LoRA fine-tuning, four generation engines, quality gates, TelecomSynth dataset | Chapter 2.4; Pages xx–xx |
-| 3 | `<<Name>>` | Perception Lead (Workers); Workers model, behaviour recognition, core experiments E1–E3 | Chapters 2.5, 2.7; Pages xx–xx |
-| 4 | `<<Name>>` | Perception Lead (Scene); Machinery/Materials/Terrain models, experiment E9 | Chapter 2.5; Pages xx–xx |
-| 5 | `<<Name>>` | Fusion & System Lead; rule base, three-level fusion, web demo, experiment tracking | Chapters 2.6, 6; Pages xx–xx |
+| 2 | `<<Name>>` | Generation Lead; LoRA fine-tuning, four generation engines, quality gates, TelecomSynth dataset | Chapter 2.5; Pages xx–xx |
+| 3 | `<<Name>>` | Perception Lead (Workers); Workers model, behaviour recognition, core experiments E1–E3 | Chapters 2.4, 2.7; Pages xx–xx |
+| 4 | `<<Name>>` | Perception Lead (Scene); Machinery/Materials/Terrain models, experiment E9 | Chapter 2.4; Pages xx–xx |
+| 5 | `<<Name>>` | Fusion & System Lead; rule base, three-level fusion, demo, experiment tracking | Chapters 2.4, 2.6, 6; Pages xx–xx |
 
-> The template's own example mentions a "team project video". **Confirm with the supervisor whether a project video must be submitted.** If so, reserve recording time during M5–M6.
-
----
-
-### 7.6 If Submitting to a Journal Later (Optional, Post-Project)
-
-The EE6008 report and an academic paper serve different purposes. To pursue submission to *Automation in Construction* as described in roadmap horizon H3, rewrite separately along academic lines:
-
-```
-1. Introduction         ← industry pain points + data scarcity
-2. Related Work         ← document 04 (three strands)
-3. Risk Taxonomy        ← 🌟 Contribution 1
-4. Generative Pipeline  ← 🌟 Contribution 2
-5. Multi-dim Perception ← four branches
-6. Hierarchical Fusion  ← 🌟 Contribution 3
-7. Experiments          ← E1–E9
-8. Discussion & Limitations
-9. Conclusion
-```
-
-> **Bonus**: release the TelecomSynth synthetic dataset and the Risk Taxonomy publicly. A dataset is itself a citable academic contribution, and synthetic data avoids the privacy problems of real imagery.
+> The template's own example mentions a "team project video". **Confirm with the supervisor whether a project video must be submitted.** If so, reserve recording time during W14–W15.

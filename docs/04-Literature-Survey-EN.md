@@ -399,20 +399,3 @@ This document's content therefore lands in the EE6008 report as follows:
 > **Practical advice**: do not attempt to force a 40-page survey into the project report. The EE6008 report asks what you did and how it turned out; the literature serves only to support the justification and the technology choices. **Keep the full survey in this document as internal material and as the basis for a later submission.**
 
 The detailed report chapter mapping is in document [01 §7](01-Technical-Plan-and-Milestones-EN.md).
-
----
-
-### 9.1 If Submitting to a Journal Later: Writing the Related Work Chapter
-
-The following applies to an academic journal submission (e.g. *Automation in Construction*) as described in roadmap horizon H3, and **not to the EE6008 report**.
-
-To adapt this document into the paper's Related Work section, compress it into four subsections of roughly 1,200–1,500 words:
-
-| Subsection | Content | Citations | Function of closing sentence |
-|-----------|---------|-----------|---------------------------|
-| 2.1 CV for Construction Safety | Reviews → PPE → behaviour → site-level risk | R1, R2, R5, R6, R8, R14 | Establish "mature technology, but constrained by data" |
-| 2.2 Data Scarcity and Generative Augmentation | Dataset landscape → general-domain synthetic data → construction-domain generative augmentation | R21–R25, R31–R33, R37–R39 | Establish "lacking quality control and annotation automation" |
-| 2.3 Information Fusion for Risk Appraisal | Multi-source fusion → risk quantification | R45–R50 | Establish "a gap between detection and risk assessment" |
-| 2.4 Research Gap | Summarise the G1–G5 table | — | Lead into the positioning statement in §6 |
-
-> **Technique**: close each subsection with a contrastive sentence beginning "However," converting the achievement just described into the motivation for the next subsection, so that the argument converges naturally on the positioning statement. This is the standard construction of a Related Work section in high-tier venues.

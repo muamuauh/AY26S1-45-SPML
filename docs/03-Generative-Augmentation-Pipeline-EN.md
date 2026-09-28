@@ -1,8 +1,9 @@
 # Generative Data Augmentation Pipeline — Design
 
-> Document version: v1.0 ｜ Generated: 2026-08-18
+> Document version: v1.1 ｜ Generated: 2026-08-18 ｜ Revised: 2026-09-28 (schedule and route order adjusted for the v3.0 two-phase flow)
 > Chinese counterpart: [03-生成式数据增广Pipeline设计-CN.md](03-生成式数据增广Pipeline设计-CN.md)
 > This is TelecomSafe's **core innovation module**, corresponding to `generative AI is introduced to address the scarcity of training data` in the project brief.
+> **Place in the v3.0 flow**: phase 2 (W8–W10). Generation targets come from the phase 1 baseline's **weak-class list**, and gate G3 reuses the phase 1 baseline detector directly (see [05 Technological Roadmap](05-Technological-Roadmap-EN.md)).
 
 ---
 
@@ -14,7 +15,7 @@ Before writing any code, establish four principles. They determine whether this 
 |---|-----------|-----------|
 | 1 | **Annotation must come for free** | If synthetic images still require manual annotation, the point of addressing data scarcity is lost. Every generation route must be designed so that generation *is* annotation |
 | 2 | **Quality must be filterable** | Generative models hallucinate (six-fingered workers, floating helmets, structurally impossible towers). **Automatic gates are mandatory**; discarding 50% is preferable to polluting the training set |
-| 3 | **Prioritise the long tail** | The value of synthetic data lies in **scenes that cannot be photographed in reality** (a worker leaning out from a tower without a harness), not in duplicating common samples. This is also where gains are largest |
+| 3 | **Prioritise the long tail** | The value of synthetic data lies in **scenes that cannot be photographed in reality** (a worker leaning out from a tower without a harness), not in duplicating common samples. This is also where gains are largest. In v3.0 the "long tail" is pinned down by the baseline's per-class error analysis |
 | 4 | **The real test set must stay uncontaminated** | The test set uses real imagery only, and those images must never participate in generative fine-tuning, or the experimental conclusions become invalid |
 
 ---
@@ -66,6 +67,8 @@ Before writing any code, establish four principles. They determine whether this 
 ## 3. Stage 0 — Risk Scenario Specification Library
 
 The stage most often skipped, and the most important. Do not "generate whatever comes to mind." Build a **structured specification table** first, so that generation becomes enumerable, coverable and countable.
+
+The library's **priorities come from the phase 1 baseline's weak-class list**: cover the 3–5 weakest classes first, and add other scenarios as time allows.
 
 ### Specification Dimensions
 
@@ -157,11 +160,20 @@ Weight them per scenario at inference: `scene(0.8) + ppe(0.6)`.
 
 ## 5. Stage 2 — Four Generation Engines
 
+**Implementation order and output share** (advancing from lowest to highest risk, consistent with [05 §2.2 ⑥](05-Technological-Roadmap-EN.md)):
+
+| Order | Route | Output share | Rationale |
+|-------|-------|-------------|-----------|
+| 1 | ③ Inpainting edit | 40–50% | Inherited annotation, minimal domain gap; almost never fails |
+| 2 | ④ Background swap | 10–15% | Annotation unchanged; doubles as E7 robustness data |
+| 3 | ① T2I new scenes | 10–15% | Covers scenes missing from reality, but needs auto-labelling fallback |
+| 4 | ② ControlNet layout | 25–30% | Zero annotation cost, but programmatic layout generation is routinely underestimated |
+
 ### Route ① Text-to-Image (New Scenes)
 
 **Purpose**: generate rare hazardous scenes entirely absent from the real world
 **Annotation cost**: requires the Stage 3 fallback annotator
-**Suggested share of output**: 20%
+**Suggested share of output**: 10–15%
 
 **Structured prompt template** (more stable than free-form writing, and enables ablation studies):
 
@@ -191,7 +203,7 @@ floating objects, distorted metal structure, watermark, text, blurry
 
 **Purpose**: precise control of object position and structure
 **Annotation cost**: **zero** (the layout map *is* the annotation)
-**Suggested share of output**: 40%
+**Suggested share of output**: 25–30%
 
 ```
 Workflow:
@@ -212,7 +224,7 @@ Workflow:
 
 **Purpose**: produce new samples through **minimal edits** to real images
 **Annotation cost**: **near zero** (annotations are inherited)
-**Suggested share of output**: 30%
+**Suggested share of output**: 40–50%
 
 **Four high-value editing operations**:
 
@@ -238,12 +250,12 @@ new_image = sd_inpaint(
 
 > **Why this route deserves the most investment**: it preserves the real image's background, illumination and noise distribution, minimising the domain gap, while precisely producing the hardest-to-obtain **violation samples**.
 >
-> **Added in v2.0**: with field collection cancelled, the project holds only 200–500 real images in total, so the inpainting route's ability to derive many violation samples from few real images becomes more critical still. Raise this route's share of output from 30% to **40–50%**, reducing the pure T2I share accordingly. Photographs of workers in violation are both rare and legally difficult to capture — the generative approach solves the data problem and the ethical problem at once, which is a powerful argument in the paper.
+> **Why it has the largest share**: real imagery in this project is limited, so the inpainting route's ability to derive many violation samples from few real images matters most. Photographs of workers in violation are both rare and legally difficult to capture — the generative approach solves the data problem and the ethical problem at once.
 
 ### Route ④ Background Replacement / Environment Transfer
 
 **Purpose**: robustness data (rain, fog, night and backlit variants of the same scene)
-**Suggested share of output**: 10%
+**Suggested share of output**: 10–15%
 
 - Separate the foreground (people/machinery) with SAM → inpaint a replacement background
 - Or apply low-strength img2img (strength 0.3–0.5) with environment prompts for global style transfer
@@ -298,7 +310,7 @@ Generated image
    │    Expected rejection rate: 10–15%
    │
    ├─ G3 Annotation reliability gate ───────────────────────
-   │    Run a real-data-trained baseline detector on the synthetic image
+   │    Run the phase 1 baseline detector on the synthetic image
    │    · > 70% of detections match the auto-annotation at IoU > 0.5 → pass
    │    · Nothing detected at all → image is degenerate, discard
    │    · Many detections absent from the annotation → annotation is incomplete, discard
@@ -327,9 +339,11 @@ Final synthetic dataset (expected overall retention 50–65%)
 | Fixed ratio | Real : Synth = 1 : 0.5 / 1 : 1 / 1 : 2 | ⭐⭐⭐⭐ Simple; use for the E5 sweep |
 | **Curriculum** | High synthetic proportion early (feature learning) → decreasing to pure real late (distribution alignment) | ⭐⭐⭐⭐⭐ **Recommended**; usually optimal |
 | Class-adaptive | Higher synthetic proportion for long-tail classes, lower for common ones | ⭐⭐⭐⭐⭐ **Consistent with Principle 3; strongly recommended** |
-| Two-stage | Stage 1: pretrain on synthetic; Stage 2: fine-tune on real | ⭐⭐⭐⭐ Robust and easy to implement |
+| Synthetic-then-real | Pretrain on synthetic data, then fine-tune on real | ⭐⭐⭐⭐ Robust and easy to implement |
 
-**Recommended combination: class-adaptive ratios + two-stage training**
+**Recommended practice**: the main E3 run uses **class-adaptive ratios** (training data changes only); curriculum, synthetic-then-real and loss weighting are reported separately as ablation A5.
+
+> ⚠️ **E3 must share the baseline configuration**: E3 may change only the training data; the training configuration (`configs/baseline.yaml`) stays identical. Curriculum scheduling, synthetic-then-real and loss weighting all change the training procedure — mix them into E3 and it becomes unclear whether any gain comes from the data or from the training tricks.
 
 ```python
 # Class-adaptive synthetic ratio
@@ -442,13 +456,14 @@ telecomsafe/
 
 ## 12. Milestone Mapping
 
-This document corresponds to **M2 (W4–W6)** in `01-Technical-Plan-and-Milestones-EN.md`, with a suggested internal breakdown:
+This document corresponds to **M3 (W8–W10)** in `01-Technical-Plan-and-Milestones-EN.md`, with a suggested internal breakdown:
 
 | Week | Task |
 |------|------|
-| W4 first half | Finalise the Stage 0 specification library (25–30 scenarios) + base model selection trials |
-| W4 second half | Stage 1 LoRA fine-tuning + visual validation |
-| W5 first half | Implement the Stage 2 engines (prioritise ② ControlNet and ③ Inpainting) |
-| W5 second half | Stage 3 automatic annotation + consistency checking |
-| W6 first half | Implement the Stage 4 gates and calibrate thresholds |
-| W6 second half | Bulk-generate 3,000+ images + quality report + **decide whether to proceed to M3** |
+| W4–W7 (during phase 1) | Member B prepares: generation environment; minimal SDXL + LoRA + inpainting chain trial (10 images → visual check) |
+| W8 first half | Finalise the Stage 0 specification library (prioritised by the baseline weak-class list) + base model selection |
+| W8 second half | Stage 1 LoRA fine-tuning + visual validation |
+| W9 first half | Stage 2: implement ③ inpainting and ④ background swap first |
+| W9 second half | Stage 3 automatic annotation + consistency checking; Stage 4 gates and threshold calibration |
+| W10 first half | ① T2I / ② ControlNet (as time allows) |
+| W10 second half | Bulk-generate 3,000+ images + quality report + **TG2: decide whether to proceed to M4** |
