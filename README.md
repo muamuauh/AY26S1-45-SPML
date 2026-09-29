@@ -72,6 +72,19 @@ python -m telecomsafe.demo.app --weights runs/phase1/e2/weights/best.pt
 | [`reports/phase1/`](reports/phase1/) | 阶段一成果总结与实验结果 |
 | [`progress/`](progress/) | 里程碑计划 vs 实际、范围变更记录 |
 
+### 获取数据与模型 / Data & Models
+
+仓库只放代码、配置和报告；数据与权重按"能否重新获取、能否公开"分三处存放：
+
+| 内容 | 存放位置 | 怎么获取 |
+|---|---|---|
+| **模型权重**（E1 / E2，各约 19 MB） | GitHub Release [`phase1-baseline-v1`](https://github.com/muamuauh/AY26S1-45-SPML/releases/tag/phase1-baseline-v1) | `python -m telecomsafe.weights`（自动校验 sha256）；`start_demo.bat` 在缺少权重时会自动下载 |
+| **公开数据集**（Construction Site Safety v30、Construction-PPE、body_harness、construction safety v2） | 各自的原始发布页 | 在 `.env` 填好自己的 Kaggle / Roboflow key，运行 `python -m telecomsafe.data.download`；版本已固定在 `configs/sources.yaml` |
+| **无法重新下载的数据**（APD、TelecomEval 候选图与许可清单、后续的标注结果） | 组内共享文件夹（学校 OneDrive / Teams，**仅限组员与导师**） | 按共享文件夹里的 `README.md` 解压到指定位置 |
+
+> ⚠️ 本仓库是**公开**的：APD 等私有数据、`.env` 中的 key 绝不能提交或放进 Release。
+> 数据集的来源、许可与实际张数见 [`data/README.md`](data/README.md)。
+
 ---
 
 ## 当前状态 / Status

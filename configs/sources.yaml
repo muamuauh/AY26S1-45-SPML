@@ -208,7 +208,7 @@ sources:
     path: data/raw/apd
     download:
       method: manual
-      instructions: 由他人分享的 Roboflow 导出包 data/other_data/APD.v1i.yolov8.zip，解压到 data/raw/apd/。
+      instructions: 从组内共享文件夹（OneDrive / Teams，仅限组员）获取 APD.v1i.yolov8.zip，解压到 data/raw/apd/。
     names: [Helmet, No_Helmet, No_Vest, Vest]
     class_map:
       Helmet: helmet

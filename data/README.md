@@ -101,7 +101,7 @@
 - **完整标注的目标类别**：helmet, no_helmet, vest, no_vest（其余类别由 teacher 补伪标签）
 - **许可**：私有（Roboflow 工作区 fathorazi-nur-fajri/apd-8wyrt，他人分享）——仅限本项目内部训练，不再分发
 - **引用**：APD dataset v1 (Roboflow private project fathorazi-nur-fajri/apd-8wyrt), shared with the project team; used for internal training only.
-- **获取方式**：手动：由他人分享的 Roboflow 导出包 data/other_data/APD.v1i.yolov8.zip，解压到 data/raw/apd/。
+- **获取方式**：手动：从组内共享文件夹（OneDrive / Teams，仅限组员）获取 APD.v1i.yolov8.zip，解压到 data/raw/apd/。
 - **用途**：训练 · B 补充
 - **备注**：核对（2026-09-28）：标注质量好；与已有数据集近似重复仅 6 张，内部重复 30 张。 图片来自新闻网站（带水印），版权不属于数据集作者：报告中注明来源，不公开发布这些图片。
 

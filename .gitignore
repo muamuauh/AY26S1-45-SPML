@@ -30,3 +30,6 @@ mlruns/
 
 # Secrets
 .env
+
+# Release / sharing staging (upload manually, never commit)
+dist/
