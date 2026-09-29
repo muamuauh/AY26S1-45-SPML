@@ -31,6 +31,7 @@ Full documentation lives in **[docs/](docs/)**, available in Chinese and English
 | 05 | [技术路线图](docs/05-技术路线图-CN.md) | [Technological Roadmap](docs/05-Technological-Roadmap-EN.md) |
 | 06 | [团队分工](docs/06-团队分工-CN.md) | [Teamwork Allocation](docs/06-Teamwork-Allocation-EN.md) |
 | 07 | [项目章程](docs/07-项目章程-CN.md) | [Project Charter](docs/07-Project-Charter-EN.md) |
+| 08 | [阶段一训练复现指南](docs/08-阶段一训练复现指南-CN.md) | — |
 
 → 索引与阅读路径见 [docs/README.md](docs/README.md)
 
@@ -42,6 +43,8 @@ Full documentation lives in **[docs/](docs/)**, available in Chinese and English
 ---
 
 ## 阶段一代码 / Phase 1 Code
+
+完整的复现步骤、每一步的预期输出与常见问题见 **[阶段一训练复现指南](docs/08-阶段一训练复现指南-CN.md)**。
 
 ```bash
 conda env create -f environment.yml && conda activate telecomsafe
