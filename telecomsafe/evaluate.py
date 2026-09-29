@@ -1,13 +1,15 @@
 """Evaluate E1/E2 on TelecomEval and write the phase 1 reports.
 
     python -m telecomsafe.evaluate                 # runs/phase1/{e1,e2}/weights/best.pt
-    python -m telecomsafe.evaluate --exps e2 --top-k 5
+    python -m telecomsafe.evaluate --exps e1 e2 e2_yolov8s   # any run under runs/phase1/
 
 Refuses to run if TelecomEval changed since it was frozen (use --skip-check only
 while TelecomEval does not exist yet, e.g. to evaluate on val during development).
 
 Outputs in reports/phase1/: <exp>_metrics.csv, <exp>_confusion_matrix.png,
 per_class_ap.csv, per_class_ap.png, class_distribution.png, weak_classes.md
+(weak_classes.md is written only if absent — its "reason" column is filled by hand;
+pass --rewrite-weak-classes to regenerate it).
 """
 
 from __future__ import annotations
@@ -20,9 +22,20 @@ from pathlib import Path
 
 from telecomsafe.paths import PROCESSED, REPORTS, RUNS
 
-# Categorical slots 1–2 of the validated default palette (light surface).
-COLORS = {"e1": "#2a78d6", "e2": "#eb6834"}
+# Categorical palette in fixed slot order (validated default palette, light surface).
+PALETTE = ["#2a78d6", "#eb6834", "#1baf7a", "#eda100", "#e87ba4", "#008300", "#4a3aa7", "#e34948"]
+# Known experiments keep their slot whatever else is plotted with them (colour follows the entity).
+SLOTS = {"e1": 0, "e2": 1, "e2_yolov8s": 2}
+LABELS = {"e1": "E1 · YOLO11s, no augmentation", "e2": "E2 · YOLO11s, default augmentation",
+          "e2_yolov8s": "E2 · YOLOv8s, default augmentation"}
 SURFACE, INK, MUTED = "#fcfcfb", "#0b0b0b", "#52514e"
+
+
+def exp_color(exp: str, order: list[str]) -> str:
+    if exp in SLOTS:
+        return PALETTE[SLOTS[exp]]
+    free = [i for i in range(len(PALETTE)) if i not in SLOTS.values()]
+    return PALETTE[free[[e for e in order if e not in SLOTS].index(exp) % len(free)]]
 
 
 def evaluate(exp: str, data: str, split: str) -> dict | None:
@@ -87,23 +100,25 @@ def plot_per_class(results: dict[str, dict], classes: list[str], out: Path, eval
     matplotlib.use("Agg")
     import matplotlib.pyplot as plt
 
-    exps = [e for e in ("e1", "e2") if e in results]
-    fig, ax = plt.subplots(figsize=(9, 4.2), facecolor=SURFACE)
+    exps = list(results)
+    fig, ax = plt.subplots(figsize=(10, 4.4), facecolor=SURFACE)
     width = 0.8 / len(exps)
     for j, exp in enumerate(exps):
         vals = [results[exp]["per_class"].get(c, {}).get("ap50", 0.0) for c in classes]
         xs = [i + (j - (len(exps) - 1) / 2) * width for i in range(len(classes))]
-        ax.bar(xs, vals, width=width - 0.03, color=COLORS[exp], label=exp.upper(), edgecolor=SURFACE, linewidth=2)
+        ax.bar(xs, vals, width=width - 0.03, color=exp_color(exp, exps),
+               label=LABELS.get(exp, exp), edgecolor=SURFACE, linewidth=2)
     for i, c in enumerate(classes):  # distinguish "AP 0" from "class absent from the evaluation set"
         if not any(c in results[e]["per_class"] for e in exps):
             ax.text(i, 0.02, "no samples", ha="center", va="bottom", rotation=90, color=MUTED, fontsize=8)
     ax.set_xticks(range(len(classes)), classes)
     ax.set_ylim(0, 1)
     ax.set_ylabel(f"AP50 on {eval_name}", color=MUTED)
-    _style(ax, "Per-class AP50 — E1 (no augmentation) vs E2 (default augmentation)")
-    ax.legend(frameon=False, labelcolor=INK)
+    _style(ax, "Per-class AP50 by experiment")
+    # Below the axes: bars can reach 1.0 in any class, so no spot inside the plot is guaranteed free.
+    ax.legend(frameon=False, labelcolor=INK, loc="upper center", bbox_to_anchor=(0.5, -0.1), ncol=min(len(exps), 3))
     fig.tight_layout()
-    fig.savefig(out, dpi=150, facecolor=SURFACE)
+    fig.savefig(out, dpi=150, facecolor=SURFACE, bbox_inches="tight")
     plt.close(fig)
 
 
@@ -114,7 +129,7 @@ def plot_distribution(counts: dict[str, int], out: Path) -> None:
 
     items = sorted(counts.items(), key=lambda kv: kv[1])
     fig, ax = plt.subplots(figsize=(7, 0.45 * len(items) + 1.2), facecolor=SURFACE)
-    ax.barh([k for k, _ in items], [v for _, v in items], color=COLORS["e1"], height=0.6)
+    ax.barh([k for k, _ in items], [v for _, v in items], color=PALETTE[0], height=0.6)
     for i, (_, v) in enumerate(items):
         ax.text(v, i, f" {v:,}", va="center", color=MUTED, fontsize=9)
     ax.set_xlabel("instances in train split", color=MUTED)
@@ -153,6 +168,8 @@ def main(argv: list[str] | None = None) -> None:
     ap.add_argument("--split", default="test", help="test = TelecomEval; val only for development")
     ap.add_argument("--top-k", type=int, default=4)
     ap.add_argument("--skip-check", action="store_true")
+    ap.add_argument("--rewrite-weak-classes", action="store_true",
+                    help="regenerate weak_classes.md (overwrites the hand-written reasons)")
     args = ap.parse_args(argv)
 
     if args.split == "test" and not args.skip_check:
@@ -173,11 +190,11 @@ def main(argv: list[str] | None = None) -> None:
     rows = []
     for c in classes:
         row = {"class": c, "train_instances": counts.get(c, "")}
-        for exp in ("e1", "e2"):
-            pc = results.get(exp, {}).get("per_class", {}).get(c, {})
+        for exp in results:
+            pc = results[exp]["per_class"].get(c, {})
             row[f"{exp}_ap50"] = f"{pc['ap50']:.4f}" if pc else ""
             row[f"{exp}_ap50_95"] = f"{pc['ap50_95']:.4f}" if pc else ""
-        if row["e1_ap50"] and row["e2_ap50"]:
+        if row.get("e1_ap50") and row.get("e2_ap50"):
             row["delta_ap50"] = f"{float(row['e2_ap50']) - float(row['e1_ap50']):+.4f}"
         else:
             row["delta_ap50"] = ""
@@ -187,7 +204,11 @@ def main(argv: list[str] | None = None) -> None:
     plot_per_class(results, classes, REPORTS / "per_class_ap.png", eval_name)
     if counts:
         plot_distribution({c: counts.get(c, 0) for c in classes}, REPORTS / "class_distribution.png")
-    (REPORTS / "weak_classes.md").write_text(weak_classes_md(results, classes, counts, args.top_k, eval_name), encoding="utf-8")
+    weak = REPORTS / "weak_classes.md"
+    if args.rewrite_weak_classes or not weak.exists():
+        weak.write_text(weak_classes_md(results, classes, counts, args.top_k, eval_name), encoding="utf-8")
+    else:
+        print(f"  kept {weak.name} (hand-written reasons); use --rewrite-weak-classes to regenerate")
 
     for exp, r in results.items():
         o = r["overall"]

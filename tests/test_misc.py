@@ -65,3 +65,10 @@ def test_released_weights_config_is_consistent():
     assert cfg["url"].endswith(cfg["release"])
     for w in cfg["weights"].values():
         assert len(w["sha256"]) == 64 and w["path"].endswith(".pt")
+
+
+def test_experiment_colours_follow_the_experiment():
+    from telecomsafe.evaluate import PALETTE, exp_color
+    assert exp_color("e2", ["e2"]) == exp_color("e2", ["e1", "e2", "e2_yolov8s"]) == PALETTE[1]
+    extra = exp_color("custom", ["e1", "custom"])
+    assert extra not in (PALETTE[0], PALETTE[1], PALETTE[2])
