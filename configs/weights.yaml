@@ -1,0 +1,19 @@
+# Released model weights (GitHub Release assets). Download with:
+#   python -m telecomsafe.weights            # all
+#   python -m telecomsafe.weights e2         # one
+# The sha256 is checked after download; a mismatch means a corrupted or wrong file.
+
+release: phase1-baseline-v1
+url: https://github.com/muamuauh/AY26S1-45-SPML/releases/download/phase1-baseline-v1
+
+weights:
+  e2:
+    asset: e2_best.pt
+    path: runs/phase1/e2/weights/best.pt
+    sha256: 4d64ab6f1b1e142a24091d117a2749aa38d162c603b6ad4eeb2e1ac0bc66e0e1
+    description: E2 baseline (Ultralytics default augmentation) — used by the demo
+  e1:
+    asset: e1_best.pt
+    path: runs/phase1/e1/weights/best.pt
+    sha256: 3184e3d198197a20338ab039bb1fdc6fc5d71e6f83c893782e355d1a9f8932f6
+    description: E1 baseline (all built-in augmentation off) — experimental control

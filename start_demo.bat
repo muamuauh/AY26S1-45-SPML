@@ -19,9 +19,14 @@ if not exist "%PY%" (
 
 set "WEIGHTS=runs\phase1\e2\weights\best.pt"
 if not "%~1"=="" set "WEIGHTS=%~1"
+if not exist "%WEIGHTS%" if "%~1"=="" (
+    echo 本地没有 E2 模型，正在从 GitHub Release 下载……
+    "%PY%" -m telecomsafe.weights e2
+)
 if not exist "%WEIGHTS%" (
     echo [错误] 找不到模型权重：%WEIGHTS%
-    echo        请先训练：python -m telecomsafe.train --exp e2
+    echo        可以下载：python -m telecomsafe.weights e2
+    echo        或重新训练：python -m telecomsafe.train --exp e2
     pause
     exit /b 1
 )

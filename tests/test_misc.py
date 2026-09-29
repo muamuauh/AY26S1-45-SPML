@@ -44,3 +44,24 @@ def test_catalog_renders_every_source():
     for src in sources:
         assert src["title"] in text
     assert "请勿手动编辑" in text
+
+
+def test_weights_download_rejects_wrong_file(tmp_path, monkeypatch):
+    import pytest
+    from telecomsafe import weights
+
+    cfg = {"url": "https://example.invalid", "weights": {
+        "e2": {"asset": "e2_best.pt", "path": str(tmp_path / "best.pt"), "sha256": "0" * 64}}}
+    monkeypatch.setattr(weights, "load_yaml", lambda _: cfg)
+    monkeypatch.setattr(weights, "fetch", lambda url, dest: dest.write_bytes(b"not the model"))
+    with pytest.raises(SystemExit):
+        weights.main(["e2"])
+    assert not (tmp_path / "best.pt").exists()  # a mismatching download is removed
+
+
+def test_released_weights_config_is_consistent():
+    from telecomsafe.paths import CONFIGS, load_yaml
+    cfg = load_yaml(CONFIGS / "weights.yaml")
+    assert cfg["url"].endswith(cfg["release"])
+    for w in cfg["weights"].values():
+        assert len(w["sha256"]) == 64 and w["path"].endswith(".pt")
