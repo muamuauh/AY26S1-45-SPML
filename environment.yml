@@ -1,0 +1,30 @@
+# TelecomSafe 开发环境
+#   conda env create -f environment.yml
+#   conda activate telecomsafe
+# 验证 GPU：python -c "import torch;print(torch.cuda.is_available(), torch.cuda.get_device_name(0))"
+#
+# PyTorch 已不再发布 conda 包，torch / torchvision 通过 pip 从 CUDA 13.0 wheel 源安装（驱动需支持 CUDA 13）。
+# 标注工具 Label Studio 依赖较重，另建环境：conda create -n labelstudio python=3.12 && pip install label-studio
+name: telecomsafe
+channels:
+  - conda-forge
+  - nodefaults
+dependencies:
+  - python=3.12
+  - pip
+  - pip:
+      - --extra-index-url https://download.pytorch.org/whl/cu130
+      - torch
+      - torchvision
+      - ultralytics
+      - gradio
+      - pyyaml
+      - pandas
+      - numpy
+      - matplotlib
+      - pillow
+      - imagehash
+      - requests
+      - roboflow
+      - kaggle
+      - pytest
