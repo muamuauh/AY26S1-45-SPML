@@ -1,0 +1,17 @@
+# 阶段一 baseline 训练配置（即实验 E2：Ultralytics 默认增广）
+#
+# ⚠️ W7 提交后只读。阶段二的 E3 必须沿用这份配置、只改训练数据，否则与 E1/E2 不可比。
+# E1 = 本配置 + 关闭全部内置增广（由 telecomsafe/train.py 覆盖，见 NO_AUGMENTATION）。
+# 参数含义见 https://docs.ultralytics.com/modes/train/#train-settings
+
+model: yolo11s.pt      # W6 与 yolo11m.pt 做一次 30 epoch 对比后定型
+imgsz: 640
+epochs: 100
+patience: 20
+batch: 16              # 4070 SUPER 12GB；显存不足时降到 8
+seed: 0
+deterministic: true
+workers: 4
+amp: true
+optimizer: auto
+cache: false
