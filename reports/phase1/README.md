@@ -32,11 +32,26 @@
 | E1 | 公开数据，关闭全部内置增广 | 0.611 | 0.350 | 0.690 | 0.630 |
 | E2 | 公开数据 + Ultralytics 默认传统增广 | **0.756** | **0.499** | 0.825 | 0.711 |
 
-训练配置见 [`configs/baseline.yaml`](../../configs/baseline.yaml)（YOLO11s，640px，100 epoch，seed 0）。E1 在第 42 个 epoch 早停，E2 跑满 100 个 epoch。逐类结果：[`per_class_ap.csv`](per_class_ap.csv)
+训练配置见 [`configs/baseline.yaml`](../../configs/baseline.yaml)（YOLO11s，640px，最多 100 epoch、patience 20，seed 0）。E1 在第 42 个 epoch 早停，E2 在第 90 个 epoch 早停。逐类结果：[`per_class_ap.csv`](per_class_ap.csv)
 
 ![逐类 AP50：E1 vs E2](per_class_ap.png)
 
-混淆矩阵：[E1](e1_confusion_matrix.png) ｜ [E2](e2_confusion_matrix.png)
+混淆矩阵：[E1](e1_confusion_matrix.png) ｜ [E2](e2_confusion_matrix.png) ｜ [E2 · YOLOv8s](e2_yolov8s_confusion_matrix.png)
+
+### 模型选型对比：YOLO11s vs YOLOv8s
+
+与 E2 使用完全相同的数据、配置与随机种子，唯一的变量是模型结构（`python -m telecomsafe.train --exp e2 --model yolov8s.pt --name e2_yolov8s`）。
+
+| 模型 | mAP50 | mAP50-95 | Precision | Recall | 参数量 | 权重 | GPU 推理* | CPU 推理* |
+|---|---|---|---|---|---|---|---|---|
+| **YOLO11s（E2，采用）** | **0.756** | **0.499** | 0.825 | 0.711 | 9.4 M | 19.2 MB | 约 15 ms | **约 100 ms** |
+| YOLOv8s | 0.755 | 0.494 | 0.813 | 0.736 | 11.1 M | 22.5 MB | **约 13 ms** | 约 128 ms |
+
+\* RTX 4070 SUPER / 本机 CPU，PyTorch 单张推理，含前后处理，200 张验证图的平均值（GPU 两轮、交换顺序测量，结果一致）。YOLOv8s 在第 78 轮早停。
+
+- **精度打平**：mAP50 相差 0.001、mAP50-95 相差 0.005，在单个随机种子下属于正常波动。逐类看互有高低：YOLOv8s 在工程机械上高约 0.03，YOLO11s 在未戴安全帽、未穿反光衣上高约 0.02。
+- **YOLO11s 更小、CPU 上更快**：参数少 15%（9.43 M 对 11.14 M），CPU 推理快约 22%，更适合没有 GPU 的现场部署。GPU 上 YOLOv8s 快约 2 ms，因为 YOLO11 的注意力模块在 PyTorch 下开销略大；两者都远低于 Demo 3 秒的要求。
+- **结论**：保留 YOLO11s 作为 baseline，不更换。YOLOv8s 的结果同时说明，阶段一的结论不依赖于特定的模型结构。
 
 ## Demo v1
 

@@ -30,7 +30,7 @@ The validation split comes from the same sources as the training data, so these 
 
 ## Training
 
-- YOLO11s, 640 px, seed 0, `configs/baseline.yaml`; E1 early-stopped at epoch 42, E2 ran 100 epochs.
+- YOLO11s, 640 px, seed 0, `configs/baseline.yaml`; up to 100 epochs with patience 20; E1 early-stopped at epoch 42, E2 at epoch 90.
 - 5,537 images after perceptual-hash de-duplication from Construction Site Safety (Roboflow v30), Ultralytics Construction-PPE, body_harness, construction safety v2 and APD; missing classes filled with teacher pseudo-labels (18% of boxes). Sources and licences: `data/README.md`.
 
 ## Licences
