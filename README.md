@@ -41,6 +41,39 @@ Full documentation lives in **[docs/](docs/)**, available in Chinese and English
 
 ---
 
+## 阶段一代码 / Phase 1 Code
+
+```bash
+conda env create -f environment.yml && conda activate telecomsafe
+pytest                                               # 单元测试，不需要 GPU 与数据
+
+cp .env.example .env                                 # 填 Kaggle / Roboflow API key（.env 不入库）
+python -m telecomsafe.data.download --list           # 查看数据集下载状态
+python -m telecomsafe.data.download                  # 下载可脚本化的数据集到 data/raw/
+python -m telecomsafe.data.catalog                   # 生成数据集说明 data/README.md
+python -m telecomsafe.data.collect_open              # 检索 TelecomEval 候选图（开放许可，自动记录署名）
+python -m telecomsafe.data.labelstudio serve        # 启动标注工具（账号见 .env）；另开终端执行 push / pull
+python -m telecomsafe.data.build --dry-run           # 映射 / 覆盖矩阵 / 去重统计
+python -m telecomsafe.data.build                     # 生成 data/processed/yolo/
+python -m telecomsafe.data.freeze_eval --create      # 冻结 TelecomEval（之后只读）
+python -m telecomsafe.train --exp e1                 # E1：关闭内置增广
+python -m telecomsafe.train --exp e2                 # E2：configs/baseline.yaml
+python -m telecomsafe.evaluate                       # 报告与图表 → reports/phase1/
+python -m telecomsafe.demo.app --weights runs/phase1/e2/weights/best.pt
+```
+
+**Windows 一键启动 Demo**：双击项目根目录的 `start_demo.bat`，就绪后自动打开浏览器（http://127.0.0.1:7860）；关闭窗口即停止。
+
+| 目录 | 内容 |
+|---|---|
+| [`configs/`](configs/) | 类别体系、数据来源登记、baseline 训练配置、规则库 |
+| [`telecomsafe/`](telecomsafe/) | 数据（下载、构建、伪标签、冻结）、训练、评估、规则判断、Demo |
+| [`data/README.md`](data/README.md) | 每个数据集的来源、链接、许可与规模（自动生成） |
+| [`reports/phase1/`](reports/phase1/) | 阶段一成果总结与实验结果 |
+| [`progress/`](progress/) | 里程碑计划 vs 实际、范围变更记录 |
+
+---
+
 ## 当前状态 / Status
 
 🚧 **阶段一 · Baseline** — ① Risk Taxonomy 与 ② 公开数据整编已于线下完成，正在进入 ③ 训练 baseline 模型。
@@ -69,15 +102,15 @@ Full documentation lives in **[docs/](docs/)**, available in Chinese and English
 - [ ] 向导师确认是否需要提交 team project video（报告模板附录提及）
 
 **阶段一（W4–W7）**
-- [x] 确定风险分类体系 Risk Taxonomy（线下完成）—— 待提交到仓库（建议 `data/taxonomy.yaml`）
-- [x] 整编公开数据（线下完成）—— 待补记 TelecomSeed / TelecomEval 实际张数与 TelecomEval 文件列表哈希
-- [ ] 确认 `licence_manifest.csv` 覆盖全部 T3 开放许可图像（CC BY / CC BY-SA 的署名义务）
-- [ ] 写类别映射表：把各公开数据集的标签名对齐到 Taxonomy 类别（阶段一第一件事，见 [docs/02 §5](docs/02-数据集与预训练模型调研-CN.md)）
-- [ ] 训练 baseline（E1 / E2），提交 `configs/baseline.yaml` —— 阶段二的 E3 必须沿用同一份
-- [ ] 规则风险判断 + Gradio Demo v1，W7 末 TGB 会议验收
+- [x] 确定风险分类体系 Risk Taxonomy（线下完成）—— 草案已转录到 `configs/taxonomy.yaml`，待与线下定稿核对
+- [x] 数据集清单与类别映射表 —— `configs/sources.yaml`，说明文档 `data/README.md`
+- [ ] ⏸ **TelecomEval 标注与冻结（暂缓，Demo v1 完成后恢复）** —— 31 张候选已预标注并导入 Label Studio，恢复步骤见 [progress/milestones.md](progress/milestones.md#暂缓事项)
+- [x] 训练 baseline（E1 / E2）—— 验证集 mAP50 0.611 / 0.756，见 [reports/phase1/](reports/phase1/README.md)；`configs/baseline.yaml` 在 TGB 后冻结
+- [x] 规则风险判断 + Gradio Demo v1 —— `python -m telecomsafe.demo.app --weights runs/phase1/e2/weights/best.pt`
+- [ ] TGB 会议（W7 末）：准备幻灯片与 Demo 录屏
 
 **贯穿全程**
-- [ ] 建立 `progress/` 目录记录里程碑**实际**完成日期与范围变更 —— 报告模板要求 Planned vs Actual 对照（见 [docs/01 §7.4](docs/01-技术方案与里程碑-CN.md)）
+- [x] 建立 `progress/` 目录记录里程碑**实际**完成日期与范围变更 —— 每完成一个里程碑就补一行（见 [docs/01 §7.4](docs/01-技术方案与里程碑-CN.md)）
 - [ ] 核实文献引用（见 [docs/04 §8](docs/04-文献综述-CN.md) 核实状态表）
 
 ---

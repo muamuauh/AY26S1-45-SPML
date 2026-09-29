@@ -176,7 +176,7 @@ Based on a **16-week** semester and organised around the v3.0 **two-phase** flow
 #### M0 ｜ W1 — Setup and Risk Taxonomy ✅
 - [x] Risk Taxonomy v1.0 (done offline)
 - [x] First draft of the literature survey (see `04-Literature-Survey-EN.md`)
-- [ ] Commit the taxonomy to the repository (suggested `data/taxonomy.yaml`, with every class name and its decision criterion)
+- [ ] Commit the taxonomy to the repository (suggested `configs/taxonomy.yaml`, with every class name and its decision criterion)
 
 #### M1 ｜ W2–W3 — Public Data Curation ✅
 - [x] T1 academic datasets, T2 community datasets and T3 openly licensed imagery curated (done offline; see document 02)

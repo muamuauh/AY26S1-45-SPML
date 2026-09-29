@@ -162,7 +162,7 @@ flowchart LR
 
 > **Status**: completed offline ｜ **Owner**: Member A
 
-**To do**: commit the final taxonomy to the repository (suggested `data/taxonomy.yaml`, listing every class name and its decision criterion). It is the class list for ③ and the rule source for ④; all three must reference the same file.
+**To do**: commit the final taxonomy to the repository (suggested `configs/taxonomy.yaml`, listing every class name and its decision criterion). It is the class list for ③ and the rule source for ④; all three must reference the same file.
 
 #### ② Source · Curate Public Data ✅ Completed
 
