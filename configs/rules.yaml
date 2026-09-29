@@ -1,0 +1,57 @@
+# 阶段一规则库：把检测框变成风险等级
+#
+# - type 对应 telecomsafe/judge/rules.py 中实现的谓词，参数含义见该文件。
+# - level: low | medium | high；整图风险等级取所有触发规则中的最高等级，无触发时为 low。
+# - source 是法规出处。条款号已按 OSHA 29 CFR 1926 编写，用于报告前请对照原文核实。
+# - enabled: false 的规则不参与判断。
+
+person_height_m: 1.7   # 用人框高度估算实际尺度
+
+rules:
+  - id: R1
+    name: 未佩戴安全帽
+    type: ppe_violation
+    level: medium
+    params:
+      negative_class: no_helmet
+      min_conf: 0.35
+    source: OSHA 29 CFR 1926.100(a) Head protection
+    source_url: https://www.osha.gov/laws-regs/regulations/standardnumber/1926/1926.100
+    enabled: true
+
+  - id: R2
+    name: 未穿反光衣
+    type: ppe_violation
+    level: low
+    params:
+      negative_class: no_vest
+      min_conf: 0.35
+    source: OSHA 29 CFR 1926.651(d) High-visibility garments
+    source_url: https://www.osha.gov/laws-regs/regulations/standardnumber/1926/1926.651
+    enabled: true
+
+  - id: R3
+    name: 塔上作业未系安全带
+    type: on_structure_without_ppe
+    level: high
+    params:
+      structure_class: tower
+      ppe_class: harness
+      min_overlap: 0.3     # 人框与塔框的重叠比例（占人框面积）超过该值视为在塔上
+      min_conf: 0.35
+    source: OSHA 29 CFR 1926.501(b)(1) / 1926.502(d) Fall protection
+    source_url: https://www.osha.gov/laws-regs/regulations/standardnumber/1926/1926.501
+    enabled: false         # 需要 taxonomy 中 tower 类 phase1: true
+
+  - id: R4
+    name: 人员靠近作业机械
+    type: proximity
+    level: high
+    params:
+      targets: [machinery]
+      max_distance_m: 2.0  # 人框与机械框最近边距（按人高换算）小于该值即触发
+      min_conf: 0.35
+      exclude_operators: true   # 人框完全在机械框内、且脚明显高于机械底部 → 驾驶室里的操作员，不算违规
+    source: OSHA 29 CFR 1926.1424(a) Work area control
+    source_url: https://www.osha.gov/laws-regs/regulations/standardnumber/1926/1926.1424
+    enabled: true
