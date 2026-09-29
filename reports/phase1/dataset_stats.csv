@@ -1,0 +1,11 @@
+﻿source,split,images,person,helmet,no_helmet,vest,no_vest,harness,machinery,vehicle,pseudo_boxes
+apd,train,2033,0,4498,151,651,3742,0,0,0,3401
+body_harness,train,139,100,0,0,0,0,143,0,0,213
+construction_ppe,train,1187,1959,1484,446,1374,0,0,0,0,0
+construction_safety_v2,train,1010,2362,2139,109,0,0,0,0,0,1310
+construction_site_safety,train,615,1008,504,351,372,506,0,439,261,0
+apd,val,226,0,524,16,94,427,0,0,0,417
+body_harness,val,15,9,0,0,0,0,13,0,0,20
+construction_ppe,val,132,192,153,39,146,0,0,0,0,0
+construction_safety_v2,val,112,249,228,11,0,0,0,0,0,134
+construction_site_safety,val,68,100,45,40,31,58,0,50,16,0
