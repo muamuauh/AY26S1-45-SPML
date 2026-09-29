@@ -1,0 +1,440 @@
+# 数据来源登记表 —— 数据集信息的唯一出处
+#
+# 下载（telecomsafe.data.download）、构建（telecomsafe.data.build）和
+# 数据集说明文档 data/README.md（telecomsafe.data.catalog 生成）都读这份文件。
+#
+# 字段说明
+#   name          本地目录名，数据放在 path（默认 data/raw/<name>/）
+#   tier          A 核心 | B 补充 | optional 可选 | eval 测试 | unused 未使用
+#   role          train | eval | unused
+#   enabled       是否参与构建（下载与文档不受影响）
+#   format        yolo | coco | voc
+#   names         YOLO 类别表的兜底值；数据集自带 data.yaml 时以其为准
+#   class_map     原类别 → 目标类别（见 configs/taxonomy.yaml）；null 表示丢弃。
+#                 构建时遇到这里没声明的原类别会直接报错，防止静默丢标注
+#   annotates     该数据集"完整标注"了哪些目标类别；其余目标类别由 teacher 补伪标签
+#   filter        no_person：丢弃含人的图（用于只标了机械的数据集）
+#   download      method: kaggle | roboflow | ultralytics | url_zip | manual
+#   verified      类别表与规模是否已按下载后的实际文件核对过
+
+sources:
+  # ------------------------------------------------------------------ A 核心
+  - name: construction_site_safety
+    title: Construction Site Safety (Roboflow Universe, version 30)
+    tier: A
+    role: train
+    enabled: true
+    homepage: https://universe.roboflow.com/roboflow-universe-projects/construction-site-safety
+    paper: null
+    description: >-
+      Roboflow 官方整理的工地安全数据集（version 30，未经增广的原始图像），包含安全帽 / 反光衣的正负类
+      （NO-Hardhat、NO-Safety Vest），以及人员、细分的工程机械与车辆。与本项目阶段一的目标类别重合度最高，
+      也是工程机械与车辆的唯一来源。
+    licence: CC BY 4.0
+    citation: "Construction Site Safety dataset (version 30), Roboflow Universe Projects, https://universe.roboflow.com/roboflow-universe-projects/construction-site-safety"
+    planned_size: 717 张（train 521 / valid 114 / test 82）
+    format: yolo
+    path: data/raw/construction_site_safety
+    download:
+      method: roboflow
+      workspace: roboflow-universe-projects
+      project: construction-site-safety
+      version: 30            # 未增广的原始版本；不要用 Kaggle 镜像（= version 28，训练集是马赛克增广副本）
+    names: [Excavator, Gloves, Hardhat, Ladder, Mask, NO-Hardhat, NO-Mask, NO-Safety Vest, Person, SUV, Safety Cone, Safety Vest, bus, dump truck, fire hydrant, machinery, mini-van, sedan, semi, trailer, truck, truck and trailer, van, vehicle, wheel loader]
+    class_map:
+      Hardhat: helmet
+      NO-Hardhat: no_helmet
+      Safety Vest: vest
+      NO-Safety Vest: no_vest
+      Person: person
+      Excavator: machinery
+      wheel loader: machinery
+      dump truck: machinery
+      machinery: machinery
+      SUV: vehicle
+      bus: vehicle
+      mini-van: vehicle
+      sedan: vehicle
+      semi: vehicle
+      trailer: vehicle
+      truck: vehicle
+      truck and trailer: vehicle
+      van: vehicle
+      vehicle: vehicle
+      Gloves: null
+      Ladder: null
+      Mask: null
+      NO-Mask: null
+      Safety Cone: null
+      fire hydrant: null
+    annotates: [person, helmet, no_helmet, vest, no_vest, machinery, vehicle]
+    notes: >-
+      核对（2026-09-29）：最初用的 Kaggle 镜像实为 Roboflow version 28，其训练集是 521 张原图各生成 5 个
+      增广版本（马赛克、cutout、裁剪、旋转等）得到的 2,605 张拼图——既让 E1 不再是"无增广"对照，也让
+      规则把不同子图里的人和机械误判为相邻。已换成未增广的 version 30（717 张）。
+    verified: true
+
+  - name: construction_ppe
+    title: Ultralytics Construction-PPE
+    tier: A
+    role: train
+    enabled: true
+    homepage: https://docs.ultralytics.com/datasets/detect/construction-ppe
+    paper: null
+    description: >-
+      Ultralytics 官方整理的施工 PPE 数据集，采集自真实工地，包含合规与不合规样本，
+      标注了安全帽、反光衣、手套、靴子、护目镜及其缺失状态。
+    licence: AGPL-3.0
+    citation: "Ultralytics Construction-PPE dataset, https://docs.ultralytics.com/datasets/detect/construction-ppe"
+    planned_size: 1,416 张（train 1,132 / val 143 / test 141）
+    format: yolo
+    path: data/raw/construction_ppe
+    download:
+      method: ultralytics
+      yaml: construction-ppe.yaml
+    names: [helmet, gloves, vest, boots, goggles, none, Person, no_helmet, no_goggle, no_gloves, no_boots]
+    class_map:
+      helmet: helmet
+      vest: vest
+      Person: person
+      no_helmet: no_helmet
+      gloves: null
+      boots: null
+      goggles: null
+      none: null
+      no_goggle: null
+      no_gloves: null
+      no_boots: null
+    annotates: [person, helmet, no_helmet, vest]
+    notes: >-
+      没有 no_vest 与机械类别，由 teacher 补伪标签。下载后核对（2026-09-28）：1,416 张，类别顺序与
+      Ultralytics 官方 construction-ppe.yaml 一致；含同一视频的相邻帧（跨 train / test），构建时去重。
+    verified: true
+
+  - name: harness_vgg2coco
+    title: harness (vgg2coco, Roboflow Universe)
+    tier: unused
+    role: unused
+    enabled: false
+    homepage: https://universe.roboflow.com/vgg2coco/harness-dyxml
+    paper: null
+    description: 名为安全带检测的数据集，实际下载 2,582 张（version 1），类别 harness / head / helmat。
+    licence: CC BY 4.0
+    citation: "harness dataset by vgg2coco, Roboflow Universe, https://universe.roboflow.com/vgg2coco/harness-dyxml"
+    planned_size: 约 1,000 张（实际 2,582 张）
+    format: yolo
+    path: data/raw/harness_vgg2coco
+    download:
+      method: roboflow
+      workspace: vgg2coco
+      project: harness-dyxml
+      version: 1
+    class_map:
+      harness: vest        # 核对发现：标成 harness 的实为反光背心
+      head: no_helmet
+      helmat: helmet       # 含手持未佩戴的安全帽，与判定标准冲突
+    annotates: [vest, no_helmet, helmet]
+    reason: >-
+      下载后核对（2026-09-28）：标成 harness 的其实是反光背心而非安全带；helmat 框包含手持的安全帽；
+      全部是同一室内场景、同一人的摆拍视频帧。标注语义与判定标准冲突，领域也不符，停用。
+    verified: true
+
+  - name: body_harness
+    title: body_harness (Construction Images, Roboflow Universe)
+    tier: A
+    role: train
+    enabled: true
+    homepage: https://universe.roboflow.com/construction-images/body_harness
+    paper: null
+    description: 796 张的施工人员安全带数据集，类别包含 safety harness 与 worker。
+    licence: CC BY 4.0
+    citation: "body_harness dataset by Construction Images, Roboflow Universe, https://universe.roboflow.com/construction-images/body_harness"
+    planned_size: 796 张
+    format: yolo
+    path: data/raw/body_harness
+    download:
+      method: roboflow
+      workspace: construction-images
+      project: body_harness
+      version: null
+    class_map:
+      safety harness: harness
+      worker: person
+    annotates: [harness, person]
+    notes: >-
+      下载后核对（2026-09-28）：version 5，796 张，标的是真实工地上穿戴的全身式安全带。
+      大量图片是同一视频的相邻帧，构建时去重；少数图中的人员漏标，由 teacher 补伪标签。
+    verified: true
+
+  # ------------------------------------------------------------------ B 补充
+  - name: construction_workers_fyp
+    title: 3 Construction Workers (FYP, Roboflow Universe)
+    tier: B
+    role: train
+    enabled: false       # 该 Roboflow 项目没有发布任何版本，无法导出（2026-09-28）
+    homepage: https://universe.roboflow.com/fyp-h6hxz/3-construction-workers
+    paper: null
+    description: 600 张的施工人员数据集，包含安全带与未戴安全帽等类别。
+    licence: CC BY 4.0
+    citation: "3 Construction Workers dataset by FYP, Roboflow Universe, https://universe.roboflow.com/fyp-h6hxz/3-construction-workers"
+    planned_size: 600 张
+    format: yolo
+    path: data/raw/construction_workers_fyp
+    download:
+      method: roboflow
+      workspace: fyp-h6hxz
+      project: 3-construction-workers
+      version: null
+    class_map: {}          # 下载后按 data.yaml 的类别表填写
+    annotates: [harness, no_helmet]
+    notes: 类别表来自搜索结果，下载后核对。
+    verified: false
+
+  - name: apd
+    title: APD — 施工人员安全帽与反光衣检测（Roboflow 私有项目）
+    tier: B
+    role: train
+    enabled: true
+    homepage: null
+    paper: null
+    description: >-
+      2,300 张真实国内工地照片（多为新闻图片，带网站水印），标注安全帽、未戴安全帽、反光衣、
+      未穿反光衣；No_Vest 框住未穿反光衣的躯干，与判定标准一致。未穿反光衣样本（4,245 个）是
+      全部数据中最多的，是 no_vest 类的主要来源。没有人员类，由 teacher 补伪标签。
+    licence: 私有（Roboflow 工作区 fathorazi-nur-fajri/apd-8wyrt，他人分享）——仅限本项目内部训练，不再分发
+    citation: "APD dataset v1 (Roboflow private project fathorazi-nur-fajri/apd-8wyrt), shared with the project team; used for internal training only."
+    planned_size: 2,300 张（train 1,610 / valid 460 / test 230）
+    format: yolo
+    path: data/raw/apd
+    download:
+      method: manual
+      instructions: 由他人分享的 Roboflow 导出包 data/other_data/APD.v1i.yolov8.zip，解压到 data/raw/apd/。
+    names: [Helmet, No_Helmet, No_Vest, Vest]
+    class_map:
+      Helmet: helmet
+      No_Helmet: no_helmet
+      No_Vest: no_vest
+      Vest: vest
+    annotates: [helmet, no_helmet, vest, no_vest]
+    notes: >-
+      核对（2026-09-28）：标注质量好；与已有数据集近似重复仅 6 张，内部重复 30 张。
+      图片来自新闻网站（带水印），版权不属于数据集作者：报告中注明来源，不公开发布这些图片。
+    verified: true
+
+  - name: construction_safety_v2
+    title: construction safety v2 (yun-pl2q1, Roboflow Universe)
+    tier: B
+    role: train
+    enabled: true
+    homepage: https://universe.roboflow.com/yun-pl2q1/construction-safety-ejqd8
+    paper: null
+    description: >-
+      1,206 张安全帽检测图像，标注安全帽、未戴安全帽和人员。含较多图库 / 棚拍照片，真实工地比例较低；
+      主要补充安全帽与人员的多样性。图中可见的反光衣未标注，由 teacher 补伪标签。
+    licence: CC BY 4.0
+    citation: "construction safety dataset v2 by yun-pl2q1, Roboflow Universe, https://universe.roboflow.com/yun-pl2q1/construction-safety-ejqd8"
+    planned_size: 1,206 张（train 997 / valid 119 / test 90）
+    format: yolo
+    path: data/raw/construction_safety_v2
+    download:
+      method: roboflow
+      workspace: yun-pl2q1
+      project: construction-safety-ejqd8
+      version: 2
+    names: [helmet, no-helmet, person]
+    class_map:
+      helmet: helmet
+      no-helmet: no_helmet
+      person: person
+    annotates: [person, helmet, no_helmet]
+    notes: 核对（2026-09-28）：由用户提供导出包（data/other_data/），与已有数据集近似重复 24 张，内部重复 15 张。
+    verified: true
+
+  - name: shel5k
+    title: SHEL5K — Safety Helmet detection with Extended Labels
+    tier: B
+    role: train
+    enabled: true
+    homepage: https://data.mendeley.com/datasets/9rcv8mm682/4
+    paper: https://www.mdpi.com/1424-8220/22/6/2315
+    description: >-
+      在 Safety Helmet Detection 数据集基础上扩展标注的 5,000 张安全帽数据集，
+      标注了安全帽、头部、戴 / 未戴安全帽的人和人脸。没有反光衣标注。
+    licence: CC BY 4.0
+    citation: "Otgonbold, M.-E. et al. SHEL5K: An Extended Dataset and Benchmarking for Safety Helmet Detection. Sensors 2022, 22(6), 2315."
+    planned_size: 5,000 张
+    format: voc
+    path: data/raw/shel5k
+    download:
+      method: manual
+      instructions: 打开 Mendeley 页面下载全部文件，解压到 data/raw/shel5k/（保留 Annotations/ 与图片目录）。
+    class_map:
+      helmet: helmet
+      head: no_helmet
+      person_with_helmet: person
+      person_no_helmet: person
+      head_with_helmet: null
+      face: null
+    annotates: [person, helmet, no_helmet]
+    notes: XML 中的类别名以实际文件为准，构建报错时按提示补全 class_map。
+    verified: false
+
+  - name: chv
+    title: CHV — Color Helmet and Vest
+    tier: B
+    role: train
+    enabled: true
+    homepage: https://github.com/ZijianWang-ZW/PPE_detection
+    paper: https://www.mdpi.com/1424-8220/21/10/3478
+    description: 从约 1 万张网络与公开数据中精选的 1,330 张工地图像，标注了人员、反光衣和四种颜色的安全帽。
+    licence: 未注明（按作者要求引用论文）
+    citation: "Wang, Z.; Wu, Y.; Yang, L.; Thirunavukarasu, A.; Evison, C.; Zhao, Y. Fast Personal Protective Equipment Detection for Real Construction Sites Using Deep Learning Approaches. Sensors 2021, 21, 3478."
+    planned_size: 1,330 张
+    format: yolo
+    path: data/raw/chv
+    download:
+      method: manual
+      instructions: 从 GitHub README 中的 Google Drive 链接下载，解压到 data/raw/chv/（images/ 与 labels/ 同级）。
+    names: [person, vest, blue, red, white, yellow]
+    class_map:
+      person: person
+      vest: vest
+      blue: helmet
+      red: helmet
+      white: helmet
+      yellow: helmet
+    annotates: [person, vest, helmet]
+    notes: 没有 no_helmet 类，由 teacher 补伪标签。
+    verified: false
+
+  - name: acid
+    title: ACID — Alberta Construction Image Dataset
+    tier: B
+    role: train
+    enabled: false         # 下载需要登记；有时间再启用
+    homepage: https://profsckang.wixsite.com/uofa-rlab/copy-of-r-lab-design
+    paper: https://ascelibrary.org/doi/abs/10.1061/(ASCE)CP.1943-5487.0000945
+    description: 10,000 张地面视角的工程机械图像，共 10 类机械。只取不含人员的图补充机械多样性。
+    licence: CC BY-NC 4.0（仅限非商业用途）
+    citation: "Xiao, B.; Kang, S.-C. Development of an Image Data Set of Construction Machines for Deep Learning Object Detection. Journal of Computing in Civil Engineering 2021, 35(2)."
+    planned_size: 10,000 张
+    format: voc
+    path: data/raw/acid
+    download:
+      method: manual
+      instructions: 按 R-Lab 页面指引从阿尔伯塔大学图书馆申请下载，解压到 data/raw/acid/。
+    class_map:
+      excavator: machinery
+      compactor: machinery
+      dozer: machinery
+      grader: machinery
+      dump_truck: machinery
+      concrete_mixer_truck: machinery
+      backhoe_loader: machinery
+      wheel_loader: machinery
+      tower_crane: machinery
+      mobile_crane: machinery
+    annotates: [machinery]
+    filter: no_person
+    verified: false
+
+  # ------------------------------------------------------------------ 可选
+  - name: telecom_tower
+    title: Telecom Tower Object Detection (Roboflow Universe)
+    tier: optional
+    role: train
+    enabled: false         # taxonomy 中 tower 类启用后再打开
+    homepage: https://universe.roboflow.com/object-detection-yolo-c8gsd/telecom-tower-object-detection
+    paper: null
+    description: 128 张通信塔检测图像，是少数直接面向电信设施的公开数据。
+    licence: 以数据集页面为准
+    citation: "Telecom Tower Object Detection dataset, Roboflow Universe, https://universe.roboflow.com/object-detection-yolo-c8gsd/telecom-tower-object-detection"
+    planned_size: 128 张
+    format: yolo
+    path: data/raw/telecom_tower
+    download:
+      method: roboflow
+      workspace: object-detection-yolo-c8gsd
+      project: telecom-tower-object-detection
+      version: null
+    class_map: {}
+    annotates: [tower]
+    verified: false
+
+  # ------------------------------------------------------------------ 测试集（自建）
+  - name: telecom_eval
+    title: TelecomEval — 电信施工场景真实测试集（自建）
+    tier: eval
+    role: eval
+    enabled: true
+    homepage: null
+    paper: null
+    description: >-
+      从 Openverse 与 Wikimedia Commons 检索的开放许可电信施工图像，人工筛选（画面中有人在电信场景作业）
+      并标注。两个阶段共用的唯一评估标尺，冻结后只读，绝不参与训练、LoRA 微调或生成条件构建。
+    licence: 逐图记录（CC0 / Public Domain / CC BY / CC BY-SA），见 licence_manifest.csv
+    citation: 逐图署名见 licence_manifest.csv
+    planned_size: ≥150 张（理想 200 张）
+    format: yolo
+    path: data/raw/telecom_eval
+    download:
+      method: manual
+      instructions: >-
+        collect_open 检索候选图 → 人工筛选 → pseudo_label 预标注 → labelstudio serve / push 标注
+        → labelstudio pull 导出到 data/raw/telecom_eval/ → freeze_eval --create（详见 data/README.md）
+    class_map: identity     # 直接按目标类别标注
+    annotates: [person, helmet, no_helmet, vest, no_vest, harness, machinery, vehicle]
+    verified: false
+
+  # ------------------------------------------------------------------ 调研过但阶段一不用
+  - name: shwd
+    title: SHWD — Safety Helmet Wearing Dataset
+    tier: unused
+    role: unused
+    enabled: false
+    homepage: https://github.com/njvisionpower/Safety-Helmet-Wearing-Dataset
+    licence: MIT
+    planned_size: 7,581 张
+    reason: 负样本多来自教室场景的人头数据集 SCUT-HEAD，与施工领域不符；只有头部级标注。
+
+  - name: soda
+    title: SODA — Site Object Detection dAtaset
+    tier: unused
+    role: unused
+    enabled: false
+    homepage: https://arxiv.org/abs/2202.09554
+    licence: 仅限研究用途
+    planned_size: 19,846 张
+    reason: 没有 no_helmet 类，机械类别少；数据量大但与阶段一目标类别重合度低。
+
+  - name: mocs
+    title: MOCS — Moving Objects in Construction Sites
+    tier: unused
+    role: unused
+    enabled: false
+    homepage: https://www.sciencedirect.com/science/article/abs/pii/S0926580520310621
+    licence: 未注明（研究用途）
+    planned_size: 41,668 张
+    reason: 只标注了工人、未标注 PPE，混入会让安全帽 / 反光衣被当作背景；下载页不稳定。
+
+  - name: css_kaggle_v28
+    title: Construction Site Safety Image Dataset (Kaggle mirror = Roboflow version 28)
+    tier: unused
+    role: unused
+    enabled: false
+    homepage: https://www.kaggle.com/datasets/snehilsanyal/construction-site-safety-image-dataset-roboflow
+    licence: CC BY 4.0
+    planned_size: 2,801 张
+    reason: >-
+      训练集是 521 张原图各生成 5 个增广版本（马赛克、cutout 等）得到的拼图，会污染 E1 的"无增广"对照
+      并让规则误判跨子图的人机距离；改用同一项目未增广的 version 30。本地副本在 data/raw/css_kaggle_v28/。
+
+  - name: sh17
+    title: SH17 — Human safety and PPE detection
+    tier: unused
+    role: unused
+    enabled: false
+    homepage: https://github.com/ahmadmughees/SH17dataset
+    licence: CC BY-NC-SA 4.0
+    planned_size: 8,099 张
+    reason: 制造业场景，没有 no_helmet 类。

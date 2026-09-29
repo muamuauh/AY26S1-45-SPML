@@ -1,0 +1,63 @@
+# TelecomSafe 目标类别（阶段一草案）
+#
+# - 以线下定稿的 Risk Taxonomy 为准；二者不一致时改这里。
+# - phase1: true 的类别按顺序成为 YOLO 类别 id。数据集构建并训练之后不要再调换顺序，
+#   否则旧权重与新数据的类别 id 对不上。
+# - criterion 是标注与规则判断共用的判定标准，标注有歧义时以它为准。
+
+version: 0.1-draft
+
+classes:
+  - name: person
+    dimension: workers
+    description: 施工现场人员（完整人体框）
+    criterion: 人体可见部分超过一半即标注；被遮挡时按可见范围画框
+    phase1: true
+
+  - name: helmet
+    dimension: workers
+    description: 安全帽
+    criterion: 只标佩戴在头上的安全帽；放在地上、拿在手里的不标
+    phase1: true
+
+  - name: no_helmet
+    dimension: workers
+    description: 未戴安全帽的头部
+    criterion: 框住头部；戴普通帽子、头巾也算未戴安全帽
+    phase1: true
+
+  - name: vest
+    dimension: workers
+    description: 反光背心 / 高可视性工作服
+    criterion: 框住穿着的反光衣上身部分
+    phase1: true
+
+  - name: no_vest
+    dimension: workers
+    description: 未穿反光衣的人员上身
+    criterion: 框住未穿反光衣的躯干
+    phase1: true
+
+  - name: harness
+    dimension: workers
+    description: 全身式安全带（含胸带、腿带）
+    criterion: 框住穿在身上的安全带主体；仅挂在结构上的安全绳不标
+    phase1: true
+
+  - name: machinery
+    dimension: machinery
+    description: 工程机械（挖掘机、吊车、装载机、压路机、推土机、搅拌车、自卸车等）
+    criterion: 框住机械整体，包括伸出的臂架与铲斗
+    phase1: true
+
+  - name: vehicle
+    dimension: machinery
+    description: 普通车辆（轿车、皮卡、面包车、普通货车）
+    criterion: 非施工专用的车辆
+    phase1: true
+
+  - name: tower
+    dimension: terrain
+    description: 通信铁塔 / 单管塔（规则 R3 用来判断高处作业）
+    criterion: 框住塔身可见部分
+    phase1: false   # 阶段一可选：数据足够时改为 true，并在 rules.yaml 启用 R3
