@@ -4,6 +4,8 @@
 
 面向电信施工安全的生成式图像学习框架 · 项目规划与调研文档
 
+> English version: [README-EN.md](README-EN.md)
+
 ---
 
 ## 项目简介 / Overview
@@ -31,7 +33,7 @@ Full documentation lives in **[docs/](docs/)**, available in Chinese and English
 | 05 | [技术路线图](docs/05-技术路线图-CN.md) | [Technological Roadmap](docs/05-Technological-Roadmap-EN.md) |
 | 06 | [团队分工](docs/06-团队分工-CN.md) | [Teamwork Allocation](docs/06-Teamwork-Allocation-EN.md) |
 | 07 | [项目章程](docs/07-项目章程-CN.md) | [Project Charter](docs/07-Project-Charter-EN.md) |
-| 08 | [阶段一训练复现指南](docs/08-阶段一训练复现指南-CN.md) | — |
+| 08 | [阶段一训练复现指南](docs/08-阶段一训练复现指南-CN.md) | [Phase 1 Training Guide](docs/08-Phase1-Training-Guide-EN.md) |
 
 → 索引与阅读路径见 [docs/README.md](docs/README.md)
 
@@ -44,7 +46,7 @@ Full documentation lives in **[docs/](docs/)**, available in Chinese and English
 
 ## 阶段一代码 / Phase 1 Code
 
-完整的复现步骤、每一步的预期输出与常见问题见 **[阶段一训练复现指南](docs/08-阶段一训练复现指南-CN.md)**。
+完整的复现步骤、每一步的预期输出与常见问题见 **[阶段一训练复现指南](docs/08-阶段一训练复现指南-CN.md)**（[English](docs/08-Phase1-Training-Guide-EN.md)）。
 
 ```bash
 conda env create -f environment.yml && conda activate telecomsafe
@@ -53,7 +55,7 @@ pytest                                               # 单元测试，不需要 
 cp .env.example .env                                 # 填 Kaggle / Roboflow API key（.env 不入库）
 python -m telecomsafe.data.download --list           # 查看数据集下载状态
 python -m telecomsafe.data.download                  # 下载可脚本化的数据集到 data/raw/
-python -m telecomsafe.data.catalog                   # 生成数据集说明 data/README.md
+python -m telecomsafe.data.catalog                   # 生成数据集说明 data/README.md 与 README-EN.md
 python -m telecomsafe.data.collect_open              # 检索 TelecomEval 候选图（开放许可，自动记录署名）
 python -m telecomsafe.data.labelstudio serve        # 启动标注工具（账号见 .env）；另开终端执行 push / pull
 python -m telecomsafe.data.build --dry-run           # 映射 / 覆盖矩阵 / 去重统计
@@ -71,7 +73,7 @@ python -m telecomsafe.demo.app --weights runs/phase1/e2/weights/best.pt
 |---|---|
 | [`configs/`](configs/) | 类别体系、数据来源登记、baseline 训练配置、规则库 |
 | [`telecomsafe/`](telecomsafe/) | 数据（下载、构建、伪标签、冻结）、训练、评估、规则判断、Demo |
-| [`data/README.md`](data/README.md) | 每个数据集的来源、链接、许可与规模（自动生成） |
+| [`data/README.md`](data/README.md) | 每个数据集的来源、链接、许可与规模（自动生成；[English](data/README-EN.md)） |
 | [`reports/phase1/`](reports/phase1/) | 阶段一成果总结与实验结果 |
 | [`progress/`](progress/) | 里程碑计划 vs 实际、范围变更记录 |
 

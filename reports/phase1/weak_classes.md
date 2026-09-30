@@ -4,7 +4,8 @@
 
 > ⚠️ 这是 **val 集**上的结果（TelecomEval 暂缓，见 progress/milestones.md）。val 与训练集同源，数字偏乐观；
 > TelecomEval 建好后需要用同一模型重新评估，再定稿本清单。
-> 本文件由 `python -m telecomsafe.evaluate` 生成，「可能原因」列为人工补充；重新运行评估会覆盖，需要重新填写。
+> 本文件由 `python -m telecomsafe.evaluate` 生成，「可能原因」列为人工补充；重新运行评估不会覆盖本文件（加 `--rewrite-weak-classes` 才会重新生成，届时需要重新填写）。
+> English version: [weak_classes-EN.md](weak_classes-EN.md)
 
 | 排名 | 类别 | AP50 | 训练实例数 | 可能原因（人工填写） |
 |---|---|---|---|---|

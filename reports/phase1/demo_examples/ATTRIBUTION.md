@@ -1,5 +1,7 @@
 # Demo 示例图来源与许可
 
+> English version: [ATTRIBUTION-EN.md](ATTRIBUTION-EN.md)
+
 | 文件 | 场景 | 预期等级 | 来源 | 作者 / 数据集 | 许可 |
 |---|---|---|---|---|---|
 | `1_compliant.jpg` | 合规作业（电信施工） | 低 | [openverse](https://www.flickr.com/photos/59595815@N03/38256157536) | MTA C&D - EAST SIDE ACCESS | CC BY 2.0 |

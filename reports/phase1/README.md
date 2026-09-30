@@ -1,5 +1,6 @@
 # 阶段一成果总结 · Baseline Demo v1
 
+> English version: [README-EN.md](README-EN.md)
 > 状态（2026-09-29）：Baseline 模型、规则判断与 Demo v1 已完成；**TelecomEval 暂缓**（见 [progress/milestones.md](../../progress/milestones.md#暂缓事项)），
 > 下列指标都在**验证集**上测得。验证集与训练集同源，数字偏乐观，仅作开发参考；TelecomEval 建好后需重新评估并更新本页。
 
@@ -36,7 +37,7 @@
 
 ![逐类 AP50：E1 vs E2](per_class_ap.png)
 
-混淆矩阵：[E1](e1_confusion_matrix.png) ｜ [E2](e2_confusion_matrix.png) ｜ [E2 · YOLOv8s](e2_yolov8s_confusion_matrix.png)
+混淆矩阵：[E1](e1_confusion_matrix.png) ｜ [E2](e2_confusion_matrix.png) ｜ [E2 · YOLOv8s](e2_yolov8s_confusion_matrix.png) ｜ [E2 · YOLO11m](e2_yolo11m_confusion_matrix.png)
 
 ### 模型选型对比：YOLO11s vs YOLOv8s
 
@@ -44,20 +45,41 @@
 
 | 模型 | mAP50 | mAP50-95 | Precision | Recall | 参数量 | 权重 | GPU 推理* | CPU 推理* |
 |---|---|---|---|---|---|---|---|---|
-| **YOLO11s（E2，采用）** | **0.756** | **0.499** | 0.825 | 0.711 | 9.4 M | 19.2 MB | 约 15 ms | **约 100 ms** |
-| YOLOv8s | 0.755 | 0.494 | 0.813 | 0.736 | 11.1 M | 22.5 MB | **约 13 ms** | 约 128 ms |
+| **YOLO11s（E2，采用）** | **0.756** | **0.499** | 0.825 | 0.711 | 9.4 M | 19.2 MB | 约 15 ms | **约 130 ms** |
+| YOLOv8s | 0.755 | 0.494 | 0.813 | 0.736 | 11.1 M | 22.5 MB | **约 12 ms** | 约 154 ms |
 
-\* RTX 4070 SUPER / 本机 CPU，PyTorch 单张推理，含前后处理，200 张验证图的平均值（GPU 两轮、交换顺序测量，结果一致）。YOLOv8s 在第 78 轮早停。
+\* RTX 4070 SUPER / 本机 CPU，PyTorch 单张推理，含前后处理；GPU 为 200 张验证图的平均值（两轮、交换顺序测量，结果一致），CPU 为 100 张的平均值。与下一节的 YOLO11m 在同一次测量中完成。YOLOv8s 在第 78 轮早停。
 
 - **精度打平**：mAP50 相差 0.001、mAP50-95 相差 0.005，在单个随机种子下属于正常波动。逐类看互有高低：YOLOv8s 在工程机械上高约 0.03，YOLO11s 在未戴安全帽、未穿反光衣上高约 0.02。
-- **YOLO11s 更小、CPU 上更快**：参数少 15%（9.43 M 对 11.14 M），CPU 推理快约 22%，更适合没有 GPU 的现场部署。GPU 上 YOLOv8s 快约 2 ms，因为 YOLO11 的注意力模块在 PyTorch 下开销略大；两者都远低于 Demo 3 秒的要求。
+- **YOLO11s 更小、CPU 上更快**：参数少 15%（9.43 M 对 11.14 M），CPU 推理快约 16%，更适合没有 GPU 的现场部署。GPU 上 YOLOv8s 快约 2 ms，因为 YOLO11 的注意力模块在 PyTorch 下开销略大；两者都远低于 Demo 3 秒的要求。
 - **结论**：保留 YOLO11s 作为 baseline，不更换。YOLOv8s 的结果同时说明，阶段一的结论不依赖于特定的模型结构。
+
+### 模型规模对比：YOLO11s vs YOLO11m
+
+阶段一计划要求在冻结配置前对比一次 11s 与 11m。做法同上：数据、配置、随机种子与 E2 完全相同，只换成 YOLO11m（`python -m telecomsafe.train --exp e2 --model yolo11m.pt --name e2_yolo11m`），并且同样完整训练到早停，而不是计划里的 30 个 epoch——否则与已经训到第 90 轮的 11s 比较不公平。
+
+| 模型 | mAP50 | mAP50-95 | Precision | Recall | 参数量 | 权重 | GPU 推理* | CPU 推理* | 训练时长 |
+|---|---|---|---|---|---|---|---|---|---|
+| **YOLO11s（E2，采用）** | 0.756 | **0.499** | 0.825 | 0.711 | **9.4 M** | **19.2 MB** | **约 15 ms** | **约 130 ms** | **0.9 h**（第 90 轮早停） |
+| YOLO11m | **0.773** | 0.491 | 0.826 | 0.720 | 20.1 M | 40.5 MB | 约 16 ms | 约 358 ms | 1.5 h（第 86 轮早停） |
+
+\* 测量方式同上一节，三个模型在同一次测量中完成。
+
+逐类 AP50（11m − 11s）：未戴安全帽 **+0.049**、车辆 **+0.058**、反光衣 +0.012、安全带 +0.011、安全帽 +0.009、未穿反光衣 +0.006、人员 0.000、工程机械 **−0.013**（mAP50-95 −0.057）。
+
+- **mAP50 高 1.6 个点，但集中在样本最少的两类**：车辆在验证集只有 6 张图、17 个实例，一两个框的差异就能让 AP 变化 0.05；未戴安全帽 106 个实例，提升相对可信。其余 6 类基本持平。
+- **更严格的 mAP50-95 反而低 0.8 个点**：11m 并没有定位得更准，工程机械明显下降。
+- **代价翻倍**：参数量和权重是 11s 的 2.1 倍，CPU 推理慢 2.8 倍，训练时间 1.7 倍。GPU 单张推理只差约 2 ms，因为单张推理时主要是固定开销。
+- **结论**：保留 YOLO11s，`configs/baseline.yaml` 不变。一个随机种子下有高有低的收益不值得 2–3 倍的开销；阶段二的 E3 还要多次训练，训练成本也要考虑。
+- **留意**：11m 在未戴安全帽（小目标）上的提升说明小目标还有余量。更便宜的做法是提高输入尺寸（如 960），可在冻结前单独试；TelecomEval 建好后，也会用它再比较一次 11s 与 11m。
 
 ## Demo v1
 
 ```
 python -m telecomsafe.demo.app --weights runs/phase1/e2/weights/best.pt
 ```
+
+界面截图：[高风险示例](demo_ui_high_risk.png) ｜ [中风险示例](demo_ui_medium_risk.png)
 
 检测 → 规则判断 → 风险等级，单图推理 0.5–1.4 秒（RTX 4070 SUPER，启动时预热模型）。示例图来源与许可见 [`demo_examples/ATTRIBUTION.md`](demo_examples/ATTRIBUTION.md)，均未参与训练。
 

@@ -1,5 +1,7 @@
 # 里程碑：计划 vs 实际
 
+> English version: [milestones-EN.md](milestones-EN.md)
+
 EE6008 报告模板 §4 Schedule 需要计划与实际日期对照，§3 Scope 需要记录范围变更。每完成一个里程碑、每触发一次降级路径，就在这里补一行，不要等到最后。
 
 周次按 docs/05 §5 的占位换算（W1 = 2026-09-07）；确认学期日历后统一替换。
@@ -10,7 +12,7 @@ EE6008 报告模板 §4 Schedule 需要计划与实际日期对照，§3 Scope �
 |---|---|---|---|---|
 | M0 | 立项与 Risk Taxonomy | W1 | `<<日期>>` | 线下完成 |
 | M1 | 公开数据整编（TG1） | W3 | `<<日期>>` | 线下完成数据调研；阶段一重新按 configs/sources.yaml 收集。TG1 实际张数：TelecomSeed `<<n>>` / TelecomEval `<<n>>` |
-| M2 | Baseline Demo（TGB） | W7 | 进行中 | 2026-09-29：baseline（E1/E2）、规则判断、Demo v1 完成，验证集 mAP50 E1 0.611 / E2 0.756；待 TelecomEval 评估与 TGB 会议 |
+| M2 | Baseline Demo（TGB） | W7 | 进行中 | 2026-09-29：baseline（E1/E2）、规则判断、Demo v1 完成，验证集 mAP50 E1 0.611 / E2 0.756；11s / 11m 对比完成，保留 YOLO11s；待 TelecomEval 评估与 TGB 会议 |
 | M3 | 生成式增广（TG2） | W10 | | |
 | M4 | 同配置再训练（TG3） | W12 | | |
 | M5 | 融合升级（TG4） | W14 | | |
