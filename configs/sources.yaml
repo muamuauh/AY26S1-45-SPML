@@ -16,11 +16,17 @@
 #   filter        no_person：丢弃含人的图（用于只标了机械的数据集）
 #   download      method: kaggle | roboflow | ultralytics | url_zip | manual
 #   verified      类别表与规模是否已按下载后的实际文件核对过
+#   en            上面中文字段的英文版（title / description / licence / planned_size / notes / reason /
+#                 instructions），用于生成英文的 data/README-EN.md；没有写的字段沿用原值
 
 sources:
   # ------------------------------------------------------------------ A 核心
   - name: construction_site_safety
     title: Construction Site Safety (Roboflow Universe, version 30)
+    en:
+      description: "Roboflow's curated construction-site safety dataset (version 30, original un-augmented images) with positive and negative helmet / vest classes (NO-Hardhat, NO-Safety Vest), people, and fine-grained machinery and vehicles. Closest match to the phase 1 target classes and the only source of machinery and vehicles."
+      planned_size: "717 images (train 521 / valid 114 / test 82)"
+      notes: "Checked 2026-09-29: the Kaggle mirror used at first is Roboflow version 28, whose training split is 2,605 mosaics made from 521 originals x 5 augmented copies (mosaic, cutout, crop, rotation...). That broke the \"no augmentation\" E1 control and made the rules treat people and machines in different mosaic tiles as adjacent. Replaced with the un-augmented version 30 (717 images)."
     tier: A
     role: train
     enabled: true
@@ -76,6 +82,10 @@ sources:
 
   - name: construction_ppe
     title: Ultralytics Construction-PPE
+    en:
+      description: "Ultralytics' curated construction PPE dataset from real sites, with compliant and non-compliant examples; labels helmets, vests, gloves, boots, goggles and their absence."
+      planned_size: "1,416 images (train 1,132 / val 143 / test 141)"
+      notes: "No no_vest or machinery classes; filled with teacher pseudo-labels. Checked 2026-09-28: 1,416 images, class order matches Ultralytics' construction-ppe.yaml; contains adjacent video frames across train / test, removed by de-duplication."
     tier: A
     role: train
     enabled: true
@@ -113,6 +123,10 @@ sources:
 
   - name: harness_vgg2coco
     title: harness (vgg2coco, Roboflow Universe)
+    en:
+      description: "Published as a safety-harness dataset; version 1 has 2,582 images with classes harness / head / helmat."
+      planned_size: "~1,000 images (actual 2,582)"
+      reason: "Checked 2026-09-28: boxes labelled harness are actually hi-vis vests, not harnesses; helmat boxes include helmets held in the hand; all images are staged video frames of one person in one room. Labels contradict our criteria and the domain does not match, so it is not used."
     tier: unused
     role: unused
     enabled: false
@@ -141,6 +155,10 @@ sources:
 
   - name: body_harness
     title: body_harness (Construction Images, Roboflow Universe)
+    en:
+      description: "796 images of construction workers wearing safety harnesses; classes safety harness and worker."
+      planned_size: "796 images"
+      notes: "Checked 2026-09-28: version 5, 796 images of full-body harnesses worn on real sites. Many images are adjacent frames of the same video (removed by de-duplication); a few people are unlabelled and get teacher pseudo-labels."
     tier: A
     role: train
     enabled: true
@@ -169,6 +187,10 @@ sources:
   # ------------------------------------------------------------------ B 补充
   - name: construction_workers_fyp
     title: 3 Construction Workers (FYP, Roboflow Universe)
+    en:
+      description: "600 images of construction workers, including harness and no-helmet classes."
+      planned_size: "600 images"
+      notes: "Class list taken from search results; to be checked after download. The Roboflow project has no published version and cannot be exported (2026-09-28)."
     tier: B
     role: train
     enabled: false       # 该 Roboflow 项目没有发布任何版本，无法导出（2026-09-28）
@@ -192,6 +214,13 @@ sources:
 
   - name: apd
     title: APD — 施工人员安全帽与反光衣检测（Roboflow 私有项目）
+    en:
+      title: "APD — helmet and vest detection on construction workers (private Roboflow project)"
+      description: "2,300 photos of real construction sites in China (mostly news photos with watermarks), labelling helmet, no helmet, vest and no vest; No_Vest boxes cover the torso without a vest, matching our criterion. Its 4,245 no-vest instances are the largest in all our data and the main source of the no_vest class. No person class; filled with teacher pseudo-labels."
+      licence: "Private (Roboflow workspace fathorazi-nur-fajri/apd-8wyrt, shared with the team) — internal training only, not redistributed"
+      planned_size: "2,300 images (train 1,610 / valid 460 / test 230)"
+      instructions: "Get APD.v1i.yolov8.zip from the team-only shared folder (OneDrive / Teams) and extract it to data/raw/apd/."
+      notes: "Checked 2026-09-28: good label quality; only 6 near-duplicates with other datasets and 30 internal duplicates. Images come from news websites (watermarked) and are not owned by the dataset author: cite the source in the report and never publish these images."
     tier: B
     role: train
     enabled: true
@@ -223,6 +252,10 @@ sources:
 
   - name: construction_safety_v2
     title: construction safety v2 (yun-pl2q1, Roboflow Universe)
+    en:
+      description: "1,206 helmet-detection images labelling helmet, no helmet and person. Many stock / studio photos and fewer real sites; mainly adds helmet and person diversity. Visible vests are unlabelled and get teacher pseudo-labels."
+      planned_size: "1,206 images (train 997 / valid 119 / test 90)"
+      notes: "Checked 2026-09-28: export package provided by the user (data/other_data/); 24 near-duplicates with other datasets, 15 internal duplicates."
     tier: B
     role: train
     enabled: true
@@ -252,6 +285,11 @@ sources:
 
   - name: shel5k
     title: SHEL5K — Safety Helmet detection with Extended Labels
+    en:
+      description: "5,000 helmet images extending the Safety Helmet Detection dataset, labelling helmet, head, people with / without helmets and faces. No vest labels."
+      planned_size: "5,000 images"
+      instructions: "Download all files from the Mendeley page and extract to data/raw/shel5k/ (keep Annotations/ and the image folder)."
+      notes: "Class names in the XML files decide; if the build reports an undeclared class, complete class_map as instructed."
     tier: B
     role: train
     enabled: true
@@ -281,6 +319,12 @@ sources:
 
   - name: chv
     title: CHV — Color Helmet and Vest
+    en:
+      description: "1,330 construction-site images selected from ~10,000 web and public images, labelling people, vests and helmets in four colours."
+      licence: "Not stated (cite the paper as the authors request)"
+      planned_size: "1,330 images"
+      instructions: "Download from the Google Drive link in the GitHub README and extract to data/raw/chv/ (images/ and labels/ side by side)."
+      notes: "No no_helmet class; filled with teacher pseudo-labels."
     tier: B
     role: train
     enabled: true
@@ -309,6 +353,11 @@ sources:
 
   - name: acid
     title: ACID — Alberta Construction Image Dataset
+    en:
+      description: "10,000 ground-level images of 10 kinds of construction machines. Only images without people are used, to diversify machinery."
+      licence: "CC BY-NC 4.0 (non-commercial only)"
+      planned_size: "10,000 images"
+      instructions: "Request the download from the University of Alberta library as described on the R-Lab page, and extract to data/raw/acid/."
     tier: B
     role: train
     enabled: false         # 下载需要登记；有时间再启用
@@ -341,6 +390,10 @@ sources:
   # ------------------------------------------------------------------ 可选
   - name: telecom_tower
     title: Telecom Tower Object Detection (Roboflow Universe)
+    en:
+      description: "128 telecom-tower detection images, one of the few public datasets aimed at telecom infrastructure."
+      licence: "See the dataset page"
+      planned_size: "128 images"
     tier: optional
     role: train
     enabled: false         # taxonomy 中 tower 类启用后再打开
@@ -364,6 +417,13 @@ sources:
   # ------------------------------------------------------------------ 测试集（自建）
   - name: telecom_eval
     title: TelecomEval — 电信施工场景真实测试集（自建）
+    en:
+      title: "TelecomEval — real telecom construction test set (self-built)"
+      description: "Openly licensed telecom construction photos found on Openverse and Wikimedia Commons, screened by hand (people working in a telecom setting) and annotated. The single yardstick shared by both phases: read-only once frozen and never used for training, LoRA fine-tuning or generation conditioning."
+      licence: "Recorded per image (CC0 / public domain / CC BY / CC BY-SA), see licence_manifest.csv"
+      citation: "Per-image attribution in licence_manifest.csv"
+      planned_size: ">= 150 images (ideally 200)"
+      instructions: "collect_open finds candidates -> manual screening -> pseudo_label pre-labels -> labelstudio serve / push to annotate -> labelstudio pull exports to data/raw/telecom_eval/ -> freeze_eval --create (see data/README-EN.md)"
     tier: eval
     role: eval
     enabled: true
@@ -389,6 +449,9 @@ sources:
   # ------------------------------------------------------------------ 调研过但阶段一不用
   - name: shwd
     title: SHWD — Safety Helmet Wearing Dataset
+    en:
+      planned_size: "7,581 images"
+      reason: "Most negatives come from SCUT-HEAD, a classroom head dataset, which does not match construction; head-level labels only."
     tier: unused
     role: unused
     enabled: false
@@ -399,6 +462,10 @@ sources:
 
   - name: soda
     title: SODA — Site Object Detection dAtaset
+    en:
+      licence: "Research use only"
+      planned_size: "19,846 images"
+      reason: "No no_helmet class and few machinery classes; large but overlaps little with the phase 1 target classes."
     tier: unused
     role: unused
     enabled: false
@@ -409,6 +476,10 @@ sources:
 
   - name: mocs
     title: MOCS — Moving Objects in Construction Sites
+    en:
+      licence: "Not stated (research use)"
+      planned_size: "41,668 images"
+      reason: "Labels workers but not PPE, so mixing it in would teach helmets / vests as background; the download page is unreliable."
     tier: unused
     role: unused
     enabled: false
@@ -419,6 +490,9 @@ sources:
 
   - name: css_kaggle_v28
     title: Construction Site Safety Image Dataset (Kaggle mirror = Roboflow version 28)
+    en:
+      planned_size: "2,801 images"
+      reason: "Training split consists of mosaics built from 521 originals x 5 augmented copies (mosaic, cutout...), which pollutes the \"no augmentation\" E1 control and makes rules misjudge person-machine distance across tiles; replaced by the un-augmented version 30 of the same project. Local copy in data/raw/css_kaggle_v28/."
     tier: unused
     role: unused
     enabled: false
@@ -431,6 +505,9 @@ sources:
 
   - name: sh17
     title: SH17 — Human safety and PPE detection
+    en:
+      planned_size: "8,099 images"
+      reason: "Manufacturing scenes; no no_helmet class."
     tier: unused
     role: unused
     enabled: false

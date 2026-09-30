@@ -1,5 +1,6 @@
 # 数据集说明 / Dataset Catalogue
 
+> English version: [README-EN.md](README-EN.md)
 > 本文件由 `python -m telecomsafe.data.catalog` 根据 `configs/sources.yaml` 自动生成，**请勿手动编辑**。
 > 数据本身不入库（见 `.gitignore`），按下文的获取方式下载到 `data/raw/<名称>/`。
 

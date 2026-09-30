@@ -79,3 +79,11 @@ def test_demo_readable_replaces_each_class_once():
     assert readable("no_helmet · confidence 0.79") == "No helmet · confidence 0.79"
     assert readable("helmet no_vest") == "Helmet No vest"
     assert readable("≈1.2 m from machinery") == "≈1.2 m from Machinery"
+
+
+def test_catalog_english_has_no_chinese_from_configs():
+    import re
+    from telecomsafe.paths import load_taxonomy
+    text = catalog.render(load_sources(), load_taxonomy(), catalog.Counter(), "en")
+    body = text.replace("> 中文版：[README.md](README.md)", "")
+    assert not re.search(r"[\u4e00-\u9fff]", body), re.findall(r".{20}[\u4e00-\u9fff]+.{20}", body)[:5]
