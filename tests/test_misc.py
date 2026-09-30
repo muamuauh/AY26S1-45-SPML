@@ -72,3 +72,10 @@ def test_experiment_colours_follow_the_experiment():
     assert exp_color("e2", ["e2"]) == exp_color("e2", ["e1", "e2", "e2_yolov8s"]) == PALETTE[1]
     extra = exp_color("custom", ["e1", "custom"])
     assert extra not in (PALETTE[0], PALETTE[1], PALETTE[2])
+
+
+def test_demo_readable_replaces_each_class_once():
+    from telecomsafe.demo.app import readable
+    assert readable("no_helmet · confidence 0.79") == "No helmet · confidence 0.79"
+    assert readable("helmet no_vest") == "Helmet No vest"
+    assert readable("≈1.2 m from machinery") == "≈1.2 m from Machinery"

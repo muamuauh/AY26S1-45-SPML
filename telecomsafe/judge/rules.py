@@ -26,7 +26,7 @@ def _of(dets: list[Detection], cls: str, min_conf: float) -> list[int]:
 
 def ppe_violation(rule: dict, dets: list[Detection], ctx: dict) -> list[RuleHit]:
     p = rule["params"]
-    return [_hit(rule, [i], f"{p['negative_class']} {dets[i].conf:.2f}") for i in _of(dets, p["negative_class"], p.get("min_conf", 0))]
+    return [_hit(rule, [i], f"{p['negative_class']} · confidence {dets[i].conf:.2f}") for i in _of(dets, p["negative_class"], p.get("min_conf", 0))]
 
 
 def proximity(rule: dict, dets: list[Detection], ctx: dict) -> list[RuleHit]:
@@ -40,7 +40,7 @@ def proximity(rule: dict, dets: list[Detection], ctx: dict) -> list[RuleHit]:
                     continue
                 d = geo.metric_gap(dets[pi].box, dets[ti].box, ctx["person_height_m"])
                 if d < p["max_distance_m"]:
-                    hits.append(_hit(rule, [pi, ti], f"≈{d:.1f} m to {cls}"))
+                    hits.append(_hit(rule, [pi, ti], f"≈{d:.1f} m from {cls}"))
     return hits
 
 
@@ -55,7 +55,7 @@ def on_structure_without_ppe(rule: dict, dets: list[Detection], ctx: dict) -> li
         on = [si for si in structures if geo.ioa(person, dets[si].box) >= p.get("min_overlap", 0.3)]
         wearing = any(geo.ioa(dets[k].box, person) >= 0.5 for k in ppe)
         if on and not wearing:
-            hits.append(_hit(rule, [pi, on[0]], f"on {p['structure_class']} without {p['ppe_class']}"))
+            hits.append(_hit(rule, [pi, on[0]], f"on {p['structure_class']}, no {p['ppe_class']} detected"))
     return hits
 
 

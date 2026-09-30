@@ -1,0 +1,138 @@
+/* TelecomSafe Demo — layout and components on top of the Gradio theme.
+   Status colours follow the validated status palette; every status colour is paired
+   with an icon and a text label, so meaning never rests on colour alone. */
+
+:root {
+  --ts-navy: #0f2a4a;
+  --ts-navy-2: #1c5cab;
+  --ts-ink: #0b0b0b;
+  --ts-ink-2: #52514e;
+  --ts-line: #e4e3df;
+  --ts-surface: #ffffff;
+  --ts-ground: #f5f5f2;
+  --ts-good: #0ca30c;
+  --ts-warning: #fab219;
+  --ts-critical: #d03b3b;
+  --ts-good-tint: #eaf6ea;
+  --ts-warning-tint: #fff5dc;
+  --ts-critical-tint: #fbeaea;
+}
+.dark {
+  --ts-ink: #f3f3f1;
+  --ts-ink-2: #c3c2b7;
+  --ts-line: #3a3a37;
+  --ts-surface: #232322;
+  --ts-ground: #1a1a19;
+  --ts-good-tint: #16301a;
+  --ts-warning-tint: #3a2f12;
+  --ts-critical-tint: #3b1a1a;
+}
+
+.gradio-container { max-width: 1320px !important; margin: 0 auto !important; }
+footer { display: none !important; }
+
+/* ---------------------------------------------------------------- header */
+.ts-header {
+  display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 16px;
+  padding: 22px 26px; border-radius: 16px; color: #fff;
+  background: linear-gradient(120deg, var(--ts-navy) 0%, var(--ts-navy-2) 100%);
+  box-shadow: 0 6px 24px rgba(15, 42, 74, .18);
+}
+.ts-brand { display: flex; align-items: center; gap: 14px; }
+.ts-logo {
+  width: 46px; height: 46px; border-radius: 12px; display: grid; place-items: center;
+  background: rgba(255, 255, 255, .14); font-size: 26px;
+}
+.ts-title { margin: 0; font-size: 22px; font-weight: 700; letter-spacing: .2px; color: #fff; }
+.ts-subtitle { margin: 2px 0 0; font-size: 13.5px; color: rgba(255, 255, 255, .78); }
+.ts-badges { display: flex; flex-wrap: wrap; gap: 8px; }
+.ts-badge {
+  padding: 5px 11px; border-radius: 999px; font-size: 12.5px; white-space: nowrap;
+  background: rgba(255, 255, 255, .14); border: 1px solid rgba(255, 255, 255, .22); color: #fff;
+}
+
+/* ---------------------------------------------------------------- panels */
+.ts-panel {
+  border: 1px solid var(--ts-line) !important; border-radius: 16px !important;
+  background: var(--ts-surface) !important; padding: 16px !important;
+}
+.ts-section-title {
+  display: flex; align-items: center; gap: 8px; margin: 2px 0 10px;
+  font-size: 14px; font-weight: 700; color: var(--ts-ink);
+}
+.ts-section-title .ts-step {
+  width: 22px; height: 22px; border-radius: 50%; display: grid; place-items: center;
+  font-size: 12px; color: #fff; background: var(--ts-navy-2);
+}
+.ts-hint { margin: 6px 2px 0; font-size: 12.5px; color: var(--ts-ink-2); }
+
+/* ---------------------------------------------------------------- risk card */
+.ts-risk {
+  display: flex; align-items: center; gap: 16px; padding: 16px 18px;
+  border-radius: 14px; border: 1px solid var(--ts-line); border-left-width: 6px;
+  background: var(--ts-surface); color: var(--ts-ink);
+}
+.ts-risk-icon {
+  flex: none; width: 48px; height: 48px; border-radius: 50%;
+  display: grid; place-items: center; font-size: 24px; font-weight: 700; color: #fff;
+}
+.ts-risk-label { font-size: 12.5px; color: var(--ts-ink-2); }
+.ts-risk-level { font-size: 24px; font-weight: 800; line-height: 1.2; }
+.ts-risk-summary { margin-top: 2px; font-size: 13px; color: var(--ts-ink-2); }
+.ts-risk.low { border-left-color: var(--ts-good); background: var(--ts-good-tint); }
+.ts-risk.low .ts-risk-icon { background: var(--ts-good); }
+.ts-risk.medium { border-left-color: var(--ts-warning); background: var(--ts-warning-tint); }
+.ts-risk.medium .ts-risk-icon { background: var(--ts-warning); color: #3e2c00; }
+.ts-risk.high { border-left-color: var(--ts-critical); background: var(--ts-critical-tint); }
+.ts-risk.high .ts-risk-icon { background: var(--ts-critical); }
+.ts-risk.idle { border-left-color: var(--ts-line); }
+.ts-risk.idle .ts-risk-icon { background: var(--ts-ink-2); }
+
+/* ---------------------------------------------------------------- rules */
+.ts-rules { display: flex; flex-direction: column; gap: 8px; }
+.ts-rule {
+  display: grid; grid-template-columns: auto 1fr auto; gap: 4px 12px; align-items: center;
+  padding: 10px 12px; border-radius: 12px; border: 1px solid var(--ts-line); background: var(--ts-surface);
+}
+.ts-rule-id {
+  grid-row: span 2; min-width: 38px; padding: 6px 8px; border-radius: 8px; text-align: center;
+  font-weight: 700; font-size: 13px; color: var(--ts-navy-2); background: rgba(28, 92, 171, .1);
+}
+.ts-rule-name { font-weight: 700; font-size: 14px; color: var(--ts-ink); }
+.ts-rule-meta { font-size: 12.5px; color: var(--ts-ink-2); }
+.ts-rule-meta a { color: var(--ts-navy-2); text-decoration: none; }
+.ts-rule-meta a:hover { text-decoration: underline; }
+.ts-level {
+  grid-row: span 2; padding: 4px 10px; border-radius: 999px; font-size: 12.5px; font-weight: 700; white-space: nowrap;
+}
+.ts-level.low { color: #0a6b0a; background: var(--ts-good-tint); border: 1px solid var(--ts-good); }
+.ts-level.medium { color: #6b4a00; background: var(--ts-warning-tint); border: 1px solid var(--ts-warning); }
+.ts-level.high { color: #8f1f1f; background: var(--ts-critical-tint); border: 1px solid var(--ts-critical); }
+.dark .ts-level.low { color: #7ee07e; } .dark .ts-level.medium { color: #ffd46b; } .dark .ts-level.high { color: #ff9a9a; }
+.ts-empty {
+  padding: 14px; border-radius: 12px; border: 1px dashed var(--ts-line);
+  font-size: 13px; color: var(--ts-ink-2); text-align: center;
+}
+
+/* ---------------------------------------------------------------- detection chips & legend */
+.ts-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.ts-chip {
+  display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: 999px;
+  font-size: 12.5px; color: var(--ts-ink); border: 1px solid var(--ts-line); background: var(--ts-surface);
+}
+.ts-chip b { font-weight: 700; }
+.ts-dot { width: 10px; height: 10px; border-radius: 3px; flex: none; }
+.ts-chip.flagged { border-color: var(--ts-critical); }
+
+/* ---------------------------------------------------------------- footer */
+.ts-footer {
+  margin-top: 4px; padding: 12px 16px; border-radius: 12px; background: var(--ts-ground);
+  font-size: 12.5px; color: var(--ts-ink-2); line-height: 1.6;
+}
+
+/* ---------------------------------------------------------------- example gallery */
+.ts-examples { margin-top: 4px; }
+.ts-examples .thumbnail-item { border-radius: 12px !important; }
+.ts-examples .caption-label { font-size: 12.5px !important; }
+.ts-examples .thumbnail-item { height: 112px !important; }
+.ts-examples .grid-wrap { min-height: 0 !important; }
