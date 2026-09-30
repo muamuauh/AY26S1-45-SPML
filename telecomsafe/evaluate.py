@@ -1,7 +1,7 @@
 """Evaluate E1/E2 on TelecomEval and write the phase 1 reports.
 
     python -m telecomsafe.evaluate                 # runs/phase1/{e1,e2}/weights/best.pt
-    python -m telecomsafe.evaluate --exps e1 e2 e2_yolov8s   # any run under runs/phase1/
+    python -m telecomsafe.evaluate --exps e1 e2 e2_yolov8s e2_yolo11m   # any run under runs/phase1/
 
 Refuses to run if TelecomEval changed since it was frozen (use --skip-check only
 while TelecomEval does not exist yet, e.g. to evaluate on val during development).
@@ -25,9 +25,9 @@ from telecomsafe.paths import PROCESSED, REPORTS, RUNS
 # Categorical palette in fixed slot order (validated default palette, light surface).
 PALETTE = ["#2a78d6", "#eb6834", "#1baf7a", "#eda100", "#e87ba4", "#008300", "#4a3aa7", "#e34948"]
 # Known experiments keep their slot whatever else is plotted with them (colour follows the entity).
-SLOTS = {"e1": 0, "e2": 1, "e2_yolov8s": 2}
+SLOTS = {"e1": 0, "e2": 1, "e2_yolov8s": 2, "e2_yolo11m": 3}
 LABELS = {"e1": "E1 · YOLO11s, no augmentation", "e2": "E2 · YOLO11s, default augmentation",
-          "e2_yolov8s": "E2 · YOLOv8s, default augmentation"}
+          "e2_yolov8s": "E2 · YOLOv8s, default augmentation", "e2_yolo11m": "E2 · YOLO11m, default augmentation"}
 SURFACE, INK, MUTED = "#fcfcfb", "#0b0b0b", "#52514e"
 
 
