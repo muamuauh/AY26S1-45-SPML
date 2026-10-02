@@ -28,3 +28,5 @@ dependencies:
       - roboflow
       - kaggle
       - pytest
+      - yt-dlp           # TelecomEval: frames from Creative Commons videos
+      - open_clip_torch  # TelecomEval: CLIP scene scores for screening

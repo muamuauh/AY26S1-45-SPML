@@ -2,10 +2,14 @@
 
     python -m telecomsafe.data.labelstudio serve    # start Label Studio (own conda env "labelstudio")
     python -m telecomsafe.data.labelstudio push     # create the project, import images + pre-labels
+    python -m telecomsafe.data.labelstudio push --add   # import images added since, into the same project
     python -m telecomsafe.data.labelstudio pull     # export finished annotations → data/raw/telecom_eval/
 
 Credentials (LABEL_STUDIO_*) come from .env; `serve` creates that account on first start.
 Pre-labels are read from data/raw/t3_candidates/prelabels/ (see telecomsafe.data.pseudo_label).
+Only candidates kept in review (subset telecom / near in data/licence_manifest.csv, see
+telecomsafe.data.screen) are imported. `pull` also writes subsets.csv, so the telecom
+images and the power-line "near" images can be evaluated separately.
 Images are served from disk (local-files storage), nothing is uploaded or copied.
 
 Annotation rules: follow the criteria in configs/taxonomy.yaml (also in data/README.md).
@@ -130,22 +134,43 @@ def read_prelabels(image: Path, w: int, h: int) -> list:
     return dets
 
 
-def push() -> None:
-    if STATE.exists():
-        sys.exit(f"project already pushed ({STATE}); delete that file only if you want a second project")
-    images = sorted(p for p in (CANDIDATES / "images").iterdir() if p.suffix.lower() in IMAGE_SUFFIXES)
-    if not images:
-        sys.exit("no candidate images — run telecomsafe.data.collect_open first")
+def kept_subsets() -> dict[str, str]:
+    """file → telecom / near for candidates kept in review (empty if nothing has been reviewed yet)."""
+    from telecomsafe.data.collect_open import read_manifest
+
+    return {r["file"]: r["subset"] for r in read_manifest() if r["status"] == "candidate" and r.get("subset")}
+
+
+def task_image(task: dict) -> str:
+    return Path(parse_qs(urlparse(task["data"]["image"]).query)["d"][0]).name
+
+
+def push(add: bool = False) -> None:
+    if STATE.exists() and not add:
+        sys.exit(f"project already pushed ({STATE}); use  push --add  to import new images into it")
+    kept = kept_subsets()
+    images = sorted(p for p in (CANDIDATES / "images").iterdir() if p.suffix.lower() in IMAGE_SUFFIXES
+                    and (not kept or p.name in kept))
     c = Client()
-    project = c.call("POST", "/api/projects", json={
-        "title": PROJECT_TITLE, "label_config": label_config(),
-        "description": "TelecomEval: annotate by the criteria in configs/taxonomy.yaml; skip unusable images.",
-        "show_skip_button": True,
-    })
-    c.call("POST", "/api/storages/localfiles", json={
-        "project": project["id"], "title": "t3 candidates", "path": str(CANDIDATES / "images"),
-        "regex_filter": r".*\.(jpe?g|png|webp)$", "use_blob_urls": True,
-    })
+    if STATE.exists():
+        project = {"id": json.loads(STATE.read_text(encoding="utf-8"))["project_id"]}
+        existing = c.call("GET", f"/api/projects/{project['id']}/export",
+                          params={"exportType": "JSON", "download_all_tasks": "true"})
+        done = {task_image(t) for t in existing}
+        images = [p for p in images if p.name not in done]
+        print(f"project {project['id']} already has {len(done)} images")
+    if not images:
+        sys.exit("no new images to import — collect and review candidates first (collect_open, screen)")
+    if not STATE.exists():
+        project = c.call("POST", "/api/projects", json={
+            "title": PROJECT_TITLE, "label_config": label_config(),
+            "description": "TelecomEval: annotate by the criteria in configs/taxonomy.yaml; skip unusable images.",
+            "show_skip_button": True,
+        })
+        c.call("POST", "/api/storages/localfiles", json={
+            "project": project["id"], "title": "t3 candidates", "path": str(CANDIDATES / "images"),
+            "regex_filter": r".*\.(jpe?g|png|webp)$", "use_blob_urls": True,
+        })
     tasks, n_boxes = [], 0
     for img in images:
         with Image.open(img) as im:
@@ -201,7 +226,12 @@ def pull() -> None:
     pid = json.loads(STATE.read_text(encoding="utf-8"))["project_id"]
     tasks = Client().call("GET", f"/api/projects/{pid}/export", params={"exportType": "JSON", "download_all_tasks": "true"})
     counts = convert(tasks, class_names(), EVAL_DIR)
-    print(f"TelecomEval → {EVAL_DIR}: {counts}")
+    kept = kept_subsets()
+    names = sorted(p.name for p in (EVAL_DIR / "images").iterdir())
+    (EVAL_DIR / "subsets.csv").write_text(
+        "file,subset\n" + "".join(f"{n},{kept.get(n, 'telecom')}\n" for n in names), encoding="utf-8")
+    by_subset = {s: sum(kept.get(n, "telecom") == s for n in names) for s in ("telecom", "near")}
+    print(f"TelecomEval → {EVAL_DIR}: {counts}  {by_subset}")
     if counts["unannotated"]:
         print(f"  ! {counts['unannotated']} images are not annotated yet — finish them before freezing")
     else:
@@ -211,9 +241,10 @@ def pull() -> None:
 def main(argv: list[str] | None = None) -> None:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("command", choices=["serve", "push", "pull", "config"])
+    ap.add_argument("--add", action="store_true", help="push: import new images into the existing project")
     args = ap.parse_args(argv)
     load_env()
-    {"serve": serve, "push": push, "pull": pull, "config": lambda: print(label_config())}[args.command]()
+    {"serve": serve, "push": lambda: push(args.add), "pull": pull, "config": lambda: print(label_config())}[args.command]()
 
 
 if __name__ == "__main__":
