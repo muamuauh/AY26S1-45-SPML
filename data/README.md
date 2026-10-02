@@ -185,18 +185,18 @@
 ### `telecom_eval` — TelecomEval — 电信施工场景真实测试集（自建）
 
 - **来源**：自建
-- **简介**：从 Openverse 与 Wikimedia Commons 检索的开放许可电信施工图像，人工筛选（画面中有人在电信场景作业） 并标注。两个阶段共用的唯一评估标尺，冻结后只读，绝不参与训练、LoRA 微调或生成条件构建。
+- **简介**：从 Openverse、Wikimedia Commons、Flickr、DVIDS 检索的开放许可电信施工图像，以及 YouTube 上 CC 许可视频 的抽帧，人工筛选（画面中有人在电信场景作业）并标注。电力线路作业（电线杆、斗臂车）单独作为 near 子集，分开报告。两个阶段共用的唯一评估标尺，冻结后只读，绝不参与训练、LoRA 微调或生成条件构建。
 - **规模**：计划 ≥150 张（理想 200 张） ｜ 本地原始 未下载 ｜ 构建后 —
 - **格式 / 本地路径**：yolo ｜ `data/raw/telecom_eval`
 - **类别映射**：直接按目标类别标注
 - **完整标注的目标类别**：person, helmet, no_helmet, vest, no_vest, harness, machinery, vehicle
 - **许可**：逐图记录（CC0 / Public Domain / CC BY / CC BY-SA），见 licence_manifest.csv
 - **引用**：逐图署名见 licence_manifest.csv
-- **获取方式**：手动：collect_open 检索候选图 → 人工筛选 → pseudo_label 预标注 → labelstudio serve / push 标注 → labelstudio pull 导出到 data/raw/telecom_eval/ → freeze_eval --create（详见 data/README.md）
+- **获取方式**：手动：collect_open / collect_video 收集候选图 → screen 打分并在 review.html 中人工筛选 → pseudo_label 预标注 → labelstudio serve / push 标注 → labelstudio pull 导出到 data/raw/telecom_eval/ → freeze_eval --create（详见 data/README.md）
 - **用途**：测试（TelecomEval）
 - ⚠️ 类别表与规模尚未按下载后的实际文件核对
 - **冻结状态**：尚未冻结（标注完成后运行 `python -m telecomsafe.data.freeze_eval --create`）
-- **候选图**：保留 31 张，剔除 388 张（逐图许可见 `data/licence_manifest.csv`）
+- **候选图**：审阅后保留 telecom 95 张、near 72 张，待审阅 0 张，已剔除 2151 张（逐图许可见 `data/licence_manifest.csv`）
 
 ## 调研过但阶段一未使用
 
@@ -211,10 +211,11 @@
 
 ## TelecomEval 建立流程
 
-1. `python -m telecomsafe.data.collect_open` —— 从 Openverse 与 Wikimedia Commons 检索开放许可（CC0 / PD / CC BY / CC BY-SA）候选图，自动记录署名
-2. 人工筛选：只保留**有人在电信场景作业**的照片，其余直接删除；然后 `python -m telecomsafe.data.collect_open --sync`
-3. `python -m telecomsafe.data.pseudo_label --weights <teacher> --images data/raw/t3_candidates/images` —— 生成预标注（teacher 标人员与 PPE，COCO 模型补车辆）
-4. `python -m telecomsafe.data.labelstudio serve` 启动 Label Studio（账号见 `.env`），另开终端 `python -m telecomsafe.data.labelstudio push` 导入图片与预标注
+1. `python -m telecomsafe.data.collect_open` —— 从 Openverse、Wikimedia Commons（含子分类）、Flickr、DVIDS 检索开放许可（CC0 / PD / CC BY / CC BY-SA）候选图，自动记录署名；Flickr、DVIDS 需要在 `.env` 填 key，否则跳过
+   `python -m telecomsafe.data.collect_video` —— 从 YouTube 的 CC 许可视频抽帧：只保留能看到完整人员（人框内有头部）的清晰帧，每段视频最多 4 帧
+2. `python -m telecomsafe.data.screen` —— 用 E2 数人、用 CLIP 判断场景并打分，生成 `data/raw/t3_candidates/review.html`；在网页中把每张图标为 Telecom / Near（电力线路作业，单独成子集）/ Reject，导出后运行 `python -m telecomsafe.data.screen --apply <导出的文件>`
+3. `python -m telecomsafe.data.pseudo_label --weights runs/phase1/e2/weights/best.pt --images data/raw/t3_candidates/images --yolo-out data/raw/t3_candidates/prelabels` —— 生成预标注（E2 标人员与 PPE，COCO 模型补车辆）
+4. `python -m telecomsafe.data.labelstudio serve` 启动 Label Studio（账号见 `.env`），另开终端 `python -m telecomsafe.data.labelstudio push` 导入筛选后保留的图片与预标注（之后新增的图用 `push --add`）
 5. 在 http://localhost:8080 逐张按上方「判定标准」修正：检查每个预标注框，补画漏标（安全带、机械没有预标注，必须手画）；不可用的图点 Skip
-6. `python -m telecomsafe.data.labelstudio pull` —— 导出为 YOLO 格式到 `data/raw/telecom_eval/`
+6. `python -m telecomsafe.data.labelstudio pull` —— 导出为 YOLO 格式到 `data/raw/telecom_eval/`，并写出 `subsets.csv`（telecom / near）
 7. `python -m telecomsafe.data.freeze_eval --create` —— 冻结；此后只读，两个阶段共用

@@ -39,19 +39,20 @@ TEXT = {
         "ultralytics": "随 Ultralytics 的 `{yaml}` 自动下载", "manual": "手动：",
         "frozen": "- **冻结状态**：已冻结。{a}；{b}",
         "not_frozen": "- **冻结状态**：尚未冻结（标注完成后运行 `python -m telecomsafe.data.freeze_eval --create`）",
-        "candidates": "- **候选图**：保留 {kept} 张，剔除 {rejected} 张（逐图许可见 `data/licence_manifest.csv`）",
+        "candidates": "- **候选图**：审阅后保留 telecom {telecom} 张、near {near} 张，待审阅 {pending} 张，已剔除 {rejected} 张（逐图许可见 `data/licence_manifest.csv`）",
         "unused": "## 调研过但阶段一未使用",
         "unused_head": "| 数据集 | 规模 | 许可 | 未使用原因 |",
         "roles": {"A": "训练 · A 核心", "B": "训练 · B 补充", "optional": "训练 · 可选", "eval": "测试（TelecomEval）", "unused": "未使用"},
         "eval_flow": [
             "## TelecomEval 建立流程",
             "",
-            "1. `python -m telecomsafe.data.collect_open` —— 从 Openverse 与 Wikimedia Commons 检索开放许可（CC0 / PD / CC BY / CC BY-SA）候选图，自动记录署名",
-            "2. 人工筛选：只保留**有人在电信场景作业**的照片，其余直接删除；然后 `python -m telecomsafe.data.collect_open --sync`",
-            "3. `python -m telecomsafe.data.pseudo_label --weights <teacher> --images data/raw/t3_candidates/images` —— 生成预标注（teacher 标人员与 PPE，COCO 模型补车辆）",
-            "4. `python -m telecomsafe.data.labelstudio serve` 启动 Label Studio（账号见 `.env`），另开终端 `python -m telecomsafe.data.labelstudio push` 导入图片与预标注",
+            "1. `python -m telecomsafe.data.collect_open` —— 从 Openverse、Wikimedia Commons（含子分类）、Flickr、DVIDS 检索开放许可（CC0 / PD / CC BY / CC BY-SA）候选图，自动记录署名；Flickr、DVIDS 需要在 `.env` 填 key，否则跳过",
+            "   `python -m telecomsafe.data.collect_video` —— 从 YouTube 的 CC 许可视频抽帧：只保留能看到完整人员（人框内有头部）的清晰帧，每段视频最多 4 帧",
+            "2. `python -m telecomsafe.data.screen` —— 用 E2 数人、用 CLIP 判断场景并打分，生成 `data/raw/t3_candidates/review.html`；在网页中把每张图标为 Telecom / Near（电力线路作业，单独成子集）/ Reject，导出后运行 `python -m telecomsafe.data.screen --apply <导出的文件>`",
+            "3. `python -m telecomsafe.data.pseudo_label --weights runs/phase1/e2/weights/best.pt --images data/raw/t3_candidates/images --yolo-out data/raw/t3_candidates/prelabels` —— 生成预标注（E2 标人员与 PPE，COCO 模型补车辆）",
+            "4. `python -m telecomsafe.data.labelstudio serve` 启动 Label Studio（账号见 `.env`），另开终端 `python -m telecomsafe.data.labelstudio push` 导入筛选后保留的图片与预标注（之后新增的图用 `push --add`）",
             "5. 在 http://localhost:8080 逐张按上方「判定标准」修正：检查每个预标注框，补画漏标（安全带、机械没有预标注，必须手画）；不可用的图点 Skip",
-            "6. `python -m telecomsafe.data.labelstudio pull` —— 导出为 YOLO 格式到 `data/raw/telecom_eval/`",
+            "6. `python -m telecomsafe.data.labelstudio pull` —— 导出为 YOLO 格式到 `data/raw/telecom_eval/`，并写出 `subsets.csv`（telecom / near）",
             "7. `python -m telecomsafe.data.freeze_eval --create` —— 冻结；此后只读，两个阶段共用",
         ],
     },
@@ -78,7 +79,7 @@ TEXT = {
         "ultralytics": "downloaded automatically with Ultralytics' `{yaml}`", "manual": "Manual: ",
         "frozen": "- **Frozen**: yes. {a}; {b}",
         "not_frozen": "- **Frozen**: not yet (run `python -m telecomsafe.data.freeze_eval --create` once annotation is done)",
-        "candidates": "- **Candidates**: {kept} kept, {rejected} rejected (per-image licences in `data/licence_manifest.csv`)",
+        "candidates": "- **Candidates**: kept after review telecom {telecom} / near {near}, {pending} awaiting review, {rejected} rejected (per-image licences in `data/licence_manifest.csv`)",
         "unused": "## Surveyed but not used in phase 1",
         "unused_head": "| Dataset | Size | Licence | Why not used |",
         "roles": {"A": "training · A core", "B": "training · B supplementary", "optional": "training · optional",
@@ -86,12 +87,13 @@ TEXT = {
         "eval_flow": [
             "## Building TelecomEval",
             "",
-            "1. `python -m telecomsafe.data.collect_open` — search Openverse and Wikimedia Commons for openly licensed (CC0 / PD / CC BY / CC BY-SA) candidates; attribution is recorded automatically",
-            "2. Screen by hand: keep only photos of **people working in a telecom setting** and delete the rest, then run `python -m telecomsafe.data.collect_open --sync`",
-            "3. `python -m telecomsafe.data.pseudo_label --weights <teacher> --images data/raw/t3_candidates/images` — pre-labels (the teacher labels people and PPE, a COCO model adds vehicles)",
-            "4. `python -m telecomsafe.data.labelstudio serve` starts Label Studio (account in `.env`); in another terminal, `python -m telecomsafe.data.labelstudio push` imports images and pre-labels",
+            "1. `python -m telecomsafe.data.collect_open` — search Openverse, Wikimedia Commons (with subcategories), Flickr and DVIDS for openly licensed (CC0 / PD / CC BY / CC BY-SA) candidates; attribution is recorded automatically. Flickr and DVIDS need a key in `.env` and are skipped otherwise",
+            "   `python -m telecomsafe.data.collect_video` — frames from Creative Commons YouTube videos: only sharp frames showing a whole person (a head inside the person box), at most 4 per video",
+            "2. `python -m telecomsafe.data.screen` — counts people with E2, scores the scene with CLIP and writes `data/raw/t3_candidates/review.html`; mark each image Telecom / Near (power-line work, a separate subset) / Reject there, export, then run `python -m telecomsafe.data.screen --apply <exported file>`",
+            "3. `python -m telecomsafe.data.pseudo_label --weights runs/phase1/e2/weights/best.pt --images data/raw/t3_candidates/images --yolo-out data/raw/t3_candidates/prelabels` — pre-labels (E2 labels people and PPE, a COCO model adds vehicles)",
+            "4. `python -m telecomsafe.data.labelstudio serve` starts Label Studio (account in `.env`); in another terminal, `python -m telecomsafe.data.labelstudio push` imports the kept images and pre-labels (use `push --add` for images added later)",
             "5. At http://localhost:8080, correct every image against the decision criteria above: check each pre-label and add missing boxes (harness and machinery are never pre-labelled); Skip unusable images",
-            "6. `python -m telecomsafe.data.labelstudio pull` — exports YOLO labels to `data/raw/telecom_eval/`",
+            "6. `python -m telecomsafe.data.labelstudio pull` — exports YOLO labels to `data/raw/telecom_eval/` and writes `subsets.csv` (telecom / near)",
             "7. `python -m telecomsafe.data.freeze_eval --create` — freeze; read-only afterwards and shared by both phases",
         ],
     },
@@ -163,8 +165,10 @@ def eval_status(t: dict) -> list[str]:
     manifest = DATA / "licence_manifest.csv"
     if manifest.exists():
         with open(manifest, encoding="utf-8-sig") as f:
-            status = Counter(r["status"] for r in csv.DictReader(f))
-        lines.append(t["candidates"].format(kept=status.get("candidate", 0), rejected=status.get("rejected", 0)))
+            rows = list(csv.DictReader(f))
+        state = Counter(r.get("subset") or "pending" for r in rows if r["status"] == "candidate")
+        lines.append(t["candidates"].format(telecom=state["telecom"], near=state["near"], pending=state["pending"],
+                                            rejected=sum(r["status"] == "rejected" for r in rows)))
     return lines
 
 

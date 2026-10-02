@@ -185,18 +185,18 @@
 ### `telecom_eval` — TelecomEval — real telecom construction test set (self-built)
 
 - **Source**: self-built
-- **Description**: Openly licensed telecom construction photos found on Openverse and Wikimedia Commons, screened by hand (people working in a telecom setting) and annotated. The single yardstick shared by both phases: read-only once frozen and never used for training, LoRA fine-tuning or generation conditioning.
+- **Description**: Openly licensed photos of telecom construction from Openverse, Wikimedia Commons, Flickr and DVIDS, plus frames from Creative Commons YouTube videos, screened by hand (people working in a telecom setting) and annotated. Power-line work (utility poles, bucket trucks) is kept as a separate "near" subset and reported separately. The single yardstick shared by both phases: read-only once frozen and never used for training, LoRA fine-tuning or generation conditioning.
 - **Size**: planned >= 150 images (ideally 200) ｜ local raw not downloaded ｜ after build —
 - **Format / local path**: yolo ｜ `data/raw/telecom_eval`
 - **Class mapping**: annotated directly with the target classes
 - **Fully annotated target classes**: person, helmet, no_helmet, vest, no_vest, harness, machinery, vehicle
 - **Licence**: Recorded per image (CC0 / public domain / CC BY / CC BY-SA), see licence_manifest.csv
 - **Citation**: Per-image attribution in licence_manifest.csv
-- **Download**: Manual: collect_open finds candidates -> manual screening -> pseudo_label pre-labels -> labelstudio serve / push to annotate -> labelstudio pull exports to data/raw/telecom_eval/ -> freeze_eval --create (see data/README-EN.md)
+- **Download**: Manual: collect_open / collect_video find candidates -> screen scores them and review.html records keep / reject -> pseudo_label pre-labels -> labelstudio serve / push to annotate -> labelstudio pull exports to data/raw/telecom_eval/ -> freeze_eval --create (see data/README-EN.md)
 - **Role**: test (TelecomEval)
 - ⚠️ Class list and size not yet checked against the downloaded files
 - **Frozen**: not yet (run `python -m telecomsafe.data.freeze_eval --create` once annotation is done)
-- **Candidates**: 31 kept, 388 rejected (per-image licences in `data/licence_manifest.csv`)
+- **Candidates**: kept after review telecom 95 / near 72, 0 awaiting review, 2151 rejected (per-image licences in `data/licence_manifest.csv`)
 
 ## Surveyed but not used in phase 1
 
@@ -211,10 +211,11 @@
 
 ## Building TelecomEval
 
-1. `python -m telecomsafe.data.collect_open` — search Openverse and Wikimedia Commons for openly licensed (CC0 / PD / CC BY / CC BY-SA) candidates; attribution is recorded automatically
-2. Screen by hand: keep only photos of **people working in a telecom setting** and delete the rest, then run `python -m telecomsafe.data.collect_open --sync`
-3. `python -m telecomsafe.data.pseudo_label --weights <teacher> --images data/raw/t3_candidates/images` — pre-labels (the teacher labels people and PPE, a COCO model adds vehicles)
-4. `python -m telecomsafe.data.labelstudio serve` starts Label Studio (account in `.env`); in another terminal, `python -m telecomsafe.data.labelstudio push` imports images and pre-labels
+1. `python -m telecomsafe.data.collect_open` — search Openverse, Wikimedia Commons (with subcategories), Flickr and DVIDS for openly licensed (CC0 / PD / CC BY / CC BY-SA) candidates; attribution is recorded automatically. Flickr and DVIDS need a key in `.env` and are skipped otherwise
+   `python -m telecomsafe.data.collect_video` — frames from Creative Commons YouTube videos: only sharp frames showing a whole person (a head inside the person box), at most 4 per video
+2. `python -m telecomsafe.data.screen` — counts people with E2, scores the scene with CLIP and writes `data/raw/t3_candidates/review.html`; mark each image Telecom / Near (power-line work, a separate subset) / Reject there, export, then run `python -m telecomsafe.data.screen --apply <exported file>`
+3. `python -m telecomsafe.data.pseudo_label --weights runs/phase1/e2/weights/best.pt --images data/raw/t3_candidates/images --yolo-out data/raw/t3_candidates/prelabels` — pre-labels (E2 labels people and PPE, a COCO model adds vehicles)
+4. `python -m telecomsafe.data.labelstudio serve` starts Label Studio (account in `.env`); in another terminal, `python -m telecomsafe.data.labelstudio push` imports the kept images and pre-labels (use `push --add` for images added later)
 5. At http://localhost:8080, correct every image against the decision criteria above: check each pre-label and add missing boxes (harness and machinery are never pre-labelled); Skip unusable images
-6. `python -m telecomsafe.data.labelstudio pull` — exports YOLO labels to `data/raw/telecom_eval/`
+6. `python -m telecomsafe.data.labelstudio pull` — exports YOLO labels to `data/raw/telecom_eval/` and writes `subsets.csv` (telecom / near)
 7. `python -m telecomsafe.data.freeze_eval --create` — freeze; read-only afterwards and shared by both phases

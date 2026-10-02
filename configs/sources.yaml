@@ -419,19 +419,20 @@ sources:
     title: TelecomEval — 电信施工场景真实测试集（自建）
     en:
       title: "TelecomEval — real telecom construction test set (self-built)"
-      description: "Openly licensed telecom construction photos found on Openverse and Wikimedia Commons, screened by hand (people working in a telecom setting) and annotated. The single yardstick shared by both phases: read-only once frozen and never used for training, LoRA fine-tuning or generation conditioning."
+      description: "Openly licensed photos of telecom construction from Openverse, Wikimedia Commons, Flickr and DVIDS, plus frames from Creative Commons YouTube videos, screened by hand (people working in a telecom setting) and annotated. Power-line work (utility poles, bucket trucks) is kept as a separate \"near\" subset and reported separately. The single yardstick shared by both phases: read-only once frozen and never used for training, LoRA fine-tuning or generation conditioning."
       licence: "Recorded per image (CC0 / public domain / CC BY / CC BY-SA), see licence_manifest.csv"
       citation: "Per-image attribution in licence_manifest.csv"
       planned_size: ">= 150 images (ideally 200)"
-      instructions: "collect_open finds candidates -> manual screening -> pseudo_label pre-labels -> labelstudio serve / push to annotate -> labelstudio pull exports to data/raw/telecom_eval/ -> freeze_eval --create (see data/README-EN.md)"
+      instructions: "collect_open / collect_video find candidates -> screen scores them and review.html records keep / reject -> pseudo_label pre-labels -> labelstudio serve / push to annotate -> labelstudio pull exports to data/raw/telecom_eval/ -> freeze_eval --create (see data/README-EN.md)"
     tier: eval
     role: eval
     enabled: true
     homepage: null
     paper: null
     description: >-
-      从 Openverse 与 Wikimedia Commons 检索的开放许可电信施工图像，人工筛选（画面中有人在电信场景作业）
-      并标注。两个阶段共用的唯一评估标尺，冻结后只读，绝不参与训练、LoRA 微调或生成条件构建。
+      从 Openverse、Wikimedia Commons、Flickr、DVIDS 检索的开放许可电信施工图像，以及 YouTube 上 CC 许可视频
+      的抽帧，人工筛选（画面中有人在电信场景作业）并标注。电力线路作业（电线杆、斗臂车）单独作为 near
+      子集，分开报告。两个阶段共用的唯一评估标尺，冻结后只读，绝不参与训练、LoRA 微调或生成条件构建。
     licence: 逐图记录（CC0 / Public Domain / CC BY / CC BY-SA），见 licence_manifest.csv
     citation: 逐图署名见 licence_manifest.csv
     planned_size: ≥150 张（理想 200 张）
@@ -440,7 +441,8 @@ sources:
     download:
       method: manual
       instructions: >-
-        collect_open 检索候选图 → 人工筛选 → pseudo_label 预标注 → labelstudio serve / push 标注
+        collect_open / collect_video 收集候选图 → screen 打分并在 review.html 中人工筛选
+        → pseudo_label 预标注 → labelstudio serve / push 标注
         → labelstudio pull 导出到 data/raw/telecom_eval/ → freeze_eval --create（详见 data/README.md）
     class_map: identity     # 直接按目标类别标注
     annotates: [person, helmet, no_helmet, vest, no_vest, harness, machinery, vehicle]
