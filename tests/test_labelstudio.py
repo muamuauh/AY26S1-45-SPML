@@ -26,7 +26,7 @@ def test_prediction_roundtrip_to_yolo(tmp_path, monkeypatch):
         {"data": {"image": "/data/local-files/?d=t3_candidates/images/c.jpg"}, "annotations": []},
     ]
     counts = ls.convert(tasks, class_names(), tmp_path / "eval")
-    assert counts == {"images": 1, "boxes": 1, "skipped": 1, "unannotated": 1}
+    assert counts == {"images": 1, "boxes": 1, "dropped": 0, "skipped": 1, "unannotated": 1}
     line = (tmp_path / "eval" / "labels" / "a.txt").read_text()
     assert line == f"{class_names().index('helmet')} 0.200000 0.300000 0.200000 0.400000"
 

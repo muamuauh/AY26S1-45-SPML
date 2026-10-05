@@ -51,10 +51,14 @@ def env(name: str) -> str:
     return value
 
 
-def label_config() -> str:
+def label_config(classes: list[dict] | None = None, hotkeys: bool = False) -> str:
+    """Rectangle labels for the given taxonomy entries (default: all); hotkeys 1-9 in order if asked."""
+    classes = load_taxonomy() if classes is None else classes
     labels = "\n".join(
-        f'    <Label value="{c["name"]}" background="{COLORS[i % len(COLORS)]}" hint={quoteattr(c.get("criterion", ""))}/>'
-        for i, c in enumerate(load_taxonomy())
+        f'    <Label value="{c["name"]}" background="{COLORS[i % len(COLORS)]}"'
+        + (f' hotkey="{i + 1}"' if hotkeys and i < 9 else "")
+        + f' hint={quoteattr(c.get("criterion", ""))}/>'
+        for i, c in enumerate(classes)
     )
     return (
         "<View>\n"
@@ -197,9 +201,16 @@ def yolo_line(value: dict, names: list[str]) -> str | None:
     return f"{names.index(label)} {x + w / 2:.6f} {y + h / 2:.6f} {w:.6f} {h:.6f}"
 
 
-def convert(tasks: list[dict], names: list[str], out: Path) -> dict[str, int]:
-    """Write finished annotations as YOLO; returns counts. Skipped/unannotated tasks are left out."""
-    counts = {"images": 0, "boxes": 0, "skipped": 0, "unannotated": 0}
+def task_source(task: dict) -> Path:
+    """Image of a task in this project's own Label Studio (local-files path relative to data/raw)."""
+    return RAW / parse_qs(urlparse(task["data"]["image"]).query)["d"][0]
+
+
+def convert(tasks: list[dict], names: list[str], out: Path, source=task_source) -> dict[str, int]:
+    """Write finished annotations as YOLO; returns counts. Skipped/unannotated tasks are left out.
+
+    `source(task)` gives the image file; boxes with labels outside `names` are counted as "dropped"."""
+    counts = {"images": 0, "boxes": 0, "dropped": 0, "skipped": 0, "unannotated": 0}
     if out.exists():
         shutil.rmtree(out)
     (out / "images").mkdir(parents=True)
@@ -210,14 +221,24 @@ def convert(tasks: list[dict], names: list[str], out: Path) -> dict[str, int]:
             counts["skipped" if t.get("annotations") else "unannotated"] += 1
             continue
         latest = max(done, key=lambda a: a.get("updated_at") or a.get("created_at") or "")
-        rel = parse_qs(urlparse(t["data"]["image"]).query)["d"][0]
-        src = RAW / rel
+        src = source(t)
         shutil.copy2(src, out / "images" / src.name)
-        lines = [ln for r in latest["result"] if r.get("type") == "rectanglelabels" and (ln := yolo_line(r["value"], names))]
+        rects = [r for r in latest["result"] if r.get("type") == "rectanglelabels"]
+        lines = [ln for r in rects if (ln := yolo_line(r["value"], names))]
+        counts["dropped"] += len(rects) - len(lines)
         (out / "labels" / f"{src.stem}.txt").write_text("\n".join(lines), encoding="utf-8")
         counts["images"] += 1
         counts["boxes"] += len(lines)
     return counts
+
+
+def write_subsets(out: Path = EVAL_DIR) -> dict[str, int]:
+    """subsets.csv (file → telecom / near) for the exported images; returns counts per subset."""
+    kept = kept_subsets()
+    names = sorted(p.name for p in (out / "images").iterdir())
+    (out / "subsets.csv").write_text(
+        "file,subset\n" + "".join(f"{n},{kept.get(n, 'telecom')}\n" for n in names), encoding="utf-8")
+    return {s: sum(kept.get(n, "telecom") == s for n in names) for s in ("telecom", "near")}
 
 
 def pull() -> None:
@@ -226,12 +247,7 @@ def pull() -> None:
     pid = json.loads(STATE.read_text(encoding="utf-8"))["project_id"]
     tasks = Client().call("GET", f"/api/projects/{pid}/export", params={"exportType": "JSON", "download_all_tasks": "true"})
     counts = convert(tasks, class_names(), EVAL_DIR)
-    kept = kept_subsets()
-    names = sorted(p.name for p in (EVAL_DIR / "images").iterdir())
-    (EVAL_DIR / "subsets.csv").write_text(
-        "file,subset\n" + "".join(f"{n},{kept.get(n, 'telecom')}\n" for n in names), encoding="utf-8")
-    by_subset = {s: sum(kept.get(n, "telecom") == s for n in names) for s in ("telecom", "near")}
-    print(f"TelecomEval → {EVAL_DIR}: {counts}  {by_subset}")
+    print(f"TelecomEval → {EVAL_DIR}: {counts}  {write_subsets()}")
     if counts["unannotated"]:
         print(f"  ! {counts['unannotated']} images are not annotated yet — finish them before freezing")
     else:

@@ -1,0 +1,123 @@
+{
+ "person": [
+  {
+   "source": "construction_site_safety",
+   "image": "valid/images/-1429-_png_jpg.rf.d88afaebfda9ebdd21b532caeceb70fd.jpg",
+   "box": 4
+  },
+  {
+   "source": "construction_site_safety",
+   "image": "valid/images/youtube-391_jpg.rf.941d2a1277953dea6f593a6f4a790a1f.jpg",
+   "box": 2
+  },
+  {
+   "source": "construction_site_safety",
+   "image": "valid/images/youtube-617_jpg.rf.0f5ea7ba0ae177b6428e831987a50f8b.jpg",
+   "box": 5
+  }
+ ],
+ "helmet": [
+  {
+   "source": "construction_site_safety",
+   "image": "valid/images/youtube-455_jpg.rf.b4a2bbd54738aa12b746d9934005477b.jpg",
+   "box": 2
+  },
+  {
+   "source": "construction_site_safety",
+   "image": "valid/images/005559_jpg.rf.fd9b766cdd074f1fb836192b20a7caca.jpg",
+   "box": 0
+  },
+  {
+   "source": "construction_site_safety",
+   "image": "valid/images/02646_jpg.rf.fb12666bba8c9fa33ed93c755335109f.jpg",
+   "box": 0
+  }
+ ],
+ "no_helmet": [
+  {
+   "source": "construction_site_safety",
+   "image": "test/images/youtube-192_jpg.rf.f2fc6cb4eb904216075118db4b2da10a.jpg",
+   "box": 0
+  }
+ ],
+ "vest": [
+  {
+   "source": "construction_site_safety",
+   "image": "valid/images/youtube-697_jpg.rf.6f131cdcfc4849be0f93b59e4c0678c1.jpg",
+   "box": 2
+  },
+  {
+   "source": "construction_site_safety",
+   "image": "valid/images/youtube-836_jpg.rf.c95929820a1458bb5693dfdff28d47ca.jpg",
+   "box": 4
+  },
+  {
+   "source": "construction_site_safety",
+   "image": "valid/images/youtube-617_jpg.rf.0f5ea7ba0ae177b6428e831987a50f8b.jpg",
+   "box": 0
+  }
+ ],
+ "no_vest": [
+  {
+   "source": "construction_site_safety",
+   "image": "valid/images/004424_jpg.rf.b59bf6cd1c70cd5d10e054a76a4453ef.jpg",
+   "box": 0
+  },
+  {
+   "source": "construction_site_safety",
+   "image": "valid/images/youtube-308_jpg.rf.856092de7fadaddb67729a9eabbdc6ba.jpg",
+   "box": 0
+  },
+  {
+   "source": "construction_site_safety",
+   "image": "valid/images/-3154-_png_jpg.rf.66d16f52f6fa0f4111cb731d9078468d.jpg",
+   "box": 1
+  }
+ ],
+ "harness": [
+  {
+   "source": "body_harness",
+   "image": "valid/images/Image68_jpg.rf.4d8f2d06ddb4ffd961d3da83594e0c87.jpg",
+   "box": 0
+  },
+  {
+   "source": "body_harness",
+   "image": "valid/images/Image85_jpg.rf.74f18bcd0bb45de26bf9eda490d0182b.jpg",
+   "box": 0
+  },
+  {
+   "source": "body_harness",
+   "image": "valid/images/Image6_jpg.rf.e7ec6df817197194c925136365180362.jpg",
+   "box": 0
+  }
+ ],
+ "machinery": [
+  {
+   "source": "construction_site_safety",
+   "image": "valid/images/youtube-367_jpg.rf.8236c31ffa99d2b9e9cba79718e2700c.jpg",
+   "box": 4
+  },
+  {
+   "source": "construction_site_safety",
+   "image": "valid/images/youtube-697_jpg.rf.6f131cdcfc4849be0f93b59e4c0678c1.jpg",
+   "box": 0
+  },
+  {
+   "source": "construction_site_safety",
+   "image": "valid/images/construction-823-_jpg.rf.33100b9109bfc065c4f75e402259d5b5.jpg",
+   "box": 0
+  }
+ ],
+ "vehicle": [
+  {
+   "source": "construction_site_safety",
+   "image": "test/images/youtube-840_jpg.rf.64ef53bced9bacdd492e0cbc19687e9e.jpg",
+   "box": 0
+  },
+  {
+   "source": "construction_site_safety",
+   "image": "valid/images/youtube-179_jpg.rf.daae2adf8a9bb7586f8a3662850efa87.jpg",
+   "box": 0
+  }
+ ]
+}
