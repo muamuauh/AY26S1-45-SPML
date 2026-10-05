@@ -219,3 +219,8 @@
 5. At http://localhost:8080, correct every image against the decision criteria above: check each pre-label and add missing boxes (harness and machinery are never pre-labelled); Skip unusable images
 6. `python -m telecomsafe.data.labelstudio pull` — exports YOLO labels to `data/raw/telecom_eval/` and writes `subsets.csv` (telecom / near)
 7. `python -m telecomsafe.data.freeze_eval --create` — freeze; read-only afterwards and shared by both phases
+
+**Packages for teammates** (`dist/packages/`, not in git; bilingual instructions, one-click scripts for Windows / macOS):
+
+- Annotation: `python -m telecomsafe.data.package annotate` packs the reviewed, not yet annotated images (with E2 pre-labels and the guidelines); the returned `annotations.json` goes in with `python -m telecomsafe.data.package intake-annotations <file>`, replacing steps 4–6 above
+- Collection: `python -m telecomsafe.data.package collect --domain telecom|near --target <n>`; the returned zip is imported as candidates with `python -m telecomsafe.data.package intake-collection <zip> --domain <...> --collector <name>`, then continue from step 2

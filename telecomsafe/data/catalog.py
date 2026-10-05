@@ -54,6 +54,11 @@ TEXT = {
             "5. 在 http://localhost:8080 逐张按上方「判定标准」修正：检查每个预标注框，补画漏标（安全带、机械没有预标注，必须手画）；不可用的图点 Skip",
             "6. `python -m telecomsafe.data.labelstudio pull` —— 导出为 YOLO 格式到 `data/raw/telecom_eval/`，并写出 `subsets.csv`（telecom / near）",
             "7. `python -m telecomsafe.data.freeze_eval --create` —— 冻结；此后只读，两个阶段共用",
+            "",
+            "**分包给组员**（`dist/packages/`，不入库；包内说明为中英双语，Windows / macOS 一键脚本）：",
+            "",
+            "- 标注：`python -m telecomsafe.data.package annotate` 打包已审阅保留、尚未标注的图（带 E2 预标注与标注规范）；组员交回 `annotations.json` 后运行 `python -m telecomsafe.data.package intake-annotations <文件>`，代替上面的第 4–6 步",
+            "- 收集：`python -m telecomsafe.data.package collect --domain telecom|near --target <张数>`；交回的压缩包用 `python -m telecomsafe.data.package intake-collection <zip> --domain <...> --collector <姓名>` 导入为候选图，再从第 2 步开始",
         ],
     },
     "en": {
@@ -95,6 +100,11 @@ TEXT = {
             "5. At http://localhost:8080, correct every image against the decision criteria above: check each pre-label and add missing boxes (harness and machinery are never pre-labelled); Skip unusable images",
             "6. `python -m telecomsafe.data.labelstudio pull` — exports YOLO labels to `data/raw/telecom_eval/` and writes `subsets.csv` (telecom / near)",
             "7. `python -m telecomsafe.data.freeze_eval --create` — freeze; read-only afterwards and shared by both phases",
+            "",
+            "**Packages for teammates** (`dist/packages/`, not in git; bilingual instructions, one-click scripts for Windows / macOS):",
+            "",
+            "- Annotation: `python -m telecomsafe.data.package annotate` packs the reviewed, not yet annotated images (with E2 pre-labels and the guidelines); the returned `annotations.json` goes in with `python -m telecomsafe.data.package intake-annotations <file>`, replacing steps 4–6 above",
+            "- Collection: `python -m telecomsafe.data.package collect --domain telecom|near --target <n>`; the returned zip is imported as candidates with `python -m telecomsafe.data.package intake-collection <zip> --domain <...> --collector <name>`, then continue from step 2",
         ],
     },
 }

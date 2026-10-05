@@ -23,7 +23,7 @@ EE6008 报告模板 §4 Schedule 需要计划与实际日期对照，§3 Scope �
 
 | 记录日期 | 事项 | 当前状态 | 何时恢复 |
 |---|---|---|---|
-| 2026-09-28 | **TelecomEval 标注与冻结** | 2026-10-02 恢复：扩大来源（Openverse、Wikimedia 作业类子分类、多语言关键词、YouTube CC 视频抽帧）后共 1,930 张候选，用 `telecomsafe.data.screen` 打分后全部人工审阅：**保留 telecom 95 张、near（电力线路作业）72 张**，剔除 1,763 张。已用 E2 预标注（置信度 0.3），导入 Label Studio 项目 2（167 张，旧的未标注项目 1 已删除）。telecom 仍不足 100 张。Flickr / DVIDS 待填 key；已起草给导师的邮件（[email_supervisor_telecom_eval.md](email_supervisor_telecom_eval.md)） | 下一步：① 在 Label Studio 标注 167 张 → `labelstudio pull` → `freeze_eval --create`；② 可并行补充 telecom 图（Flickr / DVIDS、导师回复），新增的图审阅后 `labelstudio push --add`；③ 冻结前仍不足 100 张则按 D1 处理并在报告中说明；④ 在 TelecomEval 上重新评估 E1/E2，telecom 与 near 分开报告 |
+| 2026-09-28 | **TelecomEval 标注与冻结** | 2026-10-02 恢复：扩大来源（Openverse、Wikimedia 作业类子分类、多语言关键词、YouTube CC 视频抽帧）后共 1,930 张候选，用 `telecomsafe.data.screen` 打分后全部人工审阅：**保留 telecom 95 张、near（电力线路作业）72 张**，剔除 1,763 张。已用 E2 预标注（置信度 0.3），导入 Label Studio 项目 2（167 张，旧的未标注项目 1 已删除）。telecom 仍不足 100 张。Flickr / DVIDS 待填 key；已起草给导师的邮件（[email_supervisor_telecom_eval.md](email_supervisor_telecom_eval.md)） | 下一步：① 2026-10-05 已生成分包（`telecomsafe.data.package`）：标注包（167 张，交组员标注，交回后 `package intake-annotations`）与收集包（telecom 目标 80 张、near 目标 30 张，交回后 `package intake-collection`）→ `freeze_eval --create`；② 新收集的图审阅后再出一个补充标注包；③ 冻结前仍不足 100 张则按 D1 处理并在报告中说明；④ 在 TelecomEval 上重新评估 E1/E2，telecom 与 near 分开报告 |
 
 ## 范围变更记录
 
