@@ -92,11 +92,33 @@ def merge_pseudo(samples: list[Sample], pseudo: dict[str, list], annotated: set[
 
 
 def apply_filter(samples: list[Sample], rule: str | None) -> list[Sample]:
+    """no_person: images without people; has:<class>: images with at least one box of that target class."""
     if rule is None:
         return samples
     if rule == "no_person":
         return [s for s in samples if not any(b.cls == "person" for b in s.boxes)]
+    if rule.startswith("has:"):
+        cls = rule.split(":", 1)[1]
+        return [s for s in samples if any(b.cls == cls for b in s.boxes)]
     raise ConfigError(f"unknown filter {rule!r}")
+
+
+def apply_exclude(samples: list[Sample], listing: str | None) -> list[Sample]:
+    """Drop images named in a file (one file name per line, # comments), e.g. configs/exclude/<source>.txt."""
+    if not listing:
+        return samples
+    names = {ln.strip() for ln in resolve(listing).read_text(encoding="utf-8").splitlines()
+             if ln.strip() and not ln.startswith("#")}
+    return [s for s in samples if s.image.name not in names]
+
+
+def chosen_eval_images() -> list[Path]:
+    """TelecomEval candidates kept in review. Training images are de-duplicated against them even before
+    TelecomEval is annotated and frozen, so the training set does not change when it is."""
+    from telecomsafe.data.collect_open import OUT, read_manifest
+
+    return [OUT / r["file"] for r in read_manifest()
+            if r["status"] == "candidate" and r.get("subset") in {"telecom", "near"} and (OUT / r["file"]).exists()]
 
 
 # ---------------------------------------------------------------- perceptual-hash dedupe
@@ -258,6 +280,7 @@ def build(
     use_pseudo: bool = True,
     include_eval: bool = True,
     hash_cache: Path | None = None,
+    leak_images: list[Path] | None = None,
 ) -> tuple[BuildResult, dict[str, Path]]:
     train_cfgs = [c for c in cfgs if c.get("enabled") and c.get("role") == "train"]
     eval_cfgs = [c for c in cfgs if c.get("enabled") and c.get("role") == "eval"] if include_eval else []
@@ -283,14 +306,15 @@ def build(
         if use_pseudo and pfile.exists():
             merge_pseudo(samples, json.loads(pfile.read_text(encoding="utf-8")), set(cfg.get("annotates") or []))
             pseudo_sources.add(name)
-        train += apply_filter(samples, cfg.get("filter"))
+        train += apply_exclude(apply_filter(samples, cfg.get("filter")), cfg.get("exclude"))
 
     removed = {"eval_leak": 0, "duplicate": 0}
     if train:
         train_hashes = phash_all([s.image for s in train], hash_cache)
         keep = np.ones(len(train), dtype=bool)
-        if evaluation:
-            leak = leaks(train_hashes, phash_all([s.image for s in evaluation], hash_cache), leak_threshold)
+        held_out = [s.image for s in evaluation] + list(leak_images or [])
+        if held_out:
+            leak = leaks(train_hashes, phash_all(held_out, hash_cache), leak_threshold)
             removed["eval_leak"] = int(leak.sum())
             keep &= ~leak
         dup = duplicates(train_hashes, dup_threshold) & keep
@@ -325,7 +349,7 @@ def main(argv: list[str] | None = None) -> None:
         result, roots = build(
             cfgs, targets, val_frac=args.val_frac, seed=args.seed,
             use_pseudo=not args.no_pseudo, include_eval=not args.no_eval,
-            hash_cache=INTERIM / "phash_cache.json",
+            hash_cache=INTERIM / "phash_cache.json", leak_images=chosen_eval_images(),
         )
     except ConfigError as e:
         sys.exit(f"ConfigError: {e}")

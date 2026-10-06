@@ -97,3 +97,21 @@ def test_write_dataset(yolo_dataset, tmp_path):
     assert labels[0].read_text().splitlines()[0].startswith("1 ")
     images = sorted((out / "images" / "train").iterdir())
     assert [p.stem for p in images] == [p.stem for p in labels]
+
+
+def test_filter_keeps_images_with_a_class(tmp_path):
+    a = Sample(tmp_path / "a.jpg", 1, 1, [Box("harness", 0, 0, 1, 1), Box("person", 0, 0, 1, 1)])
+    b = Sample(tmp_path / "b.jpg", 1, 1, [Box("person", 0, 0, 1, 1)])
+    assert apply_filter([a, b], "has:harness") == [a]
+
+
+def test_build_excludes_listed_images_and_held_out_images(yolo_dataset, tmp_path):
+    listing = tmp_path / "exclude.txt"
+    listing.write_text("# mirror-padded\nbg.jpg\n")
+    result, _ = build([cfg("s1", yolo_dataset, exclude=str(listing))], TARGETS, use_pseudo=False)
+    assert [s.image.name for s in result.splits["train"] + result.splits["val"]] == ["a.jpg"]
+    # images held out for TelecomEval (not yet a source) still remove their near-duplicates from training
+    result, _ = build([cfg("s1", yolo_dataset)], TARGETS, use_pseudo=False,
+                      leak_images=[yolo_dataset / "train" / "images" / "a.jpg"])
+    assert [s.image.name for s in result.splits["train"] + result.splits["val"]] == ["bg.jpg"]
+    assert result.removed["eval_leak"] == 1 and "test" not in result.splits

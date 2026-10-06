@@ -11,9 +11,10 @@
 | `construction_site_safety` Construction Site Safety (Roboflow Universe, version 30) | 训练 · A 核心 | 是 | 717 张（train 521 / valid 114 / test 82） | 717 | 683 | CC BY 4.0 | [主页](https://universe.roboflow.com/roboflow-universe-projects/construction-site-safety) |
 | `construction_ppe` Ultralytics Construction-PPE | 训练 · A 核心 | 是 | 1,416 张（train 1,132 / val 143 / test 141） | 1,416 | 1319 | AGPL-3.0 | [主页](https://docs.ultralytics.com/datasets/detect/construction-ppe) |
 | `body_harness` body_harness (Construction Images, Roboflow Universe) | 训练 · A 核心 | 是 | 796 张 | 796 | 154 | CC BY 4.0 | [主页](https://universe.roboflow.com/construction-images/body_harness) |
+| `work_at_height` Work at Height Safety (Proyecto Prevencion Predictiva, Roboflow Universe, version 1) | 训练 · A 核心 | 是 | 12,805 张（version 1：train 8,964 / valid 2,561 / test 1,280） | 12,712 | 1973 | CC BY 4.0 | [主页](https://universe.roboflow.com/proyecto-prevencion-predictiva/work-at-height-safety) |
 | `construction_workers_fyp` 3 Construction Workers (FYP, Roboflow Universe) | 训练 · B 补充 | 否 | 600 张 | 未下载 | — | CC BY 4.0 | [主页](https://universe.roboflow.com/fyp-h6hxz/3-construction-workers) |
-| `apd` APD — 施工人员安全帽与反光衣检测（Roboflow 私有项目） | 训练 · B 补充 | 是 | 2,300 张（train 1,610 / valid 460 / test 230） | 2,300 | 2259 | 私有（Roboflow 工作区 fathorazi-nur-fajri/apd-8wyrt，他人分享）——仅限本项目内部训练，不再分发 | — |
-| `construction_safety_v2` construction safety v2 (yun-pl2q1, Roboflow Universe) | 训练 · B 补充 | 是 | 1,206 张（train 997 / valid 119 / test 90） | 1,206 | 1122 | CC BY 4.0 | [主页](https://universe.roboflow.com/yun-pl2q1/construction-safety-ejqd8) |
+| `apd` APD — 施工人员安全帽与反光衣检测（Roboflow 私有项目） | 训练 · B 补充 | 是 | 2,300 张（train 1,610 / valid 460 / test 230） | 2,300 | 2228 | 私有（Roboflow 工作区 fathorazi-nur-fajri/apd-8wyrt，他人分享）——仅限本项目内部训练，不再分发 | — |
+| `construction_safety_v2` construction safety v2 (yun-pl2q1, Roboflow Universe) | 训练 · B 补充 | 是 | 1,206 张（train 997 / valid 119 / test 90） | 1,206 | 1118 | CC BY 4.0 | [主页](https://universe.roboflow.com/yun-pl2q1/construction-safety-ejqd8) |
 | `shel5k` SHEL5K — Safety Helmet detection with Extended Labels | 训练 · B 补充 | 是 | 5,000 张 | 未下载 | — | CC BY 4.0 | [主页](https://data.mendeley.com/datasets/9rcv8mm682/4) |
 | `chv` CHV — Color Helmet and Vest | 训练 · B 补充 | 是 | 1,330 张 | 未下载 | — | 未注明（按作者要求引用论文） | [主页](https://github.com/ZijianWang-ZW/PPE_detection) |
 | `acid` ACID — Alberta Construction Image Dataset | 训练 · B 补充 | 否 | 10,000 张 | 未下载 | — | CC BY-NC 4.0（仅限非商业用途） | [主页](https://profsckang.wixsite.com/uofa-rlab/copy-of-r-lab-design) |
@@ -77,6 +78,21 @@
 - **用途**：训练 · A 核心
 - **备注**：下载后核对（2026-09-28）：version 5，796 张，标的是真实工地上穿戴的全身式安全带。 大量图片是同一视频的相邻帧，构建时去重；少数图中的人员漏标，由 teacher 补伪标签。
 
+### `work_at_height` — Work at Height Safety (Proyecto Prevencion Predictiva, Roboflow Universe, version 1)
+
+- **来源**：https://universe.roboflow.com/proyecto-prevencion-predictiva/work-at-height-safety
+- **简介**：12,805 张高处作业图像（脚手架、梯子、高空作业平台），标注人员、安全帽、安全带、高空作业平台（MEWP）、 梯子与脚手架；安全带 4,189 个实例，是目前能找到的最大安全带来源。
+- **规模**：计划 12,805 张（version 1：train 8,964 / valid 2,561 / test 1,280） ｜ 本地原始 12,712 ｜ 构建后 1973
+- **格式 / 本地路径**：yolo ｜ `data/raw/work_at_height`
+- **类别映射**：person→person, helmet→helmet, harness→harness, mewp→machinery, ladder→丢弃, scaffolding→丢弃
+- **完整标注的目标类别**：person, helmet, harness, machinery（其余类别由 teacher 补伪标签）
+- **许可**：CC BY 4.0
+- **引用**：Work at Height Safety dataset (version 1) by Proyecto Prevencion Predictiva, Roboflow Universe, https://universe.roboflow.com/proyecto-prevencion-predictiva/work-at-height-safety
+- **获取方式**：Roboflow API：workspace `proyecto-prevencion-predictiva` / project `work-at-height-safety`（`python -m telecomsafe.data.download --only work_at_height`）
+- **用途**：训练 · A 核心
+- **过滤**：has:harness
+- **备注**：2026-10-05 加入（冻结 baseline 前加入）。version 1（version 3 含增广副本）实际 12,712 张，与其他 Roboflow 导出一样 拉伸为 640×640，安全带 2,720 个实例（项目页面的 4,189 为后续版本）。目视核对：安全带标注正确，含大量登塔、爬杆、 高空作业平台场景。约 1/5 的图带镜像填充，很多图只有梯子或脚手架，因此只用含安全带的图（filter has:harness）， 并剔除 862 张疑似镜像填充的图（configs/exclude/work_at_height.txt）。
+
 ### `construction_workers_fyp` — 3 Construction Workers (FYP, Roboflow Universe)
 
 - **来源**：https://universe.roboflow.com/fyp-h6hxz/3-construction-workers
@@ -96,7 +112,7 @@
 
 - **来源**：无公开页面（见获取方式）
 - **简介**：2,300 张真实国内工地照片（多为新闻图片，带网站水印），标注安全帽、未戴安全帽、反光衣、 未穿反光衣；No_Vest 框住未穿反光衣的躯干，与判定标准一致。未穿反光衣样本（4,245 个）是 全部数据中最多的，是 no_vest 类的主要来源。没有人员类，由 teacher 补伪标签。
-- **规模**：计划 2,300 张（train 1,610 / valid 460 / test 230） ｜ 本地原始 2,300 ｜ 构建后 2259
+- **规模**：计划 2,300 张（train 1,610 / valid 460 / test 230） ｜ 本地原始 2,300 ｜ 构建后 2228
 - **格式 / 本地路径**：yolo ｜ `data/raw/apd`
 - **类别映射**：Helmet→helmet, No_Helmet→no_helmet, No_Vest→no_vest, Vest→vest
 - **完整标注的目标类别**：helmet, no_helmet, vest, no_vest（其余类别由 teacher 补伪标签）
@@ -110,7 +126,7 @@
 
 - **来源**：https://universe.roboflow.com/yun-pl2q1/construction-safety-ejqd8
 - **简介**：1,206 张安全帽检测图像，标注安全帽、未戴安全帽和人员。含较多图库 / 棚拍照片，真实工地比例较低； 主要补充安全帽与人员的多样性。图中可见的反光衣未标注，由 teacher 补伪标签。
-- **规模**：计划 1,206 张（train 997 / valid 119 / test 90） ｜ 本地原始 1,206 ｜ 构建后 1122
+- **规模**：计划 1,206 张（train 997 / valid 119 / test 90） ｜ 本地原始 1,206 ｜ 构建后 1118
 - **格式 / 本地路径**：yolo ｜ `data/raw/construction_safety_v2`
 - **类别映射**：helmet→helmet, no-helmet→no_helmet, person→person
 - **完整标注的目标类别**：person, helmet, no_helmet（其余类别由 teacher 补伪标签）

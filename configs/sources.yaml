@@ -184,6 +184,47 @@ sources:
       大量图片是同一视频的相邻帧，构建时去重；少数图中的人员漏标，由 teacher 补伪标签。
     verified: true
 
+  - name: work_at_height
+    title: Work at Height Safety (Proyecto Prevencion Predictiva, Roboflow Universe, version 1)
+    en:
+      description: "12,805 images of work at height (scaffolding, ladders, mobile elevating work platforms) labelling person, helmet, harness, MEWP, ladder and scaffolding; 4,189 harness instances, the largest harness source available."
+      planned_size: "12,805 images (version 1: train 8,964 / valid 2,561 / test 1,280)"
+      notes: "Added 2026-10-05 before freezing the baseline. Version 1 (version 3 contains augmented copies) has 12,712 images, stretched to 640x640 like the other Roboflow exports, with 2,720 harness instances (the project page's 4,189 counts later versions). Harness labels checked by eye: correct, many tower, pole and aerial-platform scenes. About a fifth of the images are mirror-padded and many show only ladders or scaffolding, so only images with a harness are used (filter has:harness) minus 862 suspected mirror-padded ones (configs/exclude/work_at_height.txt)."
+    tier: A
+    role: train
+    enabled: true
+    homepage: https://universe.roboflow.com/proyecto-prevencion-predictiva/work-at-height-safety
+    paper: null
+    description: >-
+      12,805 张高处作业图像（脚手架、梯子、高空作业平台），标注人员、安全帽、安全带、高空作业平台（MEWP）、
+      梯子与脚手架；安全带 4,189 个实例，是目前能找到的最大安全带来源。
+    licence: CC BY 4.0
+    citation: "Work at Height Safety dataset (version 1) by Proyecto Prevencion Predictiva, Roboflow Universe, https://universe.roboflow.com/proyecto-prevencion-predictiva/work-at-height-safety"
+    planned_size: 12,805 张（version 1：train 8,964 / valid 2,561 / test 1,280）
+    format: yolo
+    path: data/raw/work_at_height
+    download:
+      method: roboflow
+      workspace: proyecto-prevencion-predictiva
+      project: work-at-height-safety
+      version: 1          # version 3 含增广副本，不用
+    class_map:
+      person: person
+      helmet: helmet
+      harness: harness
+      mewp: machinery     # 高空作业平台按标注规范算工程机械
+      ladder: null
+      scaffolding: null
+    annotates: [person, helmet, harness, machinery]   # mewp → machinery；teacher 不再补机械，避免平台被重复框
+    filter: has:harness
+    exclude: configs/exclude/work_at_height.txt
+    notes: >-
+      2026-10-05 加入（冻结 baseline 前加入）。version 1（version 3 含增广副本）实际 12,712 张，与其他 Roboflow 导出一样
+      拉伸为 640×640，安全带 2,720 个实例（项目页面的 4,189 为后续版本）。目视核对：安全带标注正确，含大量登塔、爬杆、
+      高空作业平台场景。约 1/5 的图带镜像填充，很多图只有梯子或脚手架，因此只用含安全带的图（filter has:harness），
+      并剔除 862 张疑似镜像填充的图（configs/exclude/work_at_height.txt）。
+    verified: true
+
   # ------------------------------------------------------------------ B 补充
   - name: construction_workers_fyp
     title: 3 Construction Workers (FYP, Roboflow Universe)

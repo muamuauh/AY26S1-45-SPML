@@ -11,9 +11,10 @@
 | `construction_site_safety` Construction Site Safety (Roboflow Universe, version 30) | training · A core | yes | 717 images (train 521 / valid 114 / test 82) | 717 | 683 | CC BY 4.0 | [homepage](https://universe.roboflow.com/roboflow-universe-projects/construction-site-safety) |
 | `construction_ppe` Ultralytics Construction-PPE | training · A core | yes | 1,416 images (train 1,132 / val 143 / test 141) | 1,416 | 1319 | AGPL-3.0 | [homepage](https://docs.ultralytics.com/datasets/detect/construction-ppe) |
 | `body_harness` body_harness (Construction Images, Roboflow Universe) | training · A core | yes | 796 images | 796 | 154 | CC BY 4.0 | [homepage](https://universe.roboflow.com/construction-images/body_harness) |
+| `work_at_height` Work at Height Safety (Proyecto Prevencion Predictiva, Roboflow Universe, version 1) | training · A core | yes | 12,805 images (version 1: train 8,964 / valid 2,561 / test 1,280) | 12,712 | 1973 | CC BY 4.0 | [homepage](https://universe.roboflow.com/proyecto-prevencion-predictiva/work-at-height-safety) |
 | `construction_workers_fyp` 3 Construction Workers (FYP, Roboflow Universe) | training · B supplementary | no | 600 images | not downloaded | — | CC BY 4.0 | [homepage](https://universe.roboflow.com/fyp-h6hxz/3-construction-workers) |
-| `apd` APD — helmet and vest detection on construction workers (private Roboflow project) | training · B supplementary | yes | 2,300 images (train 1,610 / valid 460 / test 230) | 2,300 | 2259 | Private (Roboflow workspace fathorazi-nur-fajri/apd-8wyrt, shared with the team) — internal training only, not redistributed | — |
-| `construction_safety_v2` construction safety v2 (yun-pl2q1, Roboflow Universe) | training · B supplementary | yes | 1,206 images (train 997 / valid 119 / test 90) | 1,206 | 1122 | CC BY 4.0 | [homepage](https://universe.roboflow.com/yun-pl2q1/construction-safety-ejqd8) |
+| `apd` APD — helmet and vest detection on construction workers (private Roboflow project) | training · B supplementary | yes | 2,300 images (train 1,610 / valid 460 / test 230) | 2,300 | 2228 | Private (Roboflow workspace fathorazi-nur-fajri/apd-8wyrt, shared with the team) — internal training only, not redistributed | — |
+| `construction_safety_v2` construction safety v2 (yun-pl2q1, Roboflow Universe) | training · B supplementary | yes | 1,206 images (train 997 / valid 119 / test 90) | 1,206 | 1118 | CC BY 4.0 | [homepage](https://universe.roboflow.com/yun-pl2q1/construction-safety-ejqd8) |
 | `shel5k` SHEL5K — Safety Helmet detection with Extended Labels | training · B supplementary | yes | 5,000 images | not downloaded | — | CC BY 4.0 | [homepage](https://data.mendeley.com/datasets/9rcv8mm682/4) |
 | `chv` CHV — Color Helmet and Vest | training · B supplementary | yes | 1,330 images | not downloaded | — | Not stated (cite the paper as the authors request) | [homepage](https://github.com/ZijianWang-ZW/PPE_detection) |
 | `acid` ACID — Alberta Construction Image Dataset | training · B supplementary | no | 10,000 images | not downloaded | — | CC BY-NC 4.0 (non-commercial only) | [homepage](https://profsckang.wixsite.com/uofa-rlab/copy-of-r-lab-design) |
@@ -77,6 +78,21 @@
 - **Role**: training · A core
 - **Notes**: Checked 2026-09-28: version 5, 796 images of full-body harnesses worn on real sites. Many images are adjacent frames of the same video (removed by de-duplication); a few people are unlabelled and get teacher pseudo-labels.
 
+### `work_at_height` — Work at Height Safety (Proyecto Prevencion Predictiva, Roboflow Universe, version 1)
+
+- **Source**: https://universe.roboflow.com/proyecto-prevencion-predictiva/work-at-height-safety
+- **Description**: 12,805 images of work at height (scaffolding, ladders, mobile elevating work platforms) labelling person, helmet, harness, MEWP, ladder and scaffolding; 4,189 harness instances, the largest harness source available.
+- **Size**: planned 12,805 images (version 1: train 8,964 / valid 2,561 / test 1,280) ｜ local raw 12,712 ｜ after build 1973
+- **Format / local path**: yolo ｜ `data/raw/work_at_height`
+- **Class mapping**: person→person, helmet→helmet, harness→harness, mewp→machinery, ladder→dropped, scaffolding→dropped
+- **Fully annotated target classes**: person, helmet, harness, machinery (other classes get teacher pseudo-labels)
+- **Licence**: CC BY 4.0
+- **Citation**: Work at Height Safety dataset (version 1) by Proyecto Prevencion Predictiva, Roboflow Universe, https://universe.roboflow.com/proyecto-prevencion-predictiva/work-at-height-safety
+- **Download**: Roboflow API: workspace `proyecto-prevencion-predictiva` / project `work-at-height-safety` (`python -m telecomsafe.data.download --only work_at_height`)
+- **Role**: training · A core
+- **Filter**: has:harness
+- **Notes**: Added 2026-10-05 before freezing the baseline. Version 1 (version 3 contains augmented copies) has 12,712 images, stretched to 640x640 like the other Roboflow exports, with 2,720 harness instances (the project page's 4,189 counts later versions). Harness labels checked by eye: correct, many tower, pole and aerial-platform scenes. About a fifth of the images are mirror-padded and many show only ladders or scaffolding, so only images with a harness are used (filter has:harness) minus 862 suspected mirror-padded ones (configs/exclude/work_at_height.txt).
+
 ### `construction_workers_fyp` — 3 Construction Workers (FYP, Roboflow Universe)
 
 - **Source**: https://universe.roboflow.com/fyp-h6hxz/3-construction-workers
@@ -96,7 +112,7 @@
 
 - **Source**: no public page (see Download)
 - **Description**: 2,300 photos of real construction sites in China (mostly news photos with watermarks), labelling helmet, no helmet, vest and no vest; No_Vest boxes cover the torso without a vest, matching our criterion. Its 4,245 no-vest instances are the largest in all our data and the main source of the no_vest class. No person class; filled with teacher pseudo-labels.
-- **Size**: planned 2,300 images (train 1,610 / valid 460 / test 230) ｜ local raw 2,300 ｜ after build 2259
+- **Size**: planned 2,300 images (train 1,610 / valid 460 / test 230) ｜ local raw 2,300 ｜ after build 2228
 - **Format / local path**: yolo ｜ `data/raw/apd`
 - **Class mapping**: Helmet→helmet, No_Helmet→no_helmet, No_Vest→no_vest, Vest→vest
 - **Fully annotated target classes**: helmet, no_helmet, vest, no_vest (other classes get teacher pseudo-labels)
@@ -110,7 +126,7 @@
 
 - **Source**: https://universe.roboflow.com/yun-pl2q1/construction-safety-ejqd8
 - **Description**: 1,206 helmet-detection images labelling helmet, no helmet and person. Many stock / studio photos and fewer real sites; mainly adds helmet and person diversity. Visible vests are unlabelled and get teacher pseudo-labels.
-- **Size**: planned 1,206 images (train 997 / valid 119 / test 90) ｜ local raw 1,206 ｜ after build 1122
+- **Size**: planned 1,206 images (train 997 / valid 119 / test 90) ｜ local raw 1,206 ｜ after build 1118
 - **Format / local path**: yolo ｜ `data/raw/construction_safety_v2`
 - **Class mapping**: helmet→helmet, no-helmet→no_helmet, person→person
 - **Fully annotated target classes**: person, helmet, no_helmet (other classes get teacher pseudo-labels)
