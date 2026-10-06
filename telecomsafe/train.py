@@ -3,6 +3,8 @@
     python -m telecomsafe.train --exp e2                          # baseline = configs/baseline.yaml
     python -m telecomsafe.train --exp e1                          # same, all built-in augmentation off
     python -m telecomsafe.train --exp e1 --epochs 1 --fraction 0.05   # smoke test
+    python -m telecomsafe.train --exp e2 --seed 1 --name e2_s1    # another seed of the same experiment
+    python -m telecomsafe.train --exp e2 --imgsz 960 --name e2_960   # input-size trial before freezing
     python -m telecomsafe.train --exp teacher --data data/processed/teacher/dataset.yaml --epochs 50
 
 Runs land in runs/phase1/<name>/ (Ultralytics saves args.yaml there — check it to
@@ -44,6 +46,8 @@ def main(argv: list[str] | None = None) -> None:
     ap.add_argument("--epochs", type=int)
     ap.add_argument("--batch", type=int)
     ap.add_argument("--fraction", type=float, help="train on a fraction of the data (smoke tests)")
+    ap.add_argument("--seed", type=int, help="repeat an experiment with another seed (report mean ± std)")
+    ap.add_argument("--imgsz", type=int, help="input-size trial before the baseline is frozen")
     args = ap.parse_args(argv)
 
     from ultralytics import YOLO
@@ -51,7 +55,7 @@ def main(argv: list[str] | None = None) -> None:
 
     cfg = train_args(args.exp, args.data, {
         "name": args.name, "model": args.model, "epochs": args.epochs,
-        "batch": args.batch, "fraction": args.fraction,
+        "batch": args.batch, "fraction": args.fraction, "seed": args.seed, "imgsz": args.imgsz,
     })
     # Older Ultralytics releases lack some augmentation keys (e.g. cutmix); passing them is an error.
     cfg = {k: v for k, v in cfg.items() if k == "model" or k in DEFAULT_CFG_DICT}

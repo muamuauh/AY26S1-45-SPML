@@ -87,3 +87,15 @@ def test_catalog_english_has_no_chinese_from_configs():
     text = catalog.render(load_sources(), load_taxonomy(), catalog.Counter(), "en")
     body = text.replace("> 中文版：[README.md](README.md)", "")
     assert not re.search(r"[\u4e00-\u9fff]", body), re.findall(r".{20}[\u4e00-\u9fff]+.{20}", body)[:5]
+
+
+def test_evaluate_groups_seeds_into_mean_and_std():
+    from telecomsafe.evaluate import aggregate, group_of
+    assert [group_of(r) for r in ("e2", "e2_s1", "e2_s12", "v1_e2_yolov8s", "e2_960")] == \
+        ["e2", "e2", "e2", "v1_e2_yolov8s", "e2_960"]
+    run = lambda m, a: {"overall": {"exp": "x", "split": "val", "mAP50": m, "mAP50-95": m / 2, "precision": 0.8,
+                                    "recall": 0.7}, "per_class": {"person": {"ap50": a, "ap50_95": a / 2}}, "names": ["person"]}
+    g = aggregate({"e2": run(0.74, 0.90), "e2_s1": run(0.72, 0.92), "e1": run(0.60, 0.80)})
+    assert g["e2"]["runs"] == 2 and abs(g["e2"]["overall"]["mAP50"] - 0.73) < 1e-9
+    assert abs(g["e2"]["per_class"]["person"]["ap50_std"] - 0.0141421356) < 1e-6
+    assert g["e1"]["overall"]["mAP50_std"] is None  # a single run has no spread
