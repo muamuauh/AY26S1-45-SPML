@@ -1,6 +1,6 @@
 # TelecomSafe Phase 1 Training Reproduction Guide
 
-> Document version: v1.0 ｜ Written: 2026-09-29
+> Document version: v2.0 ｜ Written: 2026-09-29 ｜ Revised: 2026-10-06 (baseline v2: Work at Height added, E2 run with 3 seeds)
 > Chinese counterpart: [08-阶段一训练复现指南-CN.md](08-阶段一训练复现指南-CN.md)
 > Audience: team members reproducing the phase 1 results from scratch, or anyone retraining later
 > Goal: obtain the E1 / E2 weights and every report and chart under `reports/phase1/`, and start the Demo
@@ -13,20 +13,20 @@
 **Pipeline**: train a teacher on the two datasets with the widest class coverage, let it pseudo-label the classes the other datasets lack, merge everything into the full training set, then train and evaluate E1 / E2.
 
 ```
-Download → build teacher set → train teacher → pseudo-label → build full set → train E1 → train E2 → evaluate → Demo
-(~10 min)      (<1 min)          (~12 min)      (~2 min)        (<1 min)       (~25 min)  (~55 min)  (~2 min)
+Download → build teacher set → train teacher → pseudo-label → build full set → train E1 → train E2 × 3 seeds → evaluate → Demo
+(~25 min)      (<1 min)          (~12 min)      (~5 min)        (~2 min)       (~35 min)  (~3.7 h)           (~3 min)
 ```
 
-Timings are for an RTX 4070 SUPER (12 GB); the GPU steps take about 1.5 hours in total.
+Timings are for an RTX 4070 SUPER (12 GB); the GPU steps take about 4.5 hours in total, or about 2 hours with a single E2 seed.
 
-**Reference results** (553 validation images; use them to check that your run reproduced correctly):
+**Reference results** (baseline v2, 747 validation images; use them to check that your run reproduced correctly):
 
 | Experiment | mAP50 | mAP50-95 | Epochs |
 |---|---|---|---|
-| E1 (augmentation off) | 0.611 | 0.350 | early stop at epoch 42 |
-| E2 (default augmentation) | 0.756 | 0.499 | early stop at epoch 90 |
+| E1 (augmentation off, seed 0) | 0.596 | 0.326 | early stop at epoch 41 |
+| E2 (default augmentation, seeds 0 / 1 / 2) | 0.737 ± 0.007 | 0.451 ± 0.002 | ended at epochs 89 / 79 / 100 |
 
-On the same machine with the same software versions the results should match exactly; a different GPU, driver or library version may differ by about ±0.01.
+On the same machine with the same software versions a given seed should reproduce exactly; a different GPU, driver or library version may differ by about ±0.01. The v1 results (2026-09-29, without Work at Height) are in `reports/phase1/v1/`.
 
 **⚠️ Three hard constraints** (breaking any of them makes results incomparable with ours):
 1. **Do not change `configs/baseline.yaml`.** Phase 2's E3 must use the same configuration and change only the training data.
@@ -87,7 +87,7 @@ APD is private data shared with us and cannot be downloaded publicly. Get `APD.v
 
 ### 3.3 Check
 
-Run `python -m telecomsafe.data.download --list`; all five below should show ✓:
+Run `python -m telecomsafe.data.download --list`; all six below should show ✓:
 
 | Dataset | Local directory | Raw images | Source |
 |---|---|---|---|
@@ -95,7 +95,10 @@ Run `python -m telecomsafe.data.download --list`; all five below should show ✓
 | Ultralytics Construction-PPE | `data/raw/construction_ppe/` | 1,416 | Ultralytics (automatic) |
 | body_harness v5 | `data/raw/body_harness/` | 796 | Roboflow (automatic) |
 | construction safety v2 | `data/raw/construction_safety_v2/` | 1,206 | Roboflow (automatic) |
+| Work at Height Safety v1 | `data/raw/work_at_height/` | 12,712 (~760 MB) | Roboflow (automatic) |
 | APD | `data/raw/apd/` | 2,300 | team share (manual) |
+
+Only Work at Height images that contain a harness are used (`filter: has:harness` in `sources.yaml`), minus 862 mirror-padded images listed in [`configs/exclude/work_at_height.txt`](../configs/exclude/work_at_height.txt); the build applies both automatically.
 
 Then run `python -m telecomsafe.data.catalog` to regenerate [data/README-EN.md](../data/README-EN.md); its "Local raw images" column should match the table above. Each dataset's source, licence and class mapping are recorded in `configs/sources.yaml`.
 
@@ -139,6 +142,7 @@ For each dataset, only the classes it **did not annotate** are filled in, only a
 | apd | 3,892 | person |
 | body_harness | 1,743 | helmet, vest |
 | construction_safety_v2 | 1,565 | vest |
+| work_at_height | 11,297 | vest, no_vest, no_helmet, vehicle (all 12,712 images are labelled; the build uses only those with a harness) |
 | construction_ppe | 0 | the teacher saw these images in training and adds none of the missing classes — a known limitation |
 | construction_site_safety | 0 | only harness is missing, and the teacher does not know that class |
 
@@ -151,9 +155,9 @@ python -m telecomsafe.data.build --dry-run    # statistics only, no files writte
 python -m telecomsafe.data.build              # writes data/processed/yolo/
 ```
 
-This step maps classes, merges pseudo-labels, removes duplicates by perceptual hash, and splits train / validation per source (90 / 10, fixed seed).
+This step maps classes, merges pseudo-labels, applies filters and exclusion lists, removes duplicates by perceptual hash (including against the chosen TelecomEval images), and splits train / validation per source (90 / 10, fixed seed).
 
-**Expected output**: `train: 4984 images`, `val: 553 images`, `Removed: {'duplicate': 898, ...}`; it also writes `reports/phase1/dataset_stats.csv` and `coverage.csv`.
+**Expected output**: `train: 6728 images`, `val: 747 images`, `Removed: {'eval_leak': 0, 'duplicate': 1059}`; it also writes `reports/phase1/dataset_stats.csv` and `coverage.csv`.
 
 Until TelecomEval is built, the command warns "no test split"; that is expected.
 
@@ -177,40 +181,48 @@ If it finishes and creates `runs/phase1/smoke/`, the environment and data are fi
 python -m telecomsafe.train --exp e1
 ```
 
-- About 25 minutes; usually stops early around epoch 40 (`patience 20`)
+- About 35 minutes; our run stopped early at epoch 41 (`patience 20`)
 - Check: `mosaic`, `fliplr`, `hsv_h` and the other augmentation parameters in `runs/phase1/e1/args.yaml` should all be `0.0`
 
 ### 8.3 E2: Ultralytics default augmentation
 
 ```powershell
-python -m telecomsafe.train --exp e2
+python -m telecomsafe.train --exp e2                          # seed 0
+python -m telecomsafe.train --exp e2 --seed 1 --name e2_s1
+python -m telecomsafe.train --exp e2 --seed 2 --name e2_s2
 ```
 
-- About 55 minutes; our run stopped early at epoch 90
-- Both experiments take their configuration from `configs/baseline.yaml` (YOLO11s, 640 px, batch 16, seed 0); the only difference is that E1 turns augmentation off
+- About 1.1–1.4 hours per seed; our runs ended at epochs 89, 79 and 100
+- Both experiments take their configuration from `configs/baseline.yaml` (YOLO11s, 640 px, batch 16); the only difference is that E1 turns augmentation off. `--seed` changes only the random seed, to estimate run-to-run variation (reported as mean ± std)
 
-### 8.4 Optional: YOLOv8s comparison
+### 8.4 Optional: YOLOv8s comparison (done on v1 data)
 
 ```powershell
 python -m telecomsafe.train --exp e2 --model yolov8s.pt --name e2_yolov8s
 ```
 
-Same data and configuration as E2 with only the architecture changed, to justify the model choice.
+Same data and configuration as E2 with only the architecture changed, to justify the model choice. It was run on the v1 data, kept as `runs/phase1/v1_e2_yolov8s`, and not repeated for baseline v2.
 
-### 8.5 Optional: YOLO11m comparison
+### 8.5 Optional: YOLO11m comparison and input-size trial
 
 ```powershell
 python -m telecomsafe.train --exp e2 --model yolo11m.pt --name e2_yolo11m
 ```
 
-Again only the model changes, to justify the model size: about 1.5 hours, early stop at epoch 86, ~8 GB of GPU memory (batch 16). Results and conclusion are in the "YOLO11s vs YOLO11m" section of the results summary.
+Again only the model changes, to justify the model size (v1 data, `runs/phase1/v1_e2_yolo11m`). Before freezing v2 an input-size trial was also run:
+
+```powershell
+python -m telecomsafe.train --exp e2 --imgsz 960 --name e2_960
+```
+
+About 2.3 hours and ~9.7 GB of GPU memory (batch 16). Results and conclusions for both are in the results summary; neither was adopted.
 
 ### 8.6 Evaluation
 
 ```powershell
 # Before TelecomEval exists: evaluate on the validation split (development reference only)
-python -m telecomsafe.evaluate --split val --skip-check
-python -m telecomsafe.evaluate --exps e1 e2 e2_yolov8s e2_yolo11m --split val --skip-check   # including YOLOv8s and YOLO11m
+python -m telecomsafe.evaluate --split val --skip-check      # e1, e2, e2_s1, e2_s2 by default
+python -m telecomsafe.evaluate --exps e2 e2_960 --split val --skip-check --out <folder>   # trials go elsewhere
 
 # After TelecomEval is frozen: formal evaluation (first checks that TelecomEval is unchanged)
 python -m telecomsafe.evaluate
@@ -220,13 +232,14 @@ python -m telecomsafe.evaluate
 
 | File | Contents |
 |---|---|
-| `<exp>_metrics.csv` | mAP50, mAP50-95, precision, recall |
-| `per_class_ap.csv` / `per_class_ap.png` | per-class AP table and comparison bar chart |
+| `<run>_metrics.csv` | mAP50, mAP50-95, precision, recall of each run |
+| `summary.csv` | per-experiment summary; runs named `<exp>_s<k>` count as further seeds of that experiment, giving mean and standard deviation |
+| `per_class_ap.csv` / `per_class_ap.png` | per-class AP table and comparison bar chart (means over seeds, with standard-deviation error bars) |
 | `<exp>_confusion_matrix.png` | normalised confusion matrix |
 | `class_distribution.png` | training-set instances per class |
 | `weak_classes.md` | weak-class list. **Not overwritten if it exists**, because the "likely reasons" column is written by hand; add `--rewrite-weak-classes` to regenerate it |
 
-The mAP on the last line of the training log (e.g. 0.605 for E1) differs slightly from the evaluation script (0.611) because the two validate with different batching. Reports always use the evaluation script's numbers.
+The mAP on the last line of the training log (in v1, 0.605 for E1) differs slightly from the evaluation script (0.611) because the two validate with different batching. Reports always use the evaluation script's numbers.
 
 ### 8.7 Start the Demo
 
@@ -253,7 +266,7 @@ start_demo.bat
 
 ## 10. Everything in one go
 
-Once the data is in place (Section 3), these commands in order reproduce everything in about 1.5 hours:
+Once the data is in place (Section 3), these commands in order reproduce everything in about 4.5 hours (about 2 hours with seed 0 only):
 
 ```powershell
 python -m telecomsafe.data.build --sources construction_site_safety construction_ppe --no-eval --no-pseudo --out data/processed/teacher
@@ -262,10 +275,12 @@ python -m telecomsafe.data.pseudo_label --weights runs/phase1/teacher/weights/be
 python -m telecomsafe.data.build
 python -m telecomsafe.train --exp e1
 python -m telecomsafe.train --exp e2
+python -m telecomsafe.train --exp e2 --seed 1 --name e2_s1
+python -m telecomsafe.train --exp e2 --seed 2 --name e2_s2
 python -m telecomsafe.evaluate --split val --skip-check
 ```
 
-Before rerunning, delete the old results in `runs/phase1/{teacher,e1,e2}`. The training script overwrites logs in a directory of the same name, but leftover weight files are easy to confuse.
+Before rerunning, delete the old results in `runs/phase1/{teacher,e1,e2,e2_s1,e2_s2}`. The training script overwrites logs in a directory of the same name, but leftover weight files are easy to confuse.
 
 ---
 
@@ -287,10 +302,10 @@ Before rerunning, delete the old results in `runs/phase1/{teacher,e1,e2}`. The t
 
 ## 12. After TelecomEval is built
 
-TelecomEval is currently deferred; see [progress/milestones-EN.md](../progress/milestones-EN.md#deferred) for how to resume. Once it is annotated and frozen:
+TelecomEval is being annotated; see [progress/milestones-EN.md](../progress/milestones-EN.md#deferred) for progress. Once it is annotated and frozen:
 
-1. `python -m telecomsafe.data.build`: TelecomEval becomes the test split in `dataset.yaml`, and training images that nearly duplicate it are removed.
-2. `python -m telecomsafe.evaluate`: formal evaluation on TelecomEval.
-3. Update `reports/phase1/README.md` and `weak_classes.md`, then freeze `configs/baseline.yaml`.
+1. `python -m telecomsafe.data.build`: TelecomEval becomes the test split in `dataset.yaml`.
+2. `python -m telecomsafe.evaluate`: formal evaluation of E1 and the 3 E2 seeds on TelecomEval.
+3. Update `reports/phase1/README.md` and `weak_classes.md`.
 
-Note: step 1 may remove a few training images that duplicate the test set. If it does, the training data has changed and you must retrain as in Section 10, so that the model has never seen the test set.
+The training set does **not** change: the build already de-duplicates against the chosen TelecomEval images (the telecom / near images kept in review in the licence manifest), so baseline v2 needs no retraining. `configs/baseline.yaml` was frozen on 2026-10-06 (tag `phase1-baseline-v2`).

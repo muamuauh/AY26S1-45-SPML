@@ -77,8 +77,8 @@ The repository holds only code, configuration and reports; data and weights live
 
 | Content | Where | How to get it |
 |---|---|---|
-| **Model weights** (E1 / E2, ~19 MB each) | GitHub Release [`phase1-baseline-v1`](https://github.com/muamuauh/AY26S1-45-SPML/releases/tag/phase1-baseline-v1) | `python -m telecomsafe.weights` (verifies sha256); `start_demo.bat` downloads them automatically if missing |
-| **Public datasets** (Construction Site Safety v30, Construction-PPE, body_harness, construction safety v2) | Their original release pages | Put your own Kaggle / Roboflow keys in `.env` and run `python -m telecomsafe.data.download`; versions are pinned in `configs/sources.yaml` |
+| **Model weights** (E1 / E2 and two more E2 seeds, ~19 MB each) | GitHub Release [`phase1-baseline-v2`](https://github.com/muamuauh/AY26S1-45-SPML/releases/tag/phase1-baseline-v2) | `python -m telecomsafe.weights` (verifies sha256); `start_demo.bat` downloads them automatically if missing |
+| **Public datasets** (Construction Site Safety v30, Construction-PPE, body_harness, construction safety v2, Work at Height Safety v1) | Their original release pages | Put your own Kaggle / Roboflow keys in `.env` and run `python -m telecomsafe.data.download`; versions are pinned in `configs/sources.yaml` |
 | **Data that cannot be re-downloaded** (APD, TelecomEval candidates and licence manifest, later annotations) | Team shared folder (university OneDrive / Teams, **team members and supervisor only**) | Extract as described in the shared folder's `README-EN.md` |
 
 > ⚠️ This repository is **public**: never commit private data such as APD, or the keys in `.env`, and never put them in a Release.
@@ -111,7 +111,7 @@ The repository holds only code, configuration and reports; data and weights live
 - [x] Risk Taxonomy (done offline) — draft transcribed into `configs/taxonomy.yaml`, to be checked against the final offline version
 - [x] Dataset list and class mapping — `configs/sources.yaml`, catalogue in `data/README-EN.md`
 - [ ] ⏸ **TelecomEval annotation and freezing (deferred until Demo v1 is done)** — 31 candidates pre-labelled and imported into Label Studio; how to resume: [progress/milestones-EN.md](progress/milestones-EN.md#deferred)
-- [x] Baseline training (E1 / E2) — validation mAP50 0.611 / 0.756, see [reports/phase1/](reports/phase1/README-EN.md); `configs/baseline.yaml` is frozen after TGB
+- [x] Baseline training (E1 / E2) — v2 frozen (2026-10-06, tag `phase1-baseline-v2`): validation mAP50 E1 0.596 / E2 0.737 ± 0.007 (3 seeds), see [reports/phase1/](reports/phase1/README-EN.md)
 - [x] Rule-based risk judgement + Gradio Demo v1 — `python -m telecomsafe.demo.app --weights runs/phase1/e2/weights/best.pt`
 - [ ] TGB meeting (end of W7): prepare slides and a Demo recording
 

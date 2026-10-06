@@ -2,18 +2,29 @@
 #   python -m telecomsafe.weights            # all
 #   python -m telecomsafe.weights e2         # one
 # The sha256 is checked after download; a mismatch means a corrupted or wrong file.
+# v1 (2026-09-29) weights stay available in the phase1-baseline-v1 release.
 
-release: phase1-baseline-v1
-url: https://github.com/muamuauh/AY26S1-45-SPML/releases/download/phase1-baseline-v1
+release: phase1-baseline-v2
+url: https://github.com/muamuauh/AY26S1-45-SPML/releases/download/phase1-baseline-v2
 
 weights:
   e2:
     asset: e2_best.pt
     path: runs/phase1/e2/weights/best.pt
-    sha256: 4d64ab6f1b1e142a24091d117a2749aa38d162c603b6ad4eeb2e1ac0bc66e0e1
-    description: E2 baseline (Ultralytics default augmentation) — used by the demo
+    sha256: 46b23c12aadf53303abd218926730eece36222fb77a1d3f97f12ed04909686d5
+    description: E2 baseline, seed 0 (Ultralytics default augmentation) — used by the demo
   e1:
     asset: e1_best.pt
     path: runs/phase1/e1/weights/best.pt
-    sha256: 3184e3d198197a20338ab039bb1fdc6fc5d71e6f83c893782e355d1a9f8932f6
+    sha256: cb63156ed0a77a265a2c701360377c1c33229e765c17441f894b6c6ef73bf82d
     description: E1 baseline (all built-in augmentation off) — experimental control
+  e2_s1:
+    asset: e2_s1_best.pt
+    path: runs/phase1/e2_s1/weights/best.pt
+    sha256: b8f2e34d0000fcd34d14cbd5c0744c6d36f68897c36a564c9f759c06cabea8c4
+    description: E2, seed 1 — for the mean ± std over seeds
+  e2_s2:
+    asset: e2_s2_best.pt
+    path: runs/phase1/e2_s2/weights/best.pt
+    sha256: 3156f1e1d3daabc263b580315032c6c5704087353cb1b200abfdfd5abdf030fc
+    description: E2, seed 2 — for the mean ± std over seeds

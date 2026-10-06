@@ -12,7 +12,7 @@ EE6008 报告模板 §4 Schedule 需要计划与实际日期对照，§3 Scope �
 |---|---|---|---|---|
 | M0 | 立项与 Risk Taxonomy | W1 | `<<日期>>` | 线下完成 |
 | M1 | 公开数据整编（TG1） | W3 | `<<日期>>` | 线下完成数据调研；阶段一重新按 configs/sources.yaml 收集。TG1 实际张数：TelecomSeed `<<n>>` / TelecomEval `<<n>>` |
-| M2 | Baseline Demo（TGB） | W7 | 进行中 | 2026-09-29：baseline（E1/E2）、规则判断、Demo v1 完成，验证集 mAP50 E1 0.611 / E2 0.756；11s / 11m 对比完成，保留 YOLO11s；待 TelecomEval 评估与 TGB 会议 |
+| M2 | Baseline Demo（TGB） | W7 | 进行中 | 2026-09-29：baseline v1、规则判断、Demo v1 完成；11s / 11m 对比后保留 YOLO11s。**2026-10-06：baseline v2 冻结**（tag `phase1-baseline-v2`）：加入 Work at Height，960 试验未采用，验证集 mAP50 E1 0.596 / E2 0.737 ± 0.007（3 个种子）。待 TelecomEval 评估与 TGB 会议 |
 | M3 | 生成式增广（TG2） | W10 | | |
 | M4 | 同配置再训练（TG3） | W12 | | |
 | M5 | 融合升级（TG4） | W14 | | |
@@ -23,7 +23,7 @@ EE6008 报告模板 §4 Schedule 需要计划与实际日期对照，§3 Scope �
 
 | 记录日期 | 事项 | 当前状态 | 何时恢复 |
 |---|---|---|---|
-| 2026-09-28 | **TelecomEval 标注与冻结** | 2026-10-02 恢复：扩大来源（Openverse、Wikimedia 作业类子分类、多语言关键词、YouTube CC 视频抽帧）后共 1,930 张候选，用 `telecomsafe.data.screen` 打分后全部人工审阅：**保留 telecom 95 张、near（电力线路作业）72 张**，剔除 1,763 张。已用 E2 预标注（置信度 0.3），导入 Label Studio 项目 2（167 张，旧的未标注项目 1 已删除）。telecom 仍不足 100 张。Flickr / DVIDS 待填 key；已起草给导师的邮件（[email_supervisor_telecom_eval.md](email_supervisor_telecom_eval.md)） | 下一步：① 2026-10-05 已生成分包（`telecomsafe.data.package`）：标注包（167 张，交组员标注，交回后 `package intake-annotations`）与收集包（telecom 目标 80 张、near 目标 30 张，交回后 `package intake-collection`）→ `freeze_eval --create`；② 新收集的图审阅后再出一个补充标注包；③ 冻结前仍不足 100 张则按 D1 处理并在报告中说明；④ 在 TelecomEval 上重新评估 E1/E2，telecom 与 near 分开报告 |
+| 2026-09-28 | **TelecomEval 标注与冻结** | 2026-10-02 恢复：扩大来源后共 1,930 张候选，用 `telecomsafe.data.screen` 打分后全部人工审阅：**保留 telecom 95 张、near（电力线路作业）72 张**。已用 E2 预标注并打成标注包（`dist/packages/`）。2026-10-05 起改为单人完成：**由本人标注**。训练集已与这 167 张去重，冻结后无需重训 baseline | 下一步：① 标注 167 张 → `package intake-annotations` → 看抽检图 → `freeze_eval --create`；② 在 TelecomEval 上评估 E1 与 E2 的 3 个种子，telecom 与 near 分开报告；③ telecom 不足 100 张则按 D1 处理并在报告中说明（可补充 Flickr / DVIDS 或导师回复的图） |
 
 ## 范围变更记录
 
@@ -36,3 +36,5 @@ EE6008 报告模板 §4 Schedule 需要计划与实际日期对照，§3 Scope �
 | 2026-09-28 | 停用 3 Construction Workers 数据集 | Roboflow 项目没有发布任何版本，无法导出 | 无 |
 | 2026-09-28 | 新增 APD、construction safety v2（用户提供） | APD 提供大量真实工地的未穿反光衣样本；v2 补充安全帽与人员多样性 | APD 为他人分享的私有数据，仅限内部训练、不再分发 |
 | 2026-09-29 | Construction Site Safety 从 Kaggle 镜像（Roboflow v28）换成 Roboflow v30 | Kaggle 版训练集全部是马赛克增广拼图：E1 不再是"无增广"对照，规则会把不同子图中的人和机械误判为相邻 | 该数据集从约 2,800 张降为 717 张原图；teacher、E1、E2 全部重训 |
+| 2026-10-05 | 加入 Work at Height Safety（Roboflow v1），只用含安全带的图，并剔除 862 张镜像填充的图 | 安全带训练实例仅 143 个、来源单一，且在电信候选图上一个都检不出 | 训练集 5,537 → 7,475 张；安全带实例 143 → 2,619；teacher 不变，E1 / E2 全部重训（baseline v2），v1 结果归档到 `reports/phase1/v1/` |
+| 2026-10-06 | E2 改为 3 个随机种子；输入尺寸 960 试验后保持 640；baseline v2 冻结 | 让阶段二 E3 vs E2 的比较能排除随机波动；960 对小目标几乎无帮助而训练时间翻倍 | E2 报告均值 ± 标准差（mAP50 0.737 ± 0.007）；TG3 判据按均值判断 |

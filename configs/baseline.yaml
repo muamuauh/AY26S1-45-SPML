@@ -1,11 +1,12 @@
 # 阶段一 baseline 训练配置（即实验 E2：Ultralytics 默认增广）
 #
-# ⚠️ W7 提交后只读。阶段二的 E3 必须沿用这份配置、只改训练数据，否则与 E1/E2 不可比。
+# ⚠️ 已冻结（2026-10-06，tag phase1-baseline-v2），此后只读。阶段二的 E3 必须沿用这份配置、只改训练数据，否则与 E1/E2 不可比。
+# E2 与 E3 各跑 3 个种子：seed 由 `python -m telecomsafe.train --seed <k> --name <exp>_s<k>` 覆盖，其余参数不变。
 # E1 = 本配置 + 关闭全部内置增广（由 telecomsafe/train.py 覆盖，见 NO_AUGMENTATION）。
 # 参数含义见 https://docs.ultralytics.com/modes/train/#train-settings
 
-model: yolo11s.pt      # W6 与 yolo11m.pt 做一次 30 epoch 对比后定型
-imgsz: 640
+model: yolo11s.pt      # 与 yolov8s、yolo11m 对比后保留（见 reports/phase1/README.md）
+imgsz: 640             # 960 试验后保留 640
 epochs: 100
 patience: 20
 batch: 16              # 4070 SUPER 12GB；显存不足时降到 8

@@ -83,8 +83,8 @@ python -m telecomsafe.demo.app --weights runs/phase1/e2/weights/best.pt
 
 | 内容 | 存放位置 | 怎么获取 |
 |---|---|---|
-| **模型权重**（E1 / E2，各约 19 MB） | GitHub Release [`phase1-baseline-v1`](https://github.com/muamuauh/AY26S1-45-SPML/releases/tag/phase1-baseline-v1) | `python -m telecomsafe.weights`（自动校验 sha256）；`start_demo.bat` 在缺少权重时会自动下载 |
-| **公开数据集**（Construction Site Safety v30、Construction-PPE、body_harness、construction safety v2） | 各自的原始发布页 | 在 `.env` 填好自己的 Kaggle / Roboflow key，运行 `python -m telecomsafe.data.download`；版本已固定在 `configs/sources.yaml` |
+| **模型权重**（E1 / E2 及 E2 另两个种子，各约 19 MB） | GitHub Release [`phase1-baseline-v2`](https://github.com/muamuauh/AY26S1-45-SPML/releases/tag/phase1-baseline-v2) | `python -m telecomsafe.weights`（自动校验 sha256）；`start_demo.bat` 在缺少权重时会自动下载 |
+| **公开数据集**（Construction Site Safety v30、Construction-PPE、body_harness、construction safety v2、Work at Height Safety v1） | 各自的原始发布页 | 在 `.env` 填好自己的 Kaggle / Roboflow key，运行 `python -m telecomsafe.data.download`；版本已固定在 `configs/sources.yaml` |
 | **无法重新下载的数据**（APD、TelecomEval 候选图与许可清单、后续的标注结果） | 组内共享文件夹（学校 OneDrive / Teams，**仅限组员与导师**） | 按共享文件夹里的 `README.md` 解压到指定位置 |
 
 > ⚠️ 本仓库是**公开**的：APD 等私有数据、`.env` 中的 key 绝不能提交或放进 Release。
@@ -123,7 +123,7 @@ python -m telecomsafe.demo.app --weights runs/phase1/e2/weights/best.pt
 - [x] 确定风险分类体系 Risk Taxonomy（线下完成）—— 草案已转录到 `configs/taxonomy.yaml`，待与线下定稿核对
 - [x] 数据集清单与类别映射表 —— `configs/sources.yaml`，说明文档 `data/README.md`
 - [ ] ⏸ **TelecomEval 标注与冻结（暂缓，Demo v1 完成后恢复）** —— 31 张候选已预标注并导入 Label Studio，恢复步骤见 [progress/milestones.md](progress/milestones.md#暂缓事项)
-- [x] 训练 baseline（E1 / E2）—— 验证集 mAP50 0.611 / 0.756，见 [reports/phase1/](reports/phase1/README.md)；`configs/baseline.yaml` 在 TGB 后冻结
+- [x] 训练 baseline（E1 / E2）—— v2 已冻结（2026-10-06，tag `phase1-baseline-v2`）：验证集 mAP50 E1 0.596 / E2 0.737 ± 0.007（3 个种子），见 [reports/phase1/](reports/phase1/README.md)
 - [x] 规则风险判断 + Gradio Demo v1 —— `python -m telecomsafe.demo.app --weights runs/phase1/e2/weights/best.pt`
 - [ ] TGB 会议（W7 末）：准备幻灯片与 Demo 录屏
 
