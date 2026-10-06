@@ -2,5 +2,6 @@
 construction_site_safety,labeled,labeled,labeled,labeled,labeled,pseudo,labeled,labeled
 construction_ppe,labeled,labeled,labeled,labeled,pseudo,pseudo,pseudo,pseudo
 body_harness,labeled,pseudo,pseudo,pseudo,pseudo,labeled,pseudo,pseudo
+work_at_height,labeled,labeled,pseudo,pseudo,pseudo,labeled,labeled,pseudo
 apd,pseudo,labeled,labeled,labeled,labeled,pseudo,pseudo,pseudo
 construction_safety_v2,labeled,labeled,labeled,pseudo,pseudo,pseudo,pseudo,pseudo

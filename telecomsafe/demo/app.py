@@ -214,9 +214,10 @@ def header(weights: str, n_classes: int, n_rules: int) -> str:
 
 FOOTER = """
 <div class="ts-footer">
-  <b>Note</b>: phase 1 baseline (YOLO11s trained on public datasets), validation mAP50 = 0.756; the telecom test set
-  (TelecomEval) is still being built. Harness, vehicle and no-helmet detection remain weak and are the focus of
-  phase 2 generative augmentation. Person–machine distance is estimated from the person's box height and is indicative only.
+  <b>Note</b>: phase 1 baseline (YOLO11s trained on six public datasets), validation mAP50 = 0.737 (mean of 3 seeds);
+  the telecom test set (TelecomEval) is still being annotated. Vehicle and no-helmet detection remain weak, and harness
+  detection in telecom scenes (towers, poles) is still unreliable — the focus of phase 2 generative augmentation.
+  Person–machine distance is estimated from the person's box height and is indicative only.
 </div>"""
 
 
