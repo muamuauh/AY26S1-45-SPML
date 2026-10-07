@@ -1,0 +1,31 @@
+# TelecomSafe 阶段二生成环境（与训练环境 telecomsafe 分开，避免依赖冲突）
+#   conda env create -f environment-gen.yml
+#   conda activate telecomgen
+#
+# 用途：SDXL Inpainting / img2img（路线 ③ ④）、SAM 2 掩码与姿态关键点（ultralytics）、CLIP / VLM 闸门。
+# 模型首次运行时从 Hugging Face 下载到 ~/.cache/huggingface（SDXL Inpainting fp16 约 7 GB）。
+# PyTorch 与训练环境一致，从 CUDA 13.0 wheel 源安装。
+name: telecomgen
+channels:
+  - conda-forge
+  - nodefaults
+dependencies:
+  - python=3.12
+  - pip
+  - pip:
+      - --extra-index-url https://download.pytorch.org/whl/cu130
+      - torch
+      - torchvision
+      - diffusers
+      - transformers
+      - accelerate
+      - safetensors
+      - peft
+      - sentencepiece
+      - ultralytics       # SAM 2 掩码、YOLO11-pose 关键点、E2 检测器（G3 闸门）
+      - open_clip_torch   # G1 闸门的 CLIP 分数
+      - pyyaml
+      - pillow
+      - numpy
+      - imagehash         # G0 防泄漏
+      - pytest
