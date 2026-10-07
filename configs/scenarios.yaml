@@ -1,0 +1,164 @@
+# TelecomSafe 阶段二 · 风险场景规格库（Stage 0，草案 v0.1，2026-10-06）
+#
+# 每一项是一种生成任务：从哪些训练图出发、怎么改、标注怎么变、生成多少张、过哪些闸门。
+# telecomsafe/gen/ 下的生成脚本按本文件执行，生成结果与本项 id 一起记录在每张图的 JSON 旁文件里。
+#
+# ⚠️ 目标数量（target）是暂定的：弱类别以 TelecomEval 冻结后 E2（3 个种子）的结果为准，再回来调整。
+# 硬规则（任何一项都不得违反）：
+#   - 底图（base）只能来自训练集 data/processed/yolo/images/train，绝不用验证集或 TelecomEval；
+#   - 背景、参考图、LoRA 训练图必须先过 G0（与 TelecomEval pHash 去重）；
+#   - 合成图只进训练集；验证集与 TelecomEval 全程纯真实。
+#   - 类别自适应上限：每类合成实例 ≤ 真实训练实例 × 3 + 100（文档 03 §5.1）。
+
+version: 0.1-draft
+
+defaults:
+  seed: 0                     # 每张图的种子 = defaults.seed + 序号，记录在旁文件里
+  model: diffusers/stable-diffusion-xl-1.0-inpainting-0.1
+  vae: madebyollin/sdxl-vae-fp16-fix
+  steps: 30
+  guidance: 7.0
+  crop_scale: 4.0             # 以目标为中心裁出边长 = 目标边长 × crop_scale 的方块，放大到 1024 再重绘
+  gates: [g0_leak, g1_semantic, g3_detector]   # G2（分布）按批次计算；G4（人工）按批次抽检
+
+scenarios:
+  # ---------------------------------------------------------------- 路线 ③ 局部重绘
+  - id: remove_helmet
+    route: inpaint
+    targets: [no_helmet]
+    target: 800
+    base:
+      require: [helmet]                 # 底图里要有安全帽
+      helmet_height: [0.04, 0.30]       # 安全帽框高度占图高的范围（太小画不清，太大像特写）
+      max_people: 4
+    # 预研结论（2026-10-06，10 张图）：SAM 掩码 ∪ 略大于安全帽框的椭圆（只用 SAM 轮廓会画回帽子形状）；
+    # 重绘强度 1.0；贴回前按掩码外一圈像素做颜色匹配（否则有光晕）；每个安全帽最多试 3 个种子，
+    # 直到 E2 不再在原位置检出安全帽。7/10 效果好；失败：戴口罩的脸、示意图底图。
+    # 首批（2026-10-06，telecomsafe.gen.inpaint，30 张底图）：约一半通过；G1 用 CLIP 判"裸头"即可区分
+    # （失败 0–0.08，通过 0.80–0.99），目测通过图约 85% 质量好；"脸被遮住"的底图过滤误判太多，已改为只记录。
+    g1_min: 0.5
+    min_helmet_px: 40
+    mask: {from: helmet, method: sam_union_ellipse, ellipse_pad: [0.12, 0.08, 0.12, 0.05], grow: 0.10}
+    strength: 1.0
+    guidance: 8.0
+    retries: 3
+    color_match: ring
+    prompt: >-
+      photo of a construction worker's bare head, short black hair visible on top of the head, no hat,
+      no helmet, natural skin and hair, photorealistic, natural light, sharp focus
+    negative: helmet, hard hat, hat, cap, beanie, hood, headwear, cartoon, drawing, blurry, deformed
+    label: {remove: helmet, add: no_helmet, box: detector_or_head_estimate}
+    g1_question: "Is this person wearing a hard hat or helmet?"   # 期望回答：no
+
+  - id: remove_vest
+    route: inpaint
+    targets: [no_vest]
+    target: 300
+    # 有安全带的底图不用：重绘会把背心外的安全带带子一起抹掉，安全带标注就错了
+    base: {require: [vest], exclude: [harness], vest_height: [0.12, 0.70], max_people: 3}
+    min_vest_px: 60
+    mask: {from: vest, method: sam, grow: 0.04}
+    strength: 1.0
+    guidance: 7.5
+    retries: 3
+    color_match: ring
+    g1_min: 0.5
+    # 首批（2026-10-07，30 张底图）：28 张通过 G1 + G3，目测约 80% 自然；格子衬衫会画出马赛克状像素块（已去掉），
+    # 衣服会沿用背心的轮廓（有时像无袖马甲，但已不是反光衣，no_vest 标注仍正确）；CLIP 拦不住马赛克 → 靠 G4 抽检
+    variables:
+      garment: [dark grey work shirt, faded blue denim jacket, black hoodie, plain white t-shirt,
+                olive green work jacket, navy blue polo shirt, brown canvas work jacket]
+    prompt: >-
+      construction worker wearing a {garment}, no high-visibility vest, no reflective strips,
+      photorealistic, natural light
+    negative: high-visibility vest, safety vest, reflective strips, neon yellow, orange vest, cartoon, blurry
+    label: {remove: vest, add: no_vest, box: same}
+    g1_question: "Is this person wearing a high-visibility safety vest?"   # 期望：no
+
+  - id: add_harness
+    route: inpaint
+    targets: [harness]
+    target: 600
+    base:
+      require: [person]
+      exclude: [harness]
+      person_height: [0.25, 0.95]       # 需要看得清躯干
+      prefer_sources: [work_at_height, construction_site_safety]
+    mask: {from: person, region: torso_and_thighs, method: sam}
+    prompt: >-
+      construction worker wearing a full-body fall-arrest safety harness with yellow webbing straps over the
+      shoulders, across the chest and around the thighs, photorealistic
+    negative: no harness, backpack, cartoon, blurry, deformed, extra limbs
+    label: {add: harness, box: mask_bbox}
+    g1_question: "Is this person wearing a full-body safety harness?"   # 期望：yes（检测器对安全带不可靠，主要靠 G1）
+
+  - id: add_vehicle
+    route: inpaint
+    targets: [vehicle]
+    target: 600
+    base: {ground_region: true, max_people: 6}   # 需要有可放置车辆的空地（由检测结果与图像下半部推断）
+    mask: {method: placed_box, size: [0.15, 0.40]}
+    prompt: >-
+      a {vehicle} parked on the ground at a construction site, photorealistic, consistent lighting and perspective
+    variables: {vehicle: [white pickup truck, delivery van, small truck, sedan car, utility van]}
+    negative: toy, cartoon, floating, distorted, blurry
+    label: {add: vehicle, box: detector_or_mask_bbox}
+
+  - id: add_telecom_machinery
+    route: inpaint
+    targets: [machinery]
+    target: 600
+    base: {ground_region: true, max_people: 6}
+    mask: {method: placed_box, size: [0.25, 0.55]}
+    prompt: >-
+      a {machine} at a roadside telecom construction site, photorealistic, consistent lighting and perspective
+    variables:
+      machine: [bucket truck with an aerial lift boom, cable drum trailer with a large cable reel,
+                cable pulling winch truck, mini excavator digging a trench, crane truck]
+    negative: toy, cartoon, floating, distorted metal, blurry
+    label: {add: machinery, box: detector_or_mask_bbox}
+
+  # ---------------------------------------------------------------- 路线 ④ 场景迁移
+  - id: telecom_scene_transfer
+    route: scene_transfer
+    targets: [person, helmet, no_helmet, vest, no_vest, harness]
+    target: 500                         # 张数（图），标注全部继承
+    base: {require: [person], person_height: [0.20, 0.90], max_people: 2}
+    background:
+      source: telecom_seed              # 第一轮被剔除的电信设施图（塔、天线、机柜、无人场景），先过 G0
+      scenes: [lattice tower, monopole, rooftop antennas, roadside cabinet, cable trench]
+    harmonize: {method: img2img, strength: [0.25, 0.40]}
+    label: {keep: all, transform: paste}
+
+  - id: weather_lighting
+    route: img2img
+    targets: [all]
+    target: 300
+    base: {any: true}
+    prompt: "{condition}, photorealistic"
+    variables: {condition: [light rain, fog, overcast dusk, night with work lights, strong backlight]}
+    strength: [0.25, 0.40]
+    label: {keep: all}
+
+  # ---------------------------------------------------------------- 路线 ①（可选，W10 有余力时）
+  - id: t2i_tower_climber
+    route: t2i
+    optional: true
+    targets: [person, harness, helmet, no_helmet]
+    target: 200
+    requires: [telecom_lora]
+    prompt: >-
+      tlcmsite, {view}, a technician climbing a lattice telecommunication tower {ppe}, steel lattice with antennas,
+      {weather}, photorealistic documentary photograph
+    variables:
+      view: [ground-level upward view, side view from the tower, distant view]
+      ppe: [wearing a helmet and a full-body harness, wearing a harness but no helmet, without a harness]
+      weather: [clear sky, overcast sky, light rain]
+    label: {method: autolabel}          # YOLO-World / Grounding DINO + E2 + 与提示词一致性核对
+
+gates:
+  g0_leak: {phash_threshold: 8}                      # 与 TelecomEval（已选定的 167 张）比对
+  g1_semantic: {clip_min: 0.25, vlm: Qwen/Qwen2.5-VL-3B-Instruct}
+  g2_distribution: {metric: kid, max_kid: 0.05, max_fid: 50}   # 按批次（每个 scenario）计算
+  g3_detector: {weights: runs/phase1/e2/weights/best.pt, conf: 0.25}   # 只剔除极端失败
+  g4_human: {sample: 0.05, scale: 5, rerate_after_days: 7, rerate_count: 50}   # 单人自评 + 盲评复评
