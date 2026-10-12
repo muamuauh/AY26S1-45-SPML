@@ -1,7 +1,8 @@
 @echo off
-rem TelecomSafe Baseline Demo v1 — double-click to start.
+rem TelecomSafe Baseline Demo v1 - double-click to start.
 rem Optional: start_demo.bat path\to\weights.pt   (default: the E2 baseline)
-chcp 65001 >nul
+rem Keep this file ASCII-only: cmd.exe misparses lines with multi-byte UTF-8 text
+rem (part of a line gets run as a command), with or without chcp 65001.
 setlocal
 cd /d "%~dp0"
 
@@ -11,8 +12,8 @@ if not exist "%PY%" (
     for /f "delims=" %%i in ('conda run -n telecomsafe python -c "import sys; print(sys.executable)" 2^>nul') do set "PY=%%i"
 )
 if not exist "%PY%" (
-    echo [错误] 找不到 conda 环境 telecomsafe。
-    echo        请先在项目目录执行：conda env create -f environment.yml
+    echo [Error] conda environment "telecomsafe" not found.
+    echo         Create it from the repository root: conda env create -f environment.yml
     pause
     exit /b 1
 )
@@ -20,25 +21,26 @@ if not exist "%PY%" (
 set "WEIGHTS=runs\phase1\e2\weights\best.pt"
 if not "%~1"=="" set "WEIGHTS=%~1"
 if not exist "%WEIGHTS%" if "%~1"=="" (
-    echo 本地没有 E2 模型，正在从 GitHub Release 下载……
+    echo E2 weights not found locally; downloading them from the GitHub Release...
     "%PY%" -m telecomsafe.weights e2
 )
 if not exist "%WEIGHTS%" (
-    echo [错误] 找不到模型权重：%WEIGHTS%
-    echo        可以下载：python -m telecomsafe.weights e2
-    echo        或重新训练：python -m telecomsafe.train --exp e2
+    echo [Error] weights not found: %WEIGHTS%
+    echo         Download them: python -m telecomsafe.weights e2
+    echo         or retrain:    python -m telecomsafe.train --exp e2
     pause
     exit /b 1
 )
 
 set PYTHONIOENCODING=utf-8
-echo TelecomSafe Demo 启动中（模型：%WEIGHTS%）……
-echo 就绪后会自动打开浏览器：http://127.0.0.1:7860
-echo 关闭本窗口或按 Ctrl+C 即可停止服务。
+echo TelecomSafe Demo starting (weights: %WEIGHTS%)...
+echo The browser opens automatically when it is ready: http://127.0.0.1:7860
+echo Close this window or press Ctrl+C to stop the server.
 echo.
 "%PY%" -m telecomsafe.demo.app --weights "%WEIGHTS%" --open
 if errorlevel 1 (
     echo.
-    echo [错误] Demo 异常退出。若提示端口 7860 被占用，请先关闭已经在运行的 Demo 窗口。
+    echo [Error] The demo exited with an error. If it says port 7860 is in use,
+    echo         close the demo window that is already running first.
 )
 pause
