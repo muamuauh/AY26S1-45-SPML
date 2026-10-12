@@ -48,7 +48,7 @@ pytest                                               # unit tests; no GPU or dat
 
 cp .env.example .env                                 # fill in Kaggle / Roboflow API keys (.env is not committed)
 python -m telecomsafe.data.download --list           # dataset download status
-python -m telecomsafe.data.download                  # download the scriptable datasets into data/raw/
+python -m telecomsafe.data.download                  # download the scriptable datasets into data/raw/ (Windows: double-click download_datasets.bat)
 python -m telecomsafe.data.catalog                   # generate the dataset catalogue data/README(-EN).md
 python -m telecomsafe.data.collect_open              # search TelecomEval candidates (open licences, attribution recorded)
 python -m telecomsafe.data.labelstudio serve         # start the annotation tool (account in .env); push / pull in another terminal

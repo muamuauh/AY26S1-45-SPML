@@ -260,7 +260,7 @@ sources:
       description: "2,300 photos of real construction sites in China (mostly news photos with watermarks), labelling helmet, no helmet, vest and no vest; No_Vest boxes cover the torso without a vest, matching our criterion. Its 4,245 no-vest instances are the largest in all our data and the main source of the no_vest class. No person class; filled with teacher pseudo-labels."
       licence: "Private (Roboflow workspace fathorazi-nur-fajri/apd-8wyrt, shared with the team) — internal training only, not redistributed"
       planned_size: "2,300 images (train 1,610 / valid 460 / test 230)"
-      instructions: "Get APD.v1i.yolov8.zip from the team-only shared folder (OneDrive / Teams) and extract it to data/raw/apd/."
+      instructions: "Get APD.v1i.yolov8.zip from the team-only shared folder (OneDrive / Teams) and put it in the repository root or your Downloads folder (it is extracted automatically), or extract it to data/raw/apd/ yourself."
       notes: "Checked 2026-09-28: good label quality; only 6 near-duplicates with other datasets and 30 internal duplicates. Images come from news websites (watermarked) and are not owned by the dataset author: cite the source in the report and never publish these images."
     tier: B
     role: train
@@ -278,7 +278,8 @@ sources:
     path: data/raw/apd
     download:
       method: manual
-      instructions: 从组内共享文件夹（OneDrive / Teams，仅限组员）获取 APD.v1i.yolov8.zip，解压到 data/raw/apd/。
+      local_zip: APD.v1i.yolov8.zip   # 放在仓库根目录、data/ 或"下载"文件夹，download 会自动解压
+      instructions: 从组内共享文件夹（OneDrive / Teams，仅限组员）获取 APD.v1i.yolov8.zip，放到仓库根目录或"下载"文件夹（会自动解压），或自行解压到 data/raw/apd/。
     names: [Helmet, No_Helmet, No_Vest, Vest]
     class_map:
       Helmet: helmet

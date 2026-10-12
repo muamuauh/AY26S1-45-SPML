@@ -76,6 +76,15 @@ copy .env.example .env      # then open .env in an editor and fill it in
 
 ### 3.1 Automatic download
 
+**One click**: on Windows, double-click `download_datasets.bat` in the repository root; on macOS / Linux, run `bash download_datasets.sh`. The script:
+
+- copies `.env.example` to `.env` if there is no `.env`; if `ROBOFLOW_API_KEY` is empty, Windows opens Notepad so you can fill it in;
+- downloads every dataset and skips those already present, so after an interruption just run it again;
+- extracts `APD.v1i.yolov8.zip` to `data/raw/apd/` if the archive is in the repository root or your Downloads folder (see 3.2);
+- ends with a list showing which datasets are ready.
+
+Or run the steps yourself:
+
 ```powershell
 python -m telecomsafe.data.download --list     # show which datasets are present locally
 python -m telecomsafe.data.download            # download every enabled, scriptable dataset
@@ -83,7 +92,7 @@ python -m telecomsafe.data.download            # download every enabled, scripta
 
 ### 3.2 Placing APD by hand
 
-APD is private data shared with us and cannot be downloaded publicly. Get `APD.v1i.yolov8.zip` from the **team-only shared folder** and extract it to `data/raw/apd/`; the directory should then contain `train/`, `valid/`, `test/` and `data.yaml` directly.
+APD is private data shared with us and cannot be downloaded publicly. Get `APD.v1i.yolov8.zip` from the **team-only shared folder** and put it in the repository root or your Downloads folder; the download script extracts it. Or extract it to `data/raw/apd/` yourself; the directory should then contain `train/`, `valid/`, `test/` and `data.yaml` directly.
 
 ### 3.3 Check
 

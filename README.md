@@ -54,7 +54,7 @@ pytest                                               # 单元测试，不需要 
 
 cp .env.example .env                                 # 填 Kaggle / Roboflow API key（.env 不入库）
 python -m telecomsafe.data.download --list           # 查看数据集下载状态
-python -m telecomsafe.data.download                  # 下载可脚本化的数据集到 data/raw/
+python -m telecomsafe.data.download                  # 下载可脚本化的数据集到 data/raw/（Windows 可直接双击 download_datasets.bat）
 python -m telecomsafe.data.catalog                   # 生成数据集说明 data/README.md 与 README-EN.md
 python -m telecomsafe.data.collect_open              # 检索 TelecomEval 候选图（开放许可，自动记录署名）
 python -m telecomsafe.data.labelstudio serve        # 启动标注工具（账号见 .env）；另开终端执行 push / pull

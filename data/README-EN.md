@@ -118,7 +118,7 @@
 - **Fully annotated target classes**: helmet, no_helmet, vest, no_vest (other classes get teacher pseudo-labels)
 - **Licence**: Private (Roboflow workspace fathorazi-nur-fajri/apd-8wyrt, shared with the team) — internal training only, not redistributed
 - **Citation**: APD dataset v1 (Roboflow private project fathorazi-nur-fajri/apd-8wyrt), shared with the project team; used for internal training only.
-- **Download**: Manual: Get APD.v1i.yolov8.zip from the team-only shared folder (OneDrive / Teams) and extract it to data/raw/apd/.
+- **Download**: Manual: Get APD.v1i.yolov8.zip from the team-only shared folder (OneDrive / Teams) and put it in the repository root or your Downloads folder (it is extracted automatically), or extract it to data/raw/apd/ yourself.
 - **Role**: training · B supplementary
 - **Notes**: Checked 2026-09-28: good label quality; only 6 near-duplicates with other datasets and 30 internal duplicates. Images come from news websites (watermarked) and are not owned by the dataset author: cite the source in the report and never publish these images.
 

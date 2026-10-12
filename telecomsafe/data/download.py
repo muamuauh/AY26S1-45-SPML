@@ -9,13 +9,18 @@ Credentials are read from the repository's .env file (template: .env.example; ne
             (kaggle.com → Settings → API → Generate New Token)
   Roboflow  ROBOFLOW_API_KEY (app.roboflow.com → Settings → API Keys)
 
-Sources with `method: manual` only print their instructions.
+Sources with `method: manual` only print their instructions. A manual source may name a `local_zip`
+(APD: the archive from the team-only share): if that file is found in the repository root, data/ or
+~/Downloads, it is extracted into place.
+
+One-click wrappers: download_datasets.bat (Windows) and download_datasets.sh (macOS / Linux).
 """
 
 from __future__ import annotations
 
 import argparse
 import os
+import shutil
 import sys
 import zipfile
 from pathlib import Path
@@ -24,7 +29,9 @@ import requests
 import yaml
 
 from telecomsafe.env import load_env
-from telecomsafe.paths import load_sources, resolve
+from telecomsafe.paths import DATA, ROOT, load_sources, resolve
+
+ZIP_FOLDERS = (ROOT, DATA, Path.home() / "Downloads")
 
 
 def is_present(path: Path) -> bool:
@@ -92,6 +99,26 @@ def via_ultralytics(spec: dict, dest: Path) -> None:
     fetch_zip(url, dest)
 
 
+def find_local_zip(name: str, folders=ZIP_FOLDERS) -> Path | None:
+    for folder in folders:
+        if (folder / name).is_file():
+            return folder / name
+    return None
+
+
+def extract_local_zip(archive: Path, dest: Path) -> None:
+    """Extract into dest; when the archive wraps everything in one top folder, lift its contents up."""
+    dest.mkdir(parents=True, exist_ok=True)
+    with zipfile.ZipFile(archive) as z:
+        z.extractall(dest)
+    entries = [p for p in dest.iterdir() if not p.name.startswith(".")]
+    if len(entries) == 1 and entries[0].is_dir():
+        inner = entries[0]
+        for p in list(inner.iterdir()):
+            shutil.move(str(p), dest / p.name)
+        inner.rmdir()
+
+
 METHODS = {"kaggle": via_kaggle, "roboflow": via_roboflow, "ultralytics": via_ultralytics,
            "url_zip": lambda spec, dest: fetch_zip(spec["url"], dest)}
 
@@ -122,7 +149,14 @@ def main(argv: list[str] | None = None) -> None:
             print(f"  ✓ {name}: already in {dest}")
             continue
         if spec["method"] == "manual":
-            print(f"  ✋ {name}: manual — {spec.get('instructions', '')}\n     {cfg.get('homepage', '')}")
+            archive = find_local_zip(spec["local_zip"]) if spec.get("local_zip") else None
+            if archive:
+                print(f"  ↓ {name}: extracting {archive}")
+                extract_local_zip(archive, dest)
+                print(f"    done → {dest}")
+                continue
+            instructions = cfg.get("en", {}).get("instructions") or spec.get("instructions", "")
+            print(f"  ✋ {name}: manual — {instructions}\n     {cfg.get('homepage') or ''}")
             continue
         print(f"  ↓ {name} via {spec['method']}")
         try:

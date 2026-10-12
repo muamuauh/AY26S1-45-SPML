@@ -28,6 +28,9 @@ data/*
 runs/
 wandb/
 mlruns/
+# Private dataset archives (APD: internal use only). download_datasets.* looks for them in the
+# repository root, so never let git pick them up.
+*.zip
 
 # Secrets
 .env

@@ -99,3 +99,21 @@ def test_evaluate_groups_seeds_into_mean_and_std():
     assert g["e2"]["runs"] == 2 and abs(g["e2"]["overall"]["mAP50"] - 0.73) < 1e-9
     assert abs(g["e2"]["per_class"]["person"]["ap50_std"] - 0.0141421356) < 1e-6
     assert g["e1"]["overall"]["mAP50_std"] is None  # a single run has no spread
+
+
+def test_local_zip_is_found_and_its_top_folder_lifted(tmp_path):
+    import zipfile
+
+    from telecomsafe.data.download import extract_local_zip, find_local_zip
+    a, b = tmp_path / "root", tmp_path / "downloads"
+    a.mkdir(), b.mkdir()
+    archive = b / "APD.zip"
+    with zipfile.ZipFile(archive, "w") as z:
+        z.writestr("APD.v1i/data.yaml", "names: []")
+        z.writestr("APD.v1i/train/images/x.jpg", "")
+    assert find_local_zip("APD.zip", (a, b)) == archive
+    assert find_local_zip("other.zip", (a, b)) is None
+    dest = tmp_path / "raw" / "apd"
+    extract_local_zip(archive, dest)
+    assert (dest / "data.yaml").exists() and (dest / "train" / "images" / "x.jpg").exists()
+    assert not (dest / "APD.v1i").exists()
