@@ -92,43 +92,128 @@ scenarios:
     label: {add: harness, box: mask_bbox}
     g1_question: "Is this person wearing a full-body safety harness?"   # 期望：yes（检测器对安全带不可靠，主要靠 G1）
 
+  # 添加类（telecomsafe.gen.insert）：以图中站着的人为参照定深度与大小，物体底边放在该人脚下，
+  # 尺寸 h / w 以人的身高为单位（w 再随机乘 0.55–1.0 模拟斜视角）；不得遮挡已标注的物体。
+  # 标注框 = 重绘后 SAM 在放置区域内分割出的紧框（不用 E2 检测框，避免只留下 E2 已会的样本）。
   - id: add_vehicle
-    route: inpaint
+    route: insert
     targets: [vehicle]
     target: 600
-    base: {ground_region: true, max_people: 6}   # 需要有可放置车辆的空地（由检测结果与图像下半部推断）
-    mask: {method: placed_box, size: [0.15, 0.40]}
+    # 首批（2026-10-07）：参照的人在脚手架 / 高空平台上 → 车悬在半空（17 张通过里只有 3–4 张合理）。
+    # 因此只认脚在画面下部的人为"站在地面上"，排除以高处作业为主的数据集，并在重绘前用 CLIP 检查车轮处是地面。
+    base: {require: [person], person_height: [0.08, 0.45], max_people: 6,
+           exclude_sources: [work_at_height, body_harness]}
+    ground_min: 0.5
+    objects:
+      - {name: white pickup truck, h: 1.05, w: 3.0}
+      - {name: white delivery van, h: 1.2, w: 2.9}
+      - {name: small box truck, h: 1.5, w: 3.6}
+      - {name: silver sedan car, h: 0.85, w: 2.7}
+      - {name: dark blue hatchback car, h: 0.85, w: 2.4}
+      - {name: white utility van with roof rack, h: 1.25, w: 3.0}
     prompt: >-
-      a {vehicle} parked on the ground at a construction site, photorealistic, consistent lighting and perspective
-    variables: {vehicle: [white pickup truck, delivery van, small truck, sedan car, utility van]}
-    negative: toy, cartoon, floating, distorted, blurry
-    label: {add: vehicle, box: detector_or_mask_bbox}
+      a {object} parked on the ground at a construction site, photorealistic, consistent lighting and
+      perspective, natural shadow under the vehicle
+    negative: toy, cartoon, floating, distorted, blurry, deformed, people, person
+    strength: 1.0
+    guidance: 7.5
+    retries: 3
+    crop_scale: 1.6
+    color_match: ring
+    g1_min: 0.5
+    min_fill: 0.25
 
   - id: add_telecom_machinery
-    route: inpaint
+    route: insert
     targets: [machinery]
     target: 600
-    base: {ground_region: true, max_people: 6}
-    mask: {method: placed_box, size: [0.25, 0.55]}
+    base: {require: [person], person_height: [0.08, 0.45], max_people: 6,
+           exclude_sources: [work_at_height, body_harness]}
+    ground_min: 0.5
+    objects:
+      - {name: bucket truck with an aerial lift boom, h: 2.0, w: 4.0}
+      - {name: cable drum trailer carrying a large cable reel, h: 1.2, w: 2.2}
+      - {name: cable pulling winch truck, h: 1.6, w: 3.6}
+      - {name: yellow mini excavator, h: 1.4, w: 2.2}
+      - {name: truck-mounted crane, h: 2.0, w: 4.5}
     prompt: >-
-      a {machine} at a roadside telecom construction site, photorealistic, consistent lighting and perspective
-    variables:
-      machine: [bucket truck with an aerial lift boom, cable drum trailer with a large cable reel,
-                cable pulling winch truck, mini excavator digging a trench, crane truck]
-    negative: toy, cartoon, floating, distorted metal, blurry
-    label: {add: machinery, box: detector_or_mask_bbox}
+      a {object} on the ground at a roadside telecom construction site, photorealistic, consistent lighting
+      and perspective, natural shadow
+    negative: toy, cartoon, floating, distorted metal, blurry, deformed, people, person
+    strength: 1.0
+    guidance: 7.5
+    retries: 3
+    crop_scale: 1.6
+    color_match: ring
+    g1_min: 0.5
+    min_fill: 0.25
 
   # ---------------------------------------------------------------- 路线 ④ 场景迁移
   - id: telecom_scene_transfer
-    route: scene_transfer
+    route: scene_transfer             # telecomsafe.gen.scene
     targets: [person, helmet, no_helmet, vest, no_vest, harness]
-    target: 500                         # 张数（图），标注全部继承
-    base: {require: [person], person_height: [0.20, 0.90], max_people: 2}
+    target: 500                       # 张数（图），标注全部继承
+    base: {require: [person], person_height: [0.25, 0.90], max_people: 2}
     background:
-      source: telecom_seed              # 第一轮被剔除的电信设施图（塔、天线、机柜、无人场景），先过 G0
-      scenes: [lattice tower, monopole, rooftop antennas, roadside cabinet, cable trench]
-    harmonize: {method: img2img, strength: [0.25, 0.40]}
-    label: {keep: all, transform: paste}
+      source: telecom_seed            # 第一轮被剔除、无人的电信候选图：CLIP 判为室外电信场景、E2 无目标类别、过 G0
+    # 首批（2026-10-07，30 张）：17 张过 G1 + G3，目测约 40% 自然。问题：被遮挡 / 半身的人抠出来像漂浮的
+    # 上半身或手；人太大像贴纸；CLIP 的"像不像贴上去"判断不出来。→ 只用 YOLO11-pose 确认全身站立的人，人缩小。
+    # 第二批（60 张）：47 张底图无全身站立的人；12 张通过，目测约一半自然。剩余问题：特写背景（电缆盘）里人比例
+    # 失真；脚落在铁塔 / 车旁半空。→ 背景池加 CLIP"远景 vs 特写"筛选；放置时 CLIP 检查脚下是地面（最多试 10 次）。
+    # 第三批（100 张，背景池 127 → 86）：15 张通过，目测约 60–65% 自然。剩余问题：俯拍 / 航拍背景里站着的人
+    # 像巨人；人占画面 40% 以上就像贴纸。→ 背景池排除俯拍，人物高度上限 0.45 → 0.38。
+    # 第四批（100 张，背景池 81 张）：16 张通过，目测约 70% 自然；问题剩黑白老照片背景、蹲姿的人贴在物体上。
+    # → 背景池排除黑白照片。
+    person_height: [0.18, 0.38]       # 人物占背景高度的比例
+    ground_min: 0.5                   # 脚下一条区域被 CLIP 判为地面的最低比例
+    # 全量（3309 张底图，2026-10-07）：586 张通过，随机抽 24 张约 75% 自然；不自然的多为蹲 / 弯腰 / 举手的人、
+    # 人偏大、小人被放大 3 倍以上发糊。→ 放大倍数上限 2.5（剔除 26 张）；姿势问题规则判不准，交给 G4。
+    max_upscale: 2.5
+    placements: 10
+    recolor: 0.5                      # 人物颜色向背景统计量靠拢的比例
+    harmonize_strength: 0.55          # 只重绘轮廓一圈与脚下阴影，人物本身不重绘（PPE 标注才能继承）
+    crop_scale: 1.3
+    min_fill: 0.3
+    g1_min: 0.5
+    prompt: >-
+      photo of a construction worker standing on the ground outdoors, natural lighting, realistic soft shadow
+      on the ground, photorealistic
+    negative: cartoon, cut-out, sticker, halo, white outline, blurry, deformed, extra person
+
+  - id: telecom_scene_generate
+    route: scene_generate             # telecomsafe.gen.scene_gen
+    # 贴真人（telecom_scene_transfer）G4 只有 9/99 自然（2026-10-07）：主要是大小 / 透视、光照 / 色调不一致。
+    # → 改为在背景里直接画人：大小由单目度量深度定（f·H/Z），姿态来自训练集真人（OpenPose ControlNet），
+    #   光照由 SDXL 结合周围画面统一生成；PPE 写在提示词里，E2 检出结果与提示词一致才保留。
+    targets: [person, helmet, no_helmet, vest, no_vest]
+    target: 500
+    person_height: [0.08, 0.6]        # 由深度算出的人高须落在背景高度的这一范围
+    fov: 65                           # 无 EXIF 焦距时假设的水平视场角
+    placements: 30
+    ground_min: 0.5
+    crop_scale: 2.0
+    min_crop: 512
+    control_scale: 0.8
+    strength: 1.0
+    guidance: 7.0
+    min_height_ratio: 0.75            # E2 检出的人高 / 计划人高
+    max_height_ratio: 1.25
+    retries: 2                        # 失败（没画出人 / PPE 不符 / 大小不符）时换种子重试
+    ppe:
+      # 首批 12 张：写"no hat"仍会画出安全帽（提示词里出现 hat 反而触发）→ 无帽 / 无背心只描述头发和衣服，
+      # 安全帽 / 反光衣放进该项的负向提示词
+      - {text: "a yellow hard hat and an orange high-visibility safety vest", helmet: true, vest: true}
+      - {text: "a white hard hat and a yellow reflective safety vest", helmet: true, vest: true}
+      - {text: "a white hard hat and a plain dark blue work jacket", helmet: true, vest: false,
+         negative: "safety vest, high-visibility vest, reflective vest, reflective stripes"}
+      - {text: "short hair, bareheaded, and an orange high-visibility safety vest", helmet: false, vest: true,
+         negative: "hard hat, helmet, hat, cap, headwear"}
+      - {text: "short hair, bareheaded, a plain grey t-shirt and work trousers", helmet: false, vest: false,
+         negative: "hard hat, helmet, hat, cap, headwear, safety vest, high-visibility vest, reflective stripes"}
+    prompt: >-
+      photo of a telecom technician standing on the ground, with {ppe}, full body, natural lighting
+      matching the scene, realistic shadow on the ground, photorealistic
+    negative: cartoon, drawing, cut-out, sticker, blurry, deformed, extra limbs, extra person, floating, oversized
 
   - id: weather_lighting
     route: img2img
@@ -161,4 +246,6 @@ gates:
   g1_semantic: {clip_min: 0.25, vlm: Qwen/Qwen2.5-VL-3B-Instruct}
   g2_distribution: {metric: kid, max_kid: 0.05, max_fid: 50}   # 按批次（每个 scenario）计算
   g3_detector: {weights: runs/phase1/e2/weights/best.pt, conf: 0.25}   # 只剔除极端失败
-  g4_human: {sample: 0.05, scale: 5, rerate_after_days: 7, rerate_count: 50}   # 单人自评 + 盲评复评
+  # 每个 scenario 随机抽 100 张，自然 / 不自然二选一（telecomsafe.gen.g4）；按 Wilson 95% 区间报告自然比例。
+  # 5% 抽样在 500 张的批次里只有 25 张，区间太宽；5 级打分单人难以前后一致 → 改为固定 100 张 + 二分。
+  g4_human: {sample: 100, scale: [natural, unnatural], rerate_after_days: 7, rerate_count: 50}   # 单人自评 + 盲评复评

@@ -101,6 +101,7 @@ def select_bases(cfg: dict, images: Path = TRAIN_IMAGES, labels: Path = TRAIN_LA
     from PIL import Image
 
     rules = cfg.get("base", {})
+    exclude_sources = tuple(exclude_sources) + tuple(rules.get("exclude_sources", []))
     need = set(rules.get("require", []))
     avoid = set(rules.get("exclude", []))
     out = []
@@ -151,6 +152,21 @@ def write_record(stem: Path, image, labels: list[Label], meta: dict) -> None:
     write_labels(paths[".txt"], labels, *image.size)
     meta = {**meta, "labels": [asdict(lb) for lb in labels]}
     paths[".json"].write_text(json.dumps(meta, indent=1, ensure_ascii=False), encoding="utf-8")
+
+
+def reject_record(stem: Path, rejected: Path, reason: str) -> None:
+    """Move an accepted record (<stem>.jpg/.txt/.json) to the rejected folder, noting why."""
+    rejected.mkdir(parents=True, exist_ok=True)
+    for ext, path in record_paths(stem).items():
+        if not path.exists():
+            continue
+        if ext == ".json":
+            meta = json.loads(path.read_text(encoding="utf-8"))
+            meta["reason"] = reason
+            (rejected / path.name).write_text(json.dumps(meta, indent=1, ensure_ascii=False), encoding="utf-8")
+            path.unlink()
+        else:
+            path.replace(rejected / path.name)
 
 
 def done_bases(*folders: Path) -> set[str]:
