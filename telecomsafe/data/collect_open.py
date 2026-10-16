@@ -2,11 +2,14 @@
 
     python -m telecomsafe.data.collect_open                   # every provider that is set up
     python -m telecomsafe.data.collect_open --per-query 40 --providers wikimedia flickr
+    python -m telecomsafe.data.collect_open --providers commons_dvids --per-query 200
     python -m telecomsafe.data.collect_open --sync            # after deleting rejected images by hand
 
 Providers: Openverse and Wikimedia Commons (no key needed), Flickr (FLICKR_API_KEY
 in .env) and DVIDS, the US Department of Defense media archive (DVIDS_API_KEY);
-a provider without its key is skipped. Wikimedia categories about people at work
+a provider without its key is skipped. DVIDS only gives API keys to affiliated users, but many of
+its photos are mirrored on Wikimedia Commons: commons_dvids searches those (insource:"dvidshub")
+with no key, and keeps only images whose short side is at least COMMONS_DVIDS_MIN_SIDE pixels. Wikimedia categories about people at work
 are also searched one level of subcategories down. Frames from Creative Commons videos come from
 telecomsafe.data.collect_video.
 
@@ -31,6 +34,7 @@ import os
 import re
 import sys
 import time
+from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -78,7 +82,20 @@ WIKIMEDIA_CATEGORIES = {  # category → domain
 # of the structure categories (towers at night, aerial photographs, towers in art...) almost never show people.
 WIKIMEDIA_RECURSE = {"Telecommunications Tower Technicians at work", "Working at height", "Lineworkers",
                      "Maintenance of overhead power lines", "Fiber to the x"}
-PROVIDERS = ["openverse", "wikimedia", "flickr", "dvids"]
+# DVIDS photos mirrored on Wikimedia Commons (their description links to dvidshub.net): soldiers putting up
+# antenna masts, climbing towers, pulling and splicing cable — higher resolution and more varied than video frames.
+COMMONS_DVIDS_QUERIES = {  # query → domain
+    "antenna tower": "telecom", "tower climb": "telecom", "communications tower": "telecom", "radio tower": "telecom",
+    "antenna mast": "telecom", "antenna installation": "telecom", "satellite antenna": "telecom",
+    "tower maintenance": "telecom", "tower harness": "telecom", "cable installation": "telecom",
+    "fiber optic": "telecom", "cable splice": "telecom", "communications technician": "telecom",
+    "network cable": "telecom", "telephone pole": "telecom", "cable trench": "telecom",
+    "lineman": "near", "power line": "near", "utility pole climb": "near", "bucket truck": "near",
+}
+COMMONS_DVIDS_MIN_SIDE = 1000
+COMMONS_DVIDS_THUMB = 1280  # DVIDS originals are large and Commons can be slow here (~30 KB/s per connection)
+DOWNLOAD_WORKERS = 4        # parallel image downloads (Wikimedia's guidance: a few, not dozens)
+PROVIDERS = ["openverse", "wikimedia", "flickr", "dvids", "commons_dvids"]
 OPENVERSE_LICENCES = "cc0,pdm,by,by-sa"
 WIKIMEDIA_OK = re.compile(r"^(cc0|public domain|pd|cc by(-sa)? [\d.]+)", re.I)
 # Flickr licence ids are looked up at run time (Flickr has added licences over the years); keep these by name
@@ -151,16 +168,19 @@ def _wikimedia_titles(s: requests.Session, query: str | None, category: str | No
     return [m["title"] for m in get_json(s, "https://commons.wikimedia.org/w/api.php", params).get("query", {}).get("search", [])]
 
 
-def wikimedia(s: requests.Session, query: str | None, category: str | None, limit: int) -> list[dict]:
+def wikimedia(s: requests.Session, query: str | None, category: str | None, limit: int,
+              min_side: int = 0, thumb_width: int = 1600) -> list[dict]:
     titles = _wikimedia_titles(s, query, category, limit)
     out = []
     for i in range(0, len(titles), 50):
         params = {"action": "query", "titles": "|".join(titles[i : i + 50]), "prop": "imageinfo",
-                  "iiprop": "url|extmetadata|mime", "iiurlwidth": 1600, "format": "json"}
+                  "iiprop": "url|extmetadata|mime|size", "iiurlwidth": thumb_width, "format": "json"}
         pages = get_json(s, "https://commons.wikimedia.org/w/api.php", params).get("query", {}).get("pages", {})
         for page in pages.values():
             info = (page.get("imageinfo") or [{}])[0]
             if not info.get("mime", "").startswith("image/") or info.get("mime") == "image/svg+xml":
+                continue
+            if min(info.get("width", 0), info.get("height", 0)) < min_side:
                 continue
             meta = {k: v.get("value", "") for k, v in info.get("extmetadata", {}).items()}
             licence = meta.get("LicenseShortName", "")
@@ -304,6 +324,8 @@ def collect(providers: list[str], per_query: int, depth: int = 1) -> None:
     for p in ("openverse", "flickr", "dvids", "wikimedia"):
         if p in providers:
             jobs += [(p, q, None, domain_of(q)) for q in QUERIES]
+    if "commons_dvids" in providers:
+        jobs += [("commons_dvids", f'insource:"dvidshub" {q}', None, dom) for q, dom in COMMONS_DVIDS_QUERIES.items()]
     if "wikimedia" in providers:
         for cat, dom in WIKIMEDIA_CATEGORIES.items():
             subcats = wikimedia_subcategories(s, cat) if depth and cat in WIKIMEDIA_RECURSE else []
@@ -317,15 +339,19 @@ def collect(providers: list[str], per_query: int, depth: int = 1) -> None:
                 items = flickr(s, query, per_query, keys["flickr"], licences)
             elif provider == "dvids":
                 items = dvids(s, query, per_query, keys["dvids"])
+            elif provider == "commons_dvids":  # recorded as wikimedia: that is where the file and licence live
+                items = wikimedia(s, query, None, per_query, min_side=COMMONS_DVIDS_MIN_SIDE,
+                                  thumb_width=COMMONS_DVIDS_THUMB)
             else:
                 items = wikimedia(s, query, category, per_query)
         except (requests.RequestException, RuntimeError, KeyError, ValueError) as e:
             print(f"  ✗ {provider} {label}: {e}", file=sys.stderr)
             continue
         new = [it for it in items if (it["provider"], it["source_id"]) not in seen]
-        print(f"  {provider:9s} {label!r}: {len(items)} found, {len(new)} new")
-        for it in new:
-            path = download(s, it)
+        print(f"  {provider:9s} {label!r}: {len(items)} found, {len(new)} new", flush=True)
+        with ThreadPoolExecutor(DOWNLOAD_WORKERS) as pool:
+            paths = list(pool.map(lambda it: download(s, it), new))
+        for it, path in zip(new, paths):
             if path is None:
                 continue
             seen.add((it["provider"], it["source_id"]))
@@ -337,7 +363,6 @@ def collect(providers: list[str], per_query: int, depth: int = 1) -> None:
                 hashes.add(h)
             rows.append({**it, "file": path.name, "status": status, "domain": domain,
                          "downloaded_at": datetime.now(timezone.utc).isoformat(timespec="seconds")})
-            time.sleep(0.5)
         write_manifest(rows)
     print(f"{sum(r['status'] == 'candidate' for r in rows)} candidates in {OUT}; manifest: {MANIFEST}")
 

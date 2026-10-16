@@ -30,6 +30,20 @@ from telecomsafe.data.collect_open import OUT, read_manifest, write_manifest
 from telecomsafe.data.collect_video import WEIGHTS, visible_people
 
 REVIEW = OUT.parent / "review.html"
+HELP = (  # the review page's instructions (the local page and the screening package)
+    "<b>Telecom (1)</b>: someone working <b>outdoors</b> on telecom infrastructure — climbing a tower, rooftop "
+    "antennas or dishes, a street cabinet, a cable trench or manhole, overhead telecom cable. "
+    "<b>Near (2)</b>: power-line work (poles, bucket trucks, transmission lines). "
+    "<b>Reject (X)</b>: indoors (offices, labs, tents, hangars); posed photos, ceremonies, portraits; illustrations "
+    "or screenshots; nobody working; purely military scenes; blurry, or the workers are tiny (under ~80 px tall — "
+    "see the size tag); near-duplicates (keep at most 2–3 per event).<br>"
+    "<b>电信 (1)</b>：有人在<b>室外</b>对电信设施作业——爬铁塔、屋顶天线 / 卫星天线、路边机柜、线缆沟槽或人井、架空通信线。"
+    "<b>相邻领域 (2)</b>：电力线路作业（线杆、斗臂车、输电线路）。"
+    "<b>排除 (X)</b>：室内（办公室、实验室、帐篷、机库）；摆拍、仪式、人像；插画、截图；没有人在作业；纯军事场景；"
+    "模糊或工人太小（身高不到约 80 像素，看尺寸标签）；几乎相同的照片（同一次活动最多留 2–3 张）。<br>"
+    "Keys: ← → move · 1 · 2 · X · 0 clear · Space enlarge. Decisions stay in this browser until you click Export. "
+    "__AFTER__"
+)
 AUTO_REJECT = 0.5  # every image kept in the first manual screening that had nobody detected scored >= 0.99
 REJECTED = OUT.parent / "rejected"
 WORK_SCENES = {
@@ -93,7 +107,18 @@ def score(rows: list[dict], rescore: bool = False) -> int:
     return len(todo)
 
 
-def review_page(rows: list[dict]) -> str:
+def image_size(path: Path) -> str:
+    from PIL import Image
+
+    try:
+        with Image.open(path) as im:  # reads the header only
+            return f"{im.width}×{im.height}"
+    except OSError:
+        return "?"
+
+
+def review_items(rows: list[dict]) -> list[dict]:
+    """One card per candidate still on disk, sorted: undecided first, auto-rejected last, best score first."""
     items = []
     for r in rows:
         if r["status"] != "candidate" or not (OUT / r["file"]).exists():
@@ -105,11 +130,22 @@ def review_page(rows: list[dict]) -> str:
             "landing": r["landing_url"], "domain": r.get("domain") or "telecom", "persons": persons,
             "scene": r.get("scene", ""), "score": float(r.get("clip_score") or 0),
             "state": r.get("subset") or ("reject" if auto else ""),
-            "auto": auto, "decided": bool(r.get("subset")),
+            "auto": auto, "decided": bool(r.get("subset")), "size": image_size(OUT / r["file"]),
         })
     items.sort(key=lambda x: (x["decided"], x["auto"], -x["score"]))
+    return items
+
+
+def page_html(items: list[dict], key: str = "telecomeval-review", export: str = "telecom_eval_decisions.json",
+              after: str = "Then run <code>python -m telecomsafe.data.screen --apply &lt;file&gt;</code>.") -> str:
     data = json.dumps(items, ensure_ascii=False).replace("</", "<\\/")
-    return PAGE.replace("__DATA__", data).replace("__COUNT__", html.escape(str(len(items))))
+    return (PAGE.replace("__HELP__", HELP.replace("__AFTER__", after)).replace("__KEY__", json.dumps(key))
+            .replace("__EXPORT__", json.dumps(export)).replace("__COUNT__", html.escape(str(len(items))))
+            .replace("__DATA__", data))
+
+
+def review_page(rows: list[dict]) -> str:
+    return page_html(review_items(rows))
 
 
 def apply(path: Path) -> None:
@@ -195,13 +231,13 @@ dialog{border:0;padding:0;background:#000;max-width:96vw;max-height:96vh}dialog 
   <div class="counts" id="counts"></div>
   <div class="filters" id="filters"></div>
   <button class="export" id="export">Export decisions</button>
-  <div class="help"><b>Telecom</b>: people working on a telecom site — tower, rooftop antennas, trench, manhole, street cabinet, aerial cable. <b>Near</b>: power-line work (poles, bucket trucks). <b>Reject</b>: no one working, indoor labs / offices / classrooms, posed portraits, illustrations, near-duplicates. Keys: ← → move · 1 Telecom · 2 Near · X Reject · 0 clear · Space enlarge. Decisions are kept in this browser until exported; then run <code>python -m telecomsafe.data.screen --apply &lt;file&gt;</code>.</div>
+  <div class="help">__HELP__</div>
 </header>
 <main id="grid"></main>
 <dialog id="zoom"><img alt=""></dialog>
 <script>
 const items = __DATA__;
-const KEY = "telecomeval-review";
+const KEY = __KEY__;
 let saved = {}; try { saved = JSON.parse(localStorage.getItem(KEY) || "{}"); } catch (e) {}
 for (const it of items) if (it.file in saved) it.state = saved[it.file];
 const LABEL = {telecom: "Telecom", near: "Near", reject: "Reject"};
@@ -220,7 +256,7 @@ function card(it, i) {
   return `<article class="card" data-i="${i}" data-state="${it.state || ""}">
     <img loading="lazy" src="images/${encodeURIComponent(it.file)}" alt="">
     <div class="meta"><div class="title" title="${esc(it.title)}">${esc(it.title) || "(untitled)"}</div>
-      <span class="tag" title="people whose head is visible, counted by the E2 detector">${it.persons} with head</span><span class="tag">${esc(it.scene)}</span><span class="tag">score ${it.score.toFixed(2)}</span>${it.domain === "near" ? '<span class="tag">near query</span>' : ""}${it.auto && it.state === "reject" ? '<span class="tag">auto: no person, low score</span>' : ""}
+      <span class="tag" title="people whose head is visible, counted by the E2 detector">${it.persons} with head</span><span class="tag">${esc(it.scene)}</span><span class="tag">score ${it.score.toFixed(2)}</span><span class="tag">${esc(it.size)}</span>${it.prev ? `<span class="tag" title="decision in the first screening round">round 1: ${esc(it.prev)}</span>` : ""}${it.domain === "near" ? '<span class="tag">near query</span>' : ""}${it.auto && it.state === "reject" ? '<span class="tag">auto: no person, low score</span>' : ""}
       <div>${esc(it.provider)} · ${esc(it.licence)} · <a href="${esc(it.landing)}" target="_blank" rel="noopener">source</a></div></div>
     <div class="btns">${["telecom", "near", "reject"].map(v => `<button data-v="${v}" class="${it.state === v ? "on" : ""}">${LABEL[v]}</button>`).join("")}</div>
   </article>`;
@@ -263,7 +299,7 @@ document.getElementById("export").addEventListener("click", () => {
   const o = {}; for (const it of items) if (it.state) o[it.file] = it.state;
   const a = document.createElement("a");
   a.href = URL.createObjectURL(new Blob([JSON.stringify(o, null, 1)], {type: "application/json"}));
-  a.download = "telecom_eval_decisions.json"; a.click();
+  a.download = __EXPORT__; a.click();
 });
 render();
 </script></body></html>

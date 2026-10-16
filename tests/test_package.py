@@ -13,7 +13,7 @@ from telecomsafe.data import collect_open, package
 HEADER = ["file", "source_url", "title", "creator", "licence", "licence_version", "licence_url", "scene", "notes"]
 
 
-def _image(path, seed, size=(640, 640)):
+def _image(path, seed, size=(1200, 1000)):  # the checker needs a short side of at least 1000 px
     rng = np.random.default_rng(seed)
     Image.fromarray(rng.integers(0, 255, (size[1] // 16, size[0] // 16, 3), dtype=np.uint8)).resize(size).save(path)
 
@@ -115,3 +115,40 @@ def test_annotation_intake_refuses_unfinished_work(project):
     export.write_text(json.dumps([{"data": {"image": "x", "file": "a.jpg"}, "annotations": []}]), encoding="utf-8")
     with pytest.raises(SystemExit):
         package.intake_annotations(export, allow_incomplete=False)
+
+
+def test_combined_collection_puts_each_scene_in_its_subset(project):
+    assert package.domain_of_scene("all", "tower") == "telecom"
+    assert package.domain_of_scene("all", "pole") == "near"
+    assert package.domain_of_scene("all", "other_power") == "near"
+    assert package.domain_of_scene("telecom", "pole") == "telecom"  # a one-domain package keeps its domain
+    codes = [c for c, _, _ in package.DOMAINS["all"]["scenes"]]
+    assert len(codes) == len(set(codes)) and "other" not in codes
+    sub = _submission(project / "sub", [
+        ["a.jpg", "https://x.org/1", "Crew", "", "CC0", "", "", "cabinet", ""],
+        ["b.jpg", "https://x.org/2", "Pole", "", "CC0", "", "", "bucket_truck", ""],
+    ], {"a.jpg": 1, "b.jpg": 2})
+    package.intake_collection(sub, "all", "Ann", skip_bad=False)
+    assert {r["file"]: r["domain"] for r in collect_open.read_manifest()} == {
+        "contrib_ann_a.jpg": "telecom", "contrib_ann_b.jpg": "near"}
+
+
+def test_screening_package_rechecks_round_one_and_splits_evenly(monkeypatch):
+    items = [{"file": f"{i}.jpg", "score": s, "auto": a, "decided": d, "state": st}
+             for i, (s, a, d, st) in enumerate([(0.9, False, True, "telecom"), (0.8, False, False, ""),
+                                                 (0.7, False, False, ""), (0.2, True, False, "reject")])]
+    monkeypatch.setattr(package.screening, "review_items", lambda rows: [dict(it) for it in items])
+    cards = package.screen_items([])
+    first = next(c for c in cards if c["file"] == "0.jpg")
+    assert first["prev"] == "telecom" and first["state"] == "" and not first["decided"]
+    assert cards[-1]["file"] == "3.jpg" and cards[-1]["state"] == "reject"  # auto-rejected last, still pre-marked
+    a, b = package.split_parts(cards, 2)
+    assert [c["file"] for c in a] == ["0.jpg", "2.jpg"] and [c["file"] for c in b] == ["1.jpg", "3.jpg"]
+
+
+def test_merged_screening_decisions_leave_out_disagreements(tmp_path):
+    p1, p2 = tmp_path / "1.json", tmp_path / "2.json"
+    p1.write_text(json.dumps({"a.jpg": "telecom", "b.jpg": "reject"}))
+    p2.write_text(json.dumps({"b.jpg": "near", "c.jpg": "near"}))
+    merged, conflicts = package.merge_decisions([p1, p2])
+    assert merged == {"a.jpg": "telecom", "c.jpg": "near"} and conflicts == ["b.jpg"]

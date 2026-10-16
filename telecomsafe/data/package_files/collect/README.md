@@ -17,11 +17,13 @@
 TelecomEval 是项目的测试集，用来衡量模型在**真实施工场景**中的表现。网上公开、并且许可允许使用的这类照片很少，目前{have_zh}。这次需要再找一批**{title_zh}**的照片。
 
 ### 要找什么样的图
-**入选**：画面里**有人正在作业**，并且属于下面的场景之一。人要能看清楚（全身或大半身），能判断是否戴安全帽、穿反光衣、系安全带。
+**入选**：画面里**有人在室外正在作业**，并且属于下面的场景之一。人要能看清楚（全身或大半身，至少有一名工人身高约 80 像素以上），能判断是否戴安全帽、穿反光衣、系安全带。
 
 {scene_table_zh}
 
-**不要**：只有设备没有人的照片；室内实验室、办公室、教室、培训中心；摆拍的人像；插画、示意图、截图、AI 生成图；带大块水印或文字的图；分辨率太低（短边不足 480 像素）；同一组照片里几乎一样的多张（每组最多选 3 张差异明显的）。
+**不要**：只有设备没有人的照片；室内（实验室、办公室、教室、培训中心、帐篷、机库）；摆拍的合影、仪式、人像；纯军事场景（作战装备、武器、军车）且没有电信作业；插画、示意图、截图、AI 生成图；带大块水印或文字的图；视频截图；分辨率太低（**短边不足 1000 像素**）；同一组照片里几乎一样的多张（每组最多选 **2–3 张**差异明显的）。
+
+**优先找**项目里最缺的：**没有**戴安全帽、**没有**系安全带、**没有**穿反光衣的工人；以及机柜、沟槽、人井、屋顶等铁塔以外的场景。
 
 例图和更细的判断方法见 **[CRITERIA.md](CRITERIA.md)**，在哪里找、怎么确认许可见 **[SOURCES.md](SOURCES.md)**。
 
@@ -79,11 +81,13 @@ TelecomEval 是项目的测试集，用来衡量模型在**真实施工场景**�
 TelecomEval is the project's test set: it measures the model on **real construction scenes**. Openly licensed photos of this kind are scarce; at the moment {have_en}. This task collects more photos of **{title_en}**.
 
 ### What to look for
-**Keep**: **people actively working** in one of the scenes below, visible enough (whole or most of the body) to tell whether they wear a helmet, a hi-vis vest and a harness.
+**Keep**: **people actively working outdoors** in one of the scenes below, visible enough (whole or most of the body, at least one worker about 80 px tall or more) to tell whether they wear a helmet, a hi-vis vest and a harness.
 
 {scene_table_en}
 
-**Do not keep**: equipment without people; indoor labs, offices, classrooms or training centres; posed portraits; illustrations, diagrams, screenshots or AI-generated images; large watermarks or captions; low resolution (short side under 480 px); several near-identical shots from one series (at most 3 clearly different ones per series).
+**Do not keep**: equipment without people; indoors (labs, offices, classrooms, training centres, tents, hangars); posed group photos, ceremonies, portraits; purely military scenes (combat gear, weapons, military vehicles) with no telecom work; illustrations, diagrams, screenshots or AI-generated images; large watermarks or captions; video frames; low resolution (**short side under 1000 px**); several near-identical shots from one series (at most **2–3** clearly different ones per series).
+
+**Look especially for** what the project lacks most: workers **without** a helmet, harness or hi-vis vest, and scenes other than towers — cabinets, trenches, manholes, rooftops.
 
 Examples and finer judgement calls are in **[CRITERIA.md](CRITERIA.md)**; where to search and how to confirm a licence is in **[SOURCES.md](SOURCES.md)**.
 

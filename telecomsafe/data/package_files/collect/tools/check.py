@@ -23,7 +23,7 @@ COLUMNS = ["file", "source_url", "title", "creator", "licence", "licence_version
 # licence code → needs version, creator and licence URL (attribution licences)
 LICENCES = {"CC0": False, "PDM": False, "US-GOV": False, "CC-BY": True, "CC-BY-SA": True}
 IMAGE_SUFFIXES = {".jpg", ".jpeg", ".png", ".webp"}
-MIN_SIDE = 480
+MIN_SIDE = 1000  # TelecomEval needs sharp photos: video frames and small web copies were the weak part of round 1
 DUP_BITS = 6  # dHash Hamming distance at or below which two images count as the same photo
 
 

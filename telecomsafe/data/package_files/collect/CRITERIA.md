@@ -5,10 +5,10 @@
 
 ## 判断顺序 / How to decide
 
-1. **有没有人正在作业？** 没有 → 不收。
-   **Is someone actually working?** No → leave it out.
-2. **人看得清吗？** 至少能看出是否戴安全帽、穿反光衣；人只有几个像素 → 不收。
-   **Can you see the person?** At least well enough to tell helmet / vest; a few pixels only → leave it out.
+1. **有没有人在室外正在作业？** 没有，或在室内 → 不收。
+   **Is someone actually working outdoors?** No, or indoors → leave it out.
+2. **人看得清吗？** 图片短边至少 1000 像素，至少有一名工人身高约 80 像素以上，能看出是否戴安全帽、穿反光衣 → 收；否则不收。
+   **Can you see the person?** Short side at least 1000 px, at least one worker about 80 px tall or more, enough to tell helmet / vest → keep; otherwise leave it out.
 3. **场景对吗？** 属于 README 里的场景之一。{domain_rule_zh}
    **Right scene?** One of the scenes in the README. {domain_rule_en}
 4. **许可对吗？** 只收 README 中的五种许可，并在来源页面亲眼确认。

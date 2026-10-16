@@ -1,10 +1,17 @@
-"""Task packages for teammates: annotate TelecomEval, or collect more candidate images.
+"""Task packages for teammates: screen candidates, annotate TelecomEval, or collect more candidate images.
 
+    python -m telecomsafe.data.package screen [--parts 2]              # → dist/packages/TelecomEval_screen_<date>[_partN].zip
     python -m telecomsafe.data.package annotate                         # → dist/packages/TelecomEval_annotate_<date>.zip
-    python -m telecomsafe.data.package collect --domain telecom --target 80
-    python -m telecomsafe.data.package collect --domain near --target 30
+    python -m telecomsafe.data.package collect --domain all --target 100
+    python -m telecomsafe.data.package collect --domain telecom --target 80     # or one domain only
+    python -m telecomsafe.data.package intake-screening <decisions.json> [<more.json> ...]
     python -m telecomsafe.data.package intake-annotations <annotations.json>
-    python -m telecomsafe.data.package intake-collection <zip or folder> --domain telecom --collector <name>
+    python -m telecomsafe.data.package intake-collection <zip or folder> --domain all --collector <name>
+
+screen     packs every candidate (new ones and those kept in an earlier round, for re-screening with the
+           current criteria) with the browser review page; --parts splits them into interleaved shares
+           of equal difficulty. The teammate hands in the exported decisions file, which intake-screening
+           applies exactly like `screen --apply` (decisions that differ between files are left out).
 
 annotate   packs the candidates kept in review (subset telecom / near) that are not yet in
            data/raw/telecom_eval/, with E2 pre-labels, the guidelines and one-click Label Studio
@@ -36,6 +43,7 @@ from urllib.parse import quote
 
 from PIL import Image, ImageDraw, ImageFont
 
+from telecomsafe.data import screen as screening
 from telecomsafe.data.collect_open import NEAR_QUERIES, OUT, TELECOM_QUERIES, read_manifest, write_manifest
 from telecomsafe.data.labelstudio import EVAL_DIR, convert, label_config, read_prelabels, to_prediction, write_subsets
 from telecomsafe.paths import INTERIM, RAW, ROOT, class_names, load_sources, load_taxonomy, resolve
@@ -64,7 +72,7 @@ DOMAINS = {
                        "Mobile phone base stations", "Fiber to the x"],
     },
     "near": {
-        "title_zh": "电力线路作业（相近领域）", "title_en": "power-line work (near domain)",
+        "title_zh": "电力线路作业（相邻领域）", "title_en": "power-line work (near domain)",
         "scenes": [
             ("pole", "爬电线杆作业", "climbing and working on a utility pole"),
             ("bucket_truck", "斗臂车、高空作业平台上作业", "working from a bucket truck or aerial work platform"),
@@ -77,11 +85,33 @@ DOMAINS = {
                        "Aerial work platforms"],
     },
 }
+# One package for both subsets: every scene code says which subset the image goes to.
+DOMAINS["all"] = {
+    "title_zh": "电信施工与电力线路作业", "title_en": "telecom and power-line work",
+    "scenes": [(c if c != "other" else "other_telecom", zh, en) for c, zh, en in DOMAINS["telecom"]["scenes"]]
+              + [(c if c != "other" else "other_power", f"{zh}（相邻领域）", f"{en} (near domain)")
+                 for c, zh, en in DOMAINS["near"]["scenes"]],
+    "rule_zh": "场景代码决定它归入电信子集还是相邻领域子集；分不清是通信线还是电力线时，选电力线路的代码。",
+    "rule_en": "The scene code decides whether it counts as telecom or near; if you cannot tell telecom cable from "
+               "power line, use a power-line code.",
+    "categories": DOMAINS["telecom"]["categories"] + DOMAINS["near"]["categories"],
+}
+NEAR_SCENES = {c for c, _, _ in DOMAINS["all"]["scenes"][len(DOMAINS["telecom"]["scenes"]):]}
+
+
+def domain_of_scene(domain: str, scene: str) -> str:
+    """The subset an image joins: fixed for a one-domain package, from the scene code for the combined one."""
+    if domain != "all":
+        return domain
+    return "near" if scene in NEAR_SCENES else "telecom"
+
+
 EXTRA_KEYWORDS = {
     "telecom": ["tower climber harness", "cell tower crew", "telecom technician ladder", "fiber optic crew street",
                 "telephone lineman", "signal soldiers antenna", "通信 施工 安全帽", "光缆 施工", "铁塔 安装"],
     "near": ["lineman", "power line repair", "utility pole worker", "electric line crew", "电力 线路 抢修", "电工 登杆"],
 }
+EXTRA_KEYWORDS["all"] = EXTRA_KEYWORDS["telecom"] + EXTRA_KEYWORDS["near"]
 
 
 # ---------------------------------------------------------------- helpers
@@ -167,6 +197,90 @@ def write_csv(path: Path, rows: list[dict]) -> None:
         w = csv.DictWriter(f, fieldnames=list(rows[0]) if rows else ["file"])
         w.writeheader()
         w.writerows(rows)
+
+
+# ---------------------------------------------------------------- screening package
+SCREEN_MAX_SIDE = 1280  # packaged copies are resized; the size tag on each card still shows the original size
+
+
+def screen_items(rows: list[dict]) -> list[dict]:
+    """Review cards for every candidate. Images kept in an earlier round come back undecided, tagged with
+    their earlier decision, so they are judged again against the current criteria."""
+    items = screening.review_items(rows)
+    for it in items:
+        if it["decided"]:
+            it.update(prev=it["state"], state="", decided=False)
+    items.sort(key=lambda x: (x["auto"], -x["score"]))
+    return items
+
+
+def split_parts(items: list[dict], parts: int) -> list[list[dict]]:
+    """Deal the sorted cards round-robin, so every share gets the same mix of easy and hard ones."""
+    return [items[i::parts] for i in range(parts)]
+
+
+def screen_package(parts: int, name: str | None) -> list[Path]:
+    rows = [r for r in read_manifest() if r["status"] == "candidate" and (OUT / r["file"]).exists()]
+    if not rows:
+        sys.exit("no candidates — run python -m telecomsafe.data.collect_open first")
+    by_file = {r["file"]: r for r in rows}
+    base = name or f"TelecomEval_screen_{date.today():%Y%m%d}"
+    outs = []
+    for k, share in enumerate(split_parts(screen_items(rows), parts), 1):
+        folder = fresh_dir(base if parts == 1 else f"{base}_part{k}")
+        for it in share:
+            with Image.open(OUT / it["file"]) as im:
+                im = im.convert("RGB")
+                im.thumbnail((SCREEN_MAX_SIDE, SCREEN_MAX_SIDE))
+                dst = folder / "images" / it["file"]
+                dst.parent.mkdir(parents=True, exist_ok=True)
+                im.save(dst, quality=85)
+        export = f"screen_decisions_{folder.name}.json"
+        after = (f"Then send the downloaded <code>{export}</code> to the project lead. / "
+                 f"导出后把下载的 <code>{export}</code> 发给项目负责人。")
+        (folder / "review.html").write_text(
+            screening.page_html(share, key=f"telecomeval-{folder.name}", export=export, after=after), encoding="utf-8")
+        write_csv(folder / "ATTRIBUTION.csv", attribution_rows([by_file[it["file"]] for it in share]))
+        n_prev = sum(bool(it.get("prev")) for it in share)
+        n_auto = sum(it["auto"] for it in share)
+        meta = {"part": k, "parts": parts, "images": len(share), "round1": n_prev,
+                "built": datetime.now(timezone.utc).isoformat(timespec="seconds")}
+        (folder / "data").mkdir(exist_ok=True)
+        (folder / "data" / "package.json").write_text(json.dumps(meta, indent=1), encoding="utf-8")
+        values = {"n_images": len(share), "n_new": len(share) - n_prev, "n_round1": n_prev, "n_auto": n_auto,
+                  "part": f"{k} / {parts}", "hours": max(1, round(len(share) * 4 / 3600 + 0.4)),
+                  "export": export, "date": f"{date.today():%Y-%m-%d}"}
+        copy_tree(FILES / "screen", folder, values)
+        out = make_zip(folder)
+        print(f"part {k}/{parts}: {len(share)} images ({n_prev} from round 1, {n_auto} auto-rejected) "
+              f"→ {out}  ({out.stat().st_size / 1e6:.0f} MB)")
+        outs.append(out)
+    return outs
+
+
+def merge_decisions(paths: list[Path]) -> tuple[dict[str, str], list[str]]:
+    """All decisions from several exported files; a file judged differently in two files is left out."""
+    merged, conflicts = {}, set()
+    for p in paths:
+        for f, d in json.loads(p.read_text(encoding="utf-8")).items():
+            if f in merged and merged[f] != d:
+                conflicts.add(f)
+            merged.setdefault(f, d)
+    for f in conflicts:
+        merged.pop(f, None)
+    return merged, sorted(conflicts)
+
+
+def intake_screening(paths: list[Path]) -> None:
+    merged, conflicts = merge_decisions(paths)
+    print(f"{len(merged)} decisions from {len(paths)} file(s): {dict(Counter(merged.values()))}")
+    if conflicts:
+        print(f"  ! {len(conflicts)} images were judged differently and are left undecided: {conflicts[:5]}")
+    tmp = INTERIM / "screen_decisions_merged.json"
+    tmp.parent.mkdir(parents=True, exist_ok=True)
+    tmp.write_text(json.dumps(merged, indent=1), encoding="utf-8")
+    screening.apply(tmp)
+    print("  next: python -m telecomsafe.data.pseudo_label ... (pre-labels), then python -m telecomsafe.data.package annotate")
 
 
 # ---------------------------------------------------------------- annotation package
@@ -307,7 +421,8 @@ def thumbnail(src: Path, dst: Path, width: int = 480) -> None:
 
 def pick_examples(domain: str) -> tuple[list[dict], list[tuple[str, str, list[dict]]]]:
     rows = read_manifest()
-    kept = [r for r in rows if r["status"] == "candidate" and r.get("subset") == domain and (OUT / r["file"]).exists()]
+    subsets = {"telecom", "near"} if domain == "all" else {domain}
+    kept = [r for r in rows if r["status"] == "candidate" and r.get("subset") in subsets and (OUT / r["file"]).exists()]
     accept, seen_scenes = [], set()
     for r in sorted(kept, key=lambda r: -float(r.get("clip_score") or 0)):  # one per scene first, then the best
         if r.get("scene") not in seen_scenes and int(r.get("persons") or 0) > 0:
@@ -358,7 +473,8 @@ def collect(domain: str, target: int, name: str | None) -> Path:
             "built": datetime.now(timezone.utc).isoformat(timespec="seconds")}
     (folder / "data" / "package.json").write_text(json.dumps(meta, indent=1), encoding="utf-8")
     kept = Counter(r.get("subset") for r in read_manifest() if r["status"] == "candidate")
-    queries = (TELECOM_QUERIES if domain == "telecom" else NEAR_QUERIES) + EXTRA_KEYWORDS[domain]
+    queries = {"telecom": TELECOM_QUERIES, "near": NEAR_QUERIES, "all": TELECOM_QUERIES + NEAR_QUERIES}[domain]
+    queries = queries + EXTRA_KEYWORDS[domain]
     values = {
         "domain": domain, "target": target, "hours": max(1, round(target * 4 / 60)), "date": f"{date.today():%Y-%m-%d}",
         "title_zh": spec["title_zh"], "title_en": spec["title_en"], "n_seen": len(seen) - 1,
@@ -464,6 +580,7 @@ def intake_collection(path: Path, domain: str, collector: str, skip_bad: bool) -
     for w in warnings:
         print(f"WARNING {w}")
     good = [r for r in rows if not r.get("_bad") and r.get("dhash")]
+    subsets = Counter(domain_of_scene(domain, r["scene"]) for r in good)
     if errors and not skip_bad:
         sys.exit(f"{len(errors)} errors — send it back, or pass --skip-bad to import only the {len(good)} passing images")
     slug = re.sub(r"[^A-Za-z0-9]+", "_", collector).strip("_").lower() or "contrib"
@@ -478,13 +595,14 @@ def intake_collection(path: Path, domain: str, collector: str, skip_bad: bool) -
         manifest.append({
             "file": dst.name, "provider": f"contrib:{slug}", "source_id": r["file"], "title": r["title"],
             "creator": r["creator"], "licence": licence, "licence_version": version, "licence_url": r["licence_url"],
-            "landing_url": r["source_url"], "image_url": "", "query": r["scene"], "domain": domain,
+            "landing_url": r["source_url"], "image_url": "", "query": r["scene"],
+            "domain": domain_of_scene(domain, r["scene"]),
             "attribution": f'"{r["title"] or "Untitled"}" by {r["creator"] or "unknown"}, {r["licence"]} {version}'.strip()
                            + f", {r['source_url']} (collected by {collector})",
             "downloaded_at": now, "status": "candidate",
         })
     write_manifest(manifest)
-    print(f"imported {len(good)} images from {collector} into {OUT} as {domain} candidates")
+    print(f"imported {len(good)} images from {collector} into {OUT}: {dict(subsets)}")
     print("  next: python -m telecomsafe.data.screen  → review → screen --apply → package annotate")
 
 
@@ -503,12 +621,17 @@ def _seen(chk) -> tuple[set[str], list[int]]:
 def main(argv: list[str] | None = None) -> None:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     sub = ap.add_subparsers(dest="cmd", required=True)
+    s = sub.add_parser("screen", help="build the screening package(s)")
+    s.add_argument("--parts", type=int, default=1, help="split the candidates into this many packages")
+    s.add_argument("--name")
+    iscr = sub.add_parser("intake-screening", help="apply exported screening decisions")
+    iscr.add_argument("files", type=Path, nargs="+")
     a = sub.add_parser("annotate", help="build the annotation package")
     a.add_argument("--name")
     a.add_argument("--include-annotated", action="store_true", help="also pack images already in data/raw/telecom_eval/")
     c = sub.add_parser("collect", help="build a collection package")
     c.add_argument("--domain", choices=list(DOMAINS), required=True)
-    c.add_argument("--target", type=int, default=80)
+    c.add_argument("--target", type=int, default=100)
     c.add_argument("--name")
     ia = sub.add_parser("intake-annotations", help="merge an exported annotations.json")
     ia.add_argument("file", type=Path)
@@ -519,7 +642,11 @@ def main(argv: list[str] | None = None) -> None:
     ic.add_argument("--collector", required=True)
     ic.add_argument("--skip-bad", action="store_true", help="import the passing images even if others fail")
     args = ap.parse_args(argv)
-    if args.cmd == "annotate":
+    if args.cmd == "screen":
+        screen_package(args.parts, args.name)
+    elif args.cmd == "intake-screening":
+        intake_screening(args.files)
+    elif args.cmd == "annotate":
         annotate(args.name, args.include_annotated)
     elif args.cmd == "collect":
         collect(args.domain, args.target, args.name)

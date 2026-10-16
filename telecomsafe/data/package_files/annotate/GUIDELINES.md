@@ -26,6 +26,8 @@ The risk rules depend on how these labels relate, so please follow them strictly
    **Bucket trucks, aerial work platforms, cranes, cable-pulling rigs and cable-drum trailers are `machinery`**; ordinary cars, pickups, vans and plain trucks are `vehicle`.
 6. **铁塔、电线杆、天线本身都不标。**
    **Towers, poles and antennas themselves are not labelled.**
+7. **军用照片（暂行规则，组内定案后统一调整）**：作战头盔**暂按 `helmet` 标**，并在该图的评论（Comments）里写 `combat helmet`，方便以后批量修改；迷彩服等没有反光条的衣服是 `no_vest`。
+   **Military photos (interim rule until the team decides)**: label a combat helmet **as `helmet` for now** and write `combat helmet` in the task's Comments, so these can be changed in one go later; camouflage and other clothes without reflective strips are `no_vest`.
 
 ## 3. 画框要求 / Box quality
 
