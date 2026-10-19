@@ -171,6 +171,22 @@ def test_contribution_check_finds_format_and_licence_problems(tmp_path):
     errors, warnings, counts, rows = check(folder)
     text = "\n".join(errors)
     assert "c.jpg: subset must be telecom or near" in text and "c.jpg: licence 'CC BY-NC 4.0' is not allowed" in text
-    assert "d.jpg: CC-BY needs the creator" in text and "class id 9" in text and "d.jpg: no person box" in text
+    assert "d.jpg: CC-BY needs the creator" in text and "class id 9" in text
+    assert any(w.startswith("d.jpg: no person box") for w in warnings)   # a warning: people may be < half visible
     assert not any(e.startswith(("a.jpg", "b.jpg")) for e in errors)
     assert any("short side 800 px" in w for w in warnings) and any("no harness box" in w for w in warnings)
+
+
+def test_image_api_endpoint_and_both_response_shapes():
+    import base64
+
+    from telecomsafe.data.generate_eval import endpoint, image_bytes
+    assert endpoint(None) == "https://api.openai.com/v1/images/generations"
+    assert endpoint("https://relay.example.com/v1/") == "https://relay.example.com/v1/images/generations"
+    assert endpoint("https://relay.example.com/v1/images/generations") == "https://relay.example.com/v1/images/generations"
+    assert image_bytes({"b64_json": base64.b64encode(b"png").decode()}, None) == b"png"
+
+    class S:
+        def get(self, url, timeout):
+            return SimpleNamespace(content=b"jpg", raise_for_status=lambda: None)
+    assert image_bytes({"url": "https://cdn/x.png"}, S()) == b"jpg"

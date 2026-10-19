@@ -26,6 +26,7 @@ import csv
 import json
 import re
 import shutil
+from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
 from PIL import Image
@@ -168,15 +169,22 @@ def apply(path: Path, contributor: str) -> Path:
     folder = CONTRIB / re.sub(r"[^A-Za-z0-9]+", "_", contributor).strip("_").lower()
     (folder / "images").mkdir(parents=True, exist_ok=True)
     s = session()
+
+    def fetch(f: str) -> bytes | None:
+        if rows[f]["provider"] != "wikimedia":
+            return None
+        try:
+            return full_resolution(s, rows[f]["title"])
+        except Exception as e:  # keep the 1280 px copy rather than lose the pick
+            print(f"  ! {f}: full-resolution download failed ({e}); using the copy on disk")
+            return None
+
+    with ThreadPoolExecutor(4) as pool:  # Commons is slow per connection from here
+        fetched = dict(zip(picks, pool.map(fetch, picks)))
     out = []
     for f, subset in picks.items():
         r = rows[f]
-        data = None
-        if r["provider"] == "wikimedia":
-            try:
-                data = full_resolution(s, r["title"])
-            except Exception as e:  # keep the 1280 px copy rather than lose the pick
-                print(f"  ! {f}: full-resolution download failed ({e}); using the copy on disk")
+        data = fetched[f]
         dst = folder / "images" / f
         if data:
             dst.write_bytes(data)
