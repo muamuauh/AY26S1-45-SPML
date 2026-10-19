@@ -4,7 +4,9 @@
     python -m telecomsafe.data.generate_eval                        # → data/interim/telecomeval_generated/
     python -m telecomsafe.data.generate_eval --apply <decisions.json> --contributor <name>
 
-Needs OPENAI_API_KEY in .env (never commit it). Each scenario is one whole-scene photo request, written
+Needs the image API in .env (never commit it), as a triple for any OpenAI-compatible endpoint or relay:
+IMAGE_API_BASE (base URL ending in /v1; default https://api.openai.com/v1), IMAGE_API_MODEL (default
+gpt-image-2; --model overrides it) and IMAGE_API_KEY. Each scenario is one whole-scene photo request, written
 for evaluation and deliberately unlike phase 2: phase 2 repaints parts of real training photos (inpainting
 a person, a helmet, a vest), whereas these are complete telecom scenes from text, with every phase-1 class
 and both PPE states covered across the set, and camera, light and region varied per scenario. The expected
@@ -36,7 +38,23 @@ from telecomsafe.env import load_env
 from telecomsafe.paths import INTERIM
 
 OUT_DIR = INTERIM / "telecomeval_generated"
-API = "https://api.openai.com/v1/images/generations"
+DEFAULT_BASE = "https://api.openai.com/v1"
+DEFAULT_MODEL = "gpt-image-2"
+
+
+def endpoint(base: str | None) -> str:
+    """…/v1 → …/v1/images/generations (a full …/images/generations URL is kept as it is)."""
+    base = (base or DEFAULT_BASE).strip().rstrip("/")
+    return base if base.endswith("/images/generations") else f"{base}/images/generations"
+
+
+def image_bytes(item: dict, s: requests.Session) -> bytes:
+    """One image from the response: base64 (OpenAI) or a URL (what some relays return)."""
+    if item.get("b64_json"):
+        return base64.b64decode(item["b64_json"])
+    r = s.get(item["url"], timeout=300)
+    r.raise_for_status()
+    return r.content
 PRICE = {"low": 0.005, "medium": 0.041, "high": 0.165}   # USD per 1536×1024 image, gpt-image-2 (Oct 2026)
 
 STYLE = ("Candid documentary photograph, realistic and unstaged: people are busy with the work and do not look at "
@@ -147,11 +165,16 @@ def coverage(scenarios=SCENARIOS) -> dict[str, int]:
     return out
 
 
-def generate(model: str, quality: str, size: str, only: list[str] | None) -> None:
+def generate(model: str | None, quality: str, size: str, only: list[str] | None) -> None:
     load_env()
-    key = os.environ.get("OPENAI_API_KEY")
+    key = os.environ.get("IMAGE_API_KEY")
     if not key:
-        sys.exit("OPENAI_API_KEY is not set — add it to .env (never commit .env)")
+        sys.exit("IMAGE_API_KEY is not set — fill IMAGE_API_BASE / IMAGE_API_MODEL / IMAGE_API_KEY in .env "
+                 "(never commit .env)")
+    url = endpoint(os.environ.get("IMAGE_API_BASE"))
+    model = model or os.environ.get("IMAGE_API_MODEL") or DEFAULT_MODEL
+    s = requests.Session()
+    print(f"model {model}, endpoint {url.split('//')[-1].split('/')[0]}", flush=True)
     (OUT_DIR / "images").mkdir(parents=True, exist_ok=True)
     log = OUT_DIR / "prompts.csv"
     done = set()
@@ -170,14 +193,19 @@ def generate(model: str, quality: str, size: str, only: list[str] | None) -> Non
                 continue
             prompt = prompt_for(k, sc)
             t0 = time.time()
-            r = requests.post(API, headers={"Authorization": f"Bearer {key}"}, timeout=300,
-                              json={"model": model, "prompt": prompt, "size": size, "quality": quality, "n": 1})
-            if r.status_code != 200:
-                print(f"  ✗ {sid}: HTTP {r.status_code} {r.text[:200]}", file=sys.stderr)
+            try:
+                r = s.post(url, headers={"Authorization": f"Bearer {key}"}, timeout=600,
+                           json={"model": model, "prompt": prompt, "size": size, "quality": quality, "n": 1})
+                if r.status_code != 200:
+                    print(f"  ✗ {sid}: HTTP {r.status_code} {r.text[:200]}", file=sys.stderr)
+                    continue
+                body = r.json()
+                data = image_bytes(body["data"][0], s)
+            except (requests.RequestException, KeyError, IndexError, ValueError) as e:
+                print(f"  ✗ {sid}: {e!r}"[:300], file=sys.stderr)
                 continue
-            body = r.json()
             file = f"gen_{sid}.png"
-            (OUT_DIR / "images" / file).write_bytes(base64.b64decode(body["data"][0]["b64_json"]))
+            (OUT_DIR / "images" / file).write_bytes(data)
             w.writerow({"id": sid, "file": file, "subset": sc[1], "scene": sc[2], "expected": sc[3], "model": model,
                         "quality": quality, "size": size, "date": f"{date.today():%Y-%m-%d}", "prompt": prompt,
                         "usage": json.dumps(body.get("usage", {}))})
@@ -230,7 +258,7 @@ def apply(path: Path, contributor: str) -> Path:
 
 def main(argv: list[str] | None = None) -> None:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("--model", default="gpt-image-2")
+    ap.add_argument("--model", help="overrides IMAGE_API_MODEL from .env")
     ap.add_argument("--quality", default="medium", choices=list(PRICE))
     ap.add_argument("--size", default="1536x1024")
     ap.add_argument("--only", nargs="*", help="scenario ids")

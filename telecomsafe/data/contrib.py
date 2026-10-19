@@ -33,6 +33,7 @@ from urllib.parse import quote
 
 from PIL import Image
 
+from telecomsafe.env import load_env
 from telecomsafe.paths import IMAGE_SUFFIXES, PROCESSED, RAW, ROOT, class_names
 
 EVAL_DIR = RAW / "telecom_eval"
@@ -144,12 +145,15 @@ def check(folder: Path) -> tuple[list[str], list[str], Counter, list[dict]]:
             continue
         errs, c = check_label_file(label.read_text(encoding="utf-8"), len(names))
         errors += [f"{where} labels {e}" for e in errs]
-        if not c[names.index("person")]:
-            errors.append(f"{where}: no person box (every TelecomEval image shows people at work)")
+        people = c[names.index("person")]
         heads = c[names.index("helmet")] + c[names.index("no_helmet")]
         torsos = c[names.index("vest")] + c[names.index("no_vest")]
-        if c[names.index("person")] and not heads and not torsos:
-            warnings.append(f"{where}: people but no helmet / no_helmet / vest / no_vest box — check the consistency rules")
+        if not people:  # allowed: workers less than half visible are not boxed as person
+            warnings.append(f"{where}: no person box — fine only if every worker is less than half visible")
+        if people and heads < people:
+            warnings.append(f"{where}: {people} people but {heads} helmet / no_helmet — every visible head needs one")
+        if people and torsos < people:
+            warnings.append(f"{where}: {people} people but {torsos} vest / no_vest — every visible torso needs one")
         counts.update(c)
     for k, n in enumerate(names):
         if not counts[k]:
@@ -177,8 +181,10 @@ def annotate(folder: Path) -> None:
     from telecomsafe.data import pseudo_label
 
     pre = folder / "prelabels"
-    pseudo_label.main(["--weights", str(ROOT / "runs" / "phase1" / "e2" / "weights" / "best.pt"),
-                       "--images", str(folder / "images"), "--yolo-out", str(pre)])
+    images = [p for p in (folder / "images").iterdir() if p.suffix.lower() in IMAGE_SUFFIXES]
+    if not all((pre / f"{p.stem}.txt").exists() for p in images):  # pre-label only once
+        pseudo_label.main(["--weights", str(ROOT / "runs" / "phase1" / "e2" / "weights" / "best.pt"),
+                           "--images", str(folder / "images"), "--yolo-out", str(pre)])
     names = class_names()
     c = ls.Client()
     project = c.call("POST", "/api/projects", json={
@@ -304,6 +310,8 @@ def main(argv: list[str] | None = None) -> None:
     ap.add_argument("folder", type=Path)
     ap.add_argument("--contributor")
     args = ap.parse_args(argv)
+    load_env()  # Label Studio credentials
+    args.folder = args.folder.resolve()  # Label Studio needs absolute paths under data/raw/
     if args.command == "check":
         sys.exit(0 if report(args.folder) else 1)
     if args.command == "annotate":
