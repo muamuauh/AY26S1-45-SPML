@@ -15,7 +15,7 @@ A contribution folder (format: docs/TelecomEval-Contribution-EN.md):
 `annotate` / `export` are for contributors who use this project's Label Studio (`labelstudio serve` must be
 running); anyone else can label with any tool that writes YOLO files. `intake` re-runs `check`, refuses
 images that are near-duplicates of the training data (they would leak) or of images already merged,
-copies everything into data/raw/telecom_eval/ as <contributor>__<file>, and rewrites
+copies everything into data/raw/telecom_eval/ as <file stem>__<contributor>.<ext>, and rewrites
 sources.csv / subsets.csv there. Nothing can be merged once TelecomEval is frozen.
 """
 
@@ -252,16 +252,28 @@ def near(h: int, others, dist: int = LEAK_DIST) -> bool:
     return any(bin(h ^ o).count("1") <= dist for o in others)
 
 
+def eval_name(file: str, contributor: str) -> str:
+    """The file's name in TelecomEval: the contributor is a suffix, so every image can be traced back."""
+    p = Path(file)
+    return f"{p.stem}__{contributor}{p.suffix.lower()}"
+
+
+def owned_by(name: str, contributor: str) -> bool:
+    return Path(name).stem.endswith(f"__{contributor}")
+
+
 def intake(folder: Path, contributor: str) -> None:
     if FROZEN.exists():
         sys.exit(f"TelecomEval is frozen ({FROZEN}); contributions can no longer be merged")
     if not report(folder):
         sys.exit("fix the errors above first")
-    slug = re.sub(r"[^A-Za-z0-9]+", "_", contributor).strip("_").lower()
+    who = re.sub(r"[^A-Za-z0-9]+", "_", contributor).strip("_")
     with open(folder / "sources.csv", encoding="utf-8-sig") as f:
         rows = list(csv.DictReader(f))
     train = phashes(p for split in ("train", "val") for p in (PROCESSED / "yolo" / "images" / split).iterdir())
-    merged = phashes((EVAL_DIR / "images").iterdir()) if (EVAL_DIR / "images").exists() else {}
+    others = [p for p in (EVAL_DIR / "images").iterdir() if not owned_by(p.name, who)] \
+        if (EVAL_DIR / "images").exists() else []
+    merged = phashes(others)
     mine = phashes(folder / "images" / r["file"] for r in rows)
     bad = []
     for r in rows:
@@ -277,31 +289,37 @@ def intake(folder: Path, contributor: str) -> None:
         sys.exit(f"{len(bad)} images refused; nothing was merged")
     for sub in ("images", "labels"):
         (EVAL_DIR / sub).mkdir(parents=True, exist_ok=True)
+        for p in (EVAL_DIR / sub).iterdir():  # an earlier intake by the same contributor is replaced
+            if owned_by(p.name, who):
+                p.unlink()
     out_rows = []
     for r in rows:
-        name = f"{slug}__{r['file']}"
+        name = eval_name(r["file"], who)
         shutil.copy2(folder / "images" / r["file"], EVAL_DIR / "images" / name)
         shutil.copy2(folder / "labels" / f"{Path(r['file']).stem}.txt", EVAL_DIR / "labels" / f"{Path(name).stem}.txt")
-        out_rows.append({**{k: r.get(k, "") for k in FIELDS}, "file": name, "contributor": contributor})
-    write_sources(out_rows, replace_prefix=f"{slug}__")
-    print(f"merged {len(out_rows)} images from {contributor} → {EVAL_DIR}")
+        out_rows.append({**{k: r.get(k, "") for k in FIELDS}, "file": name, "contributor": who,
+                         "original_file": r.get("original_file") or r["file"]})
+    write_sources(out_rows, who)
+    print(f"merged {len(out_rows)} images from {who} → {EVAL_DIR}")
 
 
-def write_sources(rows: list[dict], replace_prefix: str) -> None:
-    """sources.csv (all columns) and subsets.csv (file, subset, method) for data/raw/telecom_eval/;
-    an earlier intake by the same contributor is replaced."""
+def write_sources(rows: list[dict], contributor: str) -> None:
+    """sources.csv (all columns) and subsets.csv (file, subset, method, contributor) for
+    data/raw/telecom_eval/; an earlier intake by the same contributor is replaced."""
     path = EVAL_DIR / "sources.csv"
     old = []
     if path.exists():
         with open(path, encoding="utf-8-sig") as f:
-            old = [r for r in csv.DictReader(f) if not r["file"].startswith(replace_prefix)]
-    allrows = old + rows
+            old = [r for r in csv.DictReader(f) if not owned_by(r["file"], contributor)]
+    allrows = sorted(old + rows, key=lambda r: (r.get("contributor", ""), r["file"]))
     with open(path, "w", newline="", encoding="utf-8-sig") as f:
-        w = csv.DictWriter(f, fieldnames=FIELDS + ["contributor"], extrasaction="ignore")
+        w = csv.DictWriter(f, fieldnames=FIELDS + ["contributor", "original_file"], extrasaction="ignore")
         w.writeheader()
         w.writerows(allrows)
     (EVAL_DIR / "subsets.csv").write_text(
-        "file,subset,method\n" + "".join(f"{r['file']},{r['subset']},{r['method']}\n" for r in allrows), encoding="utf-8")
+        "file,subset,method,contributor\n"
+        + "".join(f"{r['file']},{r['subset']},{r['method']},{r.get('contributor', '')}\n" for r in allrows),
+        encoding="utf-8")
 
 
 def main(argv: list[str] | None = None) -> None:

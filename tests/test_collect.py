@@ -190,3 +190,10 @@ def test_image_api_endpoint_and_both_response_shapes():
         def get(self, url, timeout):
             return SimpleNamespace(content=b"jpg", raise_for_status=lambda: None)
     assert image_bytes({"url": "https://cdn/x.png"}, S()) == b"jpg"
+
+
+def test_contributor_is_a_traceable_suffix():
+    from telecomsafe.data.contrib import eval_name, owned_by
+    assert eval_name("tower_01.JPG", "Lu") == "tower_01__Lu.jpg"
+    assert owned_by("tower_01__Lu.jpg", "Lu") and not owned_by("tower_01__Lu.jpg", "Lin")
+    assert owned_by("tower_01__Lu.txt", "Lu")
