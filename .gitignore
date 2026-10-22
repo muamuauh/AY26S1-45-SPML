@@ -32,6 +32,9 @@ mlruns/
 # repository root, so never let git pick them up.
 *.zip
 
+# Teammates' TelecomEval submissions, unpacked locally (merged into data/raw/telecom_eval/)
+temp_package/
+
 # Secrets
 .env
 
