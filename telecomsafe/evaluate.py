@@ -1,7 +1,13 @@
 """Evaluate E1/E2 on TelecomEval and write the phase 1 reports.
 
     python -m telecomsafe.evaluate                 # runs/phase1/{e1,e2,e2_s1,e2_s2}/weights/best.pt
+    python -m telecomsafe.evaluate --out reports/phase1/telecom_eval     # TelecomEval, by subset
     python -m telecomsafe.evaluate --exps e1 e2 e2_s1 e2_s2 --split val --skip-check --out <folder>
+
+On TelecomEval (--split test) every run is also scored on its subsets, from
+data/raw/telecom_eval/subsets.csv: real photos (all, telecom, near) and generated images. Real telecom
+photos are the headline figure — generated images are reported beside them, never in their place.
+Subset scores go to subsets.csv and results.md, as percentages (0–100 %).
 
 Runs named <exp>_s<k> are further seeds of <exp>: they are grouped with it and every
 table and chart reports the mean over seeds (± standard deviation when there are several).
@@ -25,7 +31,18 @@ import statistics
 import sys
 from pathlib import Path
 
-from telecomsafe.paths import PROCESSED, REPORTS, RUNS
+from telecomsafe.paths import PROCESSED, RAW, REPORTS, RUNS
+
+EVAL_DIR = RAW / "telecom_eval"
+EVAL_LISTS = PROCESSED / "telecom_eval"
+# subset name → (what it holds, test on rows of subsets.csv)
+SUBSETS = {
+    "all": ("all TelecomEval images", lambda r: True),
+    "real": ("real photos", lambda r: r["method"] != "generated"),
+    "real_telecom": ("real photos, telecom work", lambda r: r["method"] != "generated" and r["subset"] == "telecom"),
+    "real_near": ("real photos, power-line work", lambda r: r["method"] != "generated" and r["subset"] == "near"),
+    "generated": ("generated images", lambda r: r["method"] == "generated"),
+}
 
 # Categorical palette in fixed slot order (validated default palette, light surface).
 PALETTE = ["#2a78d6", "#eb6834", "#1baf7a", "#eda100", "#e87ba4", "#008300", "#4a3aa7", "#e34948"]
@@ -76,20 +93,21 @@ def fmt(v: float | None) -> str:
     return "" if v is None else f"{v:.4f}"
 
 
-def evaluate(exp: str, data: str, split: str, out: Path = REPORTS) -> dict | None:
+def evaluate(exp: str, data: str, split: str, out: Path = REPORTS, name: str | None = None) -> dict | None:
     weights = RUNS / exp / "weights" / "best.pt"
     if not weights.exists():
         print(f"  ! {weights} not found — skipping {exp}", file=sys.stderr)
         return None
     from ultralytics import YOLO
 
-    m = YOLO(str(weights)).val(data=data, split=split, project=str(RUNS / "eval"), name=exp, exist_ok=True, plots=True)
+    m = YOLO(str(weights)).val(data=data, split=split, project=str(RUNS / "eval"), name=name or exp, exist_ok=True,
+                               plots=True)
     names = m.names
     per_class = {}
     for i, cid in enumerate(m.ap_class_index):
         per_class[names[int(cid)]] = {"ap50": float(m.box.ap50[i]), "ap50_95": float(m.box.ap[i])}
     cm = Path(m.save_dir) / "confusion_matrix_normalized.png"
-    if cm.exists() and group_of(exp) == exp:  # one confusion matrix per experiment (its first seed)
+    if cm.exists() and group_of(exp) == exp and name is None:  # one per experiment (first seed, whole set)
         shutil.copy2(cm, out / f"{exp}_confusion_matrix.png")
     return {
         "overall": {"exp": exp, "split": split, "mAP50": m.box.map50, "mAP50-95": m.box.map,
@@ -97,6 +115,54 @@ def evaluate(exp: str, data: str, split: str, out: Path = REPORTS) -> dict | Non
         "per_class": per_class,
         "names": [names[k] for k in sorted(names)],
     }
+
+
+def subset_yamls(names: list[str], eval_dir: Path = EVAL_DIR, out: Path = EVAL_LISTS) -> dict[str, tuple[Path, int]]:
+    """One dataset yaml per TelecomEval subset (image lists; labels sit next to images/ in labels/)."""
+    with open(eval_dir / "subsets.csv", encoding="utf-8") as f:
+        rows = list(csv.DictReader(f))
+    out.mkdir(parents=True, exist_ok=True)
+    made = {}
+    for key, (_, keep) in SUBSETS.items():
+        files = [str((eval_dir / "images" / r["file"]).resolve()) for r in rows if keep(r)]
+        if not files:
+            continue
+        lst = out / f"{key}.txt"
+        lst.write_text("\n".join(files) + "\n", encoding="utf-8")
+        # Ultralytics wants train and val keys too; all three point at the same list
+        names_yaml = "\n".join(f"  {i}: {n}" for i, n in enumerate(names))
+        y = out / f"{key}.yaml"
+        y.write_text(f"train: {lst.as_posix()}\nval: {lst.as_posix()}\ntest: {lst.as_posix()}\nnames:\n{names_yaml}\n",
+                     encoding="utf-8")
+        made[key] = (y, len(files))
+    return made
+
+
+def pct(v: float | None) -> str:
+    return "" if v is None else f"{100 * v:.1f}"
+
+
+def subset_report(runs_by_subset: dict[str, dict[str, dict]], sizes: dict[str, int], out: Path) -> None:
+    """subsets.csv (fractions) and results.md (percentages) — mean ± std over seeds per experiment."""
+    rows, lines = [], []
+    lines += ["# TelecomEval results", "",
+              "All figures are percentages (0–100 %), mean ± standard deviation over the seeds of each experiment.",
+              "**Real telecom photos** are the headline figure; generated images are reported separately.", "",
+              "| Subset | Images | Experiment | mAP50 | mAP50-95 | Precision | Recall |", "|---|---|---|---|---|---|---|"]
+    for key, runs in runs_by_subset.items():
+        for exp, r in aggregate(runs).items():
+            o = r["overall"]
+            row = {"subset": key, "images": sizes[key], "exp": exp, "runs": o["runs"]}
+            cells = []
+            for k in ("mAP50", "mAP50-95", "precision", "recall"):
+                row[k], row[f"{k}_std"] = fmt(o[k]), fmt(o[f"{k}_std"])
+                cells.append(pct(o[k]) + (f" ± {pct(o[f'{k}_std'])}" if o[f"{k}_std"] is not None else ""))
+            rows.append(row)
+            lines.append(f"| {SUBSETS[key][0]} | {sizes[key]} | {exp.upper()} ({o['runs']} run{'s' if o['runs'] > 1 else ''}) | "
+                         + " | ".join(cells) + " |")
+    write_rows(out / "subsets.csv", rows)
+    (out / "results.md").write_text("\n".join(lines) + "\n", encoding="utf-8")
+    print("\n".join(lines[6:]))
 
 
 def train_instances() -> dict[str, int]:
@@ -224,6 +290,12 @@ def main(argv: list[str] | None = None) -> None:
             sys.exit("TelecomEval is not frozen or has changed:\n  " + "\n  ".join(problems[:10]))
 
     args.out.mkdir(parents=True, exist_ok=True)
+    yamls = {}
+    if args.split == "test" and (EVAL_DIR / "subsets.csv").exists():
+        from telecomsafe.paths import class_names
+
+        yamls = subset_yamls(class_names())
+        args.data = str(yamls["all"][0])
     runs = {e: r for e in args.exps if (r := evaluate(e, args.data, args.split, args.out))}
     if not runs:
         sys.exit("no trained runs found")
@@ -259,6 +331,13 @@ def main(argv: list[str] | None = None) -> None:
         weak.write_text(weak_classes_md(results, classes, counts, args.top_k, eval_name), encoding="utf-8")
     else:
         print(f"  kept {weak.name} (hand-written reasons); use --rewrite-weak-classes to regenerate")
+
+    if yamls:
+        by_subset = {"all": runs}
+        for key, (y, _) in yamls.items():
+            if key != "all":
+                by_subset[key] = {e: r for e in runs if (r := evaluate(e, str(y), "test", args.out, f"{e}_{key}"))}
+        subset_report(by_subset, {k: n for k, (_, n) in yamls.items()}, args.out)
 
     for exp, r in results.items():
         o = r["overall"]
