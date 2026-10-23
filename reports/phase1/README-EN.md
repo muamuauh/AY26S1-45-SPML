@@ -1,13 +1,13 @@
 # Phase 1 Results · Baseline Demo v1
 
 > 中文版：[README.md](README.md)
-> Status (2026-10-06): baseline **v2** is frozen (tag `phase1-baseline-v2`); rule judgement and Demo v1 are done. **TelecomEval is being annotated** (see [progress/milestones-EN.md](../../progress/milestones-EN.md#deferred)),
-> so every metric below is measured on the **validation split**. It comes from the same sources as the training data, so the numbers are optimistic and for development reference only; re-evaluate and update this page once TelecomEval is frozen.
+> Status (2026-10-23): baseline **v2** is frozen (tag `phase1-baseline-v2`); rule judgement and Demo v1 are done. **TelecomEval is frozen (222 images) and evaluated**; see "TelecomEval evaluation" below.
+> The metrics under "Experiments" are on the **validation split**, which shares sources with training: optimistic, for development reference only. TelecomEval is the authoritative result.
 > The v1 report files (2026-09-29, 5 datasets, one seed) are kept in [`v1/`](v1/).
 
 ## In one sentence
 
-A YOLO11s baseline trained on 7,475 de-duplicated images from 6 public datasets reaches mAP50 = **0.737 ± 0.007** on the validation split (E2, 3 random seeds); Ultralytics' default conventional augmentation beats no augmentation at all (E1, 0.596) by **+14 points**, improving all 8 classes. Adding the Work at Height dataset raises harness training instances from 143 to 2,619, reaching AP50 0.81 on validation, and harnesses now start to be detected on the 167 telecom construction candidates (v1: 0 images, v2: 26). Vehicle and no_helmet remain the weakest classes — the first targets for phase 2's generative augmentation.
+A YOLO11s baseline trained on 7,475 de-duplicated images from 6 public datasets reaches mAP50 = **0.737 ± 0.007** on the validation split (E2, 3 random seeds); Ultralytics' default conventional augmentation beats no augmentation at all (E1, 0.596) by **+14 points**, improving all 8 classes. Adding the Work at Height dataset raises harness training instances from 143 to 2,619, reaching AP50 0.81 on validation, and harnesses now start to be detected on the 167 telecom construction candidates (v1: 0 images, v2: 26). On the frozen TelecomEval, E2 reaches mAP50 **42.7 ± 2.1%** (real telecom photos **46.9 ± 4.1%**; E1 33.4%), a clear domain gap from the validation split. The weakest class is no_helmet (14.1%), followed by vehicle, machinery and harness (26–30%) — the first targets for phase 2's generative augmentation.
 
 ## Data
 
@@ -24,7 +24,7 @@ A YOLO11s baseline trained on 7,475 de-duplicated images from 6 public datasets 
 | body_harness | 139 / 15 | Harness |
 
 - Only Work at Height images that contain a harness are used, minus 862 suspected mirror-padded images ([`configs/exclude/work_at_height.txt`](../../configs/exclude/work_at_height.txt)); see "Problems found and fixed" below.
-- De-duplication (pHash) removed 1,059 images, mostly adjacent video frames and duplicates across splits. Training images were also de-duplicated against the 167 chosen TelecomEval images (0 duplicates), so the training set does not change when TelecomEval is frozen.
+- De-duplication (pHash) removed 1,059 images, mostly adjacent video frames and duplicates across splits. Every TelecomEval image was pHash-compared with the training set when it was merged, and near-duplicates were refused (38 images in one member's first submission), so the training set needs no change.
 - Classes a dataset did not annotate were filled in by a teacher model; pseudo-labels make up **18.7%** of all boxes (6,493 / 34,785).
 
 ![Training instances per class](class_distribution.png)
@@ -121,9 +121,33 @@ Detection → rule judgement → risk level, 0.5–1.4 s per image (RTX 4070 SUP
 | Pole work without a hi-vis vest | Low | Low · no violations; no_vest (detected by v1) and harness (confidence 0.22) are both below the threshold | [screenshot](demo_results/4_no_vest_on_pole.jpg) |
 | **Failure case**: pole climber without a helmet, wearing a harness | Medium | Low · no violations; no_helmet missed, harness only at confidence 0.20 | [screenshot](demo_results/5_failure_pole_climber.jpg) |
 
+## TelecomEval evaluation (frozen, 222 images)
+
+TelecomEval was frozen on 2026-10-23 ([`splits/telecom_eval.sha256`](../../splits/telecom_eval.sha256), total hash `36432926…`). It was contributed by 5 team members; each image's contributor, source, licence and real / generated status are recorded in `data/raw/telecom_eval/sources.csv`, and file names end in `__<contributor>`. All figures below are **percentages**; E2 is the mean ± standard deviation of 3 seeds. **Real telecom photos are the headline figure**; generated images are reported separately and never in their place. Full results: [`telecom_eval/results.md`](telecom_eval/results.md).
+
+| Subset | Images | E1 mAP50 | E2 mAP50 | E2 mAP50-95 |
+|---|---|---|---|---|
+| **Real photos · telecom work** | 77 | 33.4 | **46.9 ± 4.1** | 29.4 ± 5.6 |
+| Real photos · power-line work | 47 | 22.2 | 26.0 ± 2.2 | 10.3 ± 1.0 |
+| Real photos · all | 124 | 28.8 | 36.4 ± 2.9 | 19.2 ± 2.9 |
+| Generated images | 98 | 45.2 | 52.7 ± 1.9 | 31.8 ± 1.8 |
+| **All of TelecomEval** | 222 | 35.5 | **42.7 ± 2.1** | 24.0 ± 2.1 |
+
+| Class (all 222 images, AP50 %) | person | vest | helmet | no_vest | harness | machinery | vehicle | no_helmet |
+|---|---|---|---|---|---|---|---|---|
+| E1 | 69.3 | 59.4 | 56.8 | 30.6 | 23.3 | 18.3 | 11.4 | 14.8 |
+| E2 | 82.6 | 66.9 | 62.4 | 32.7 | 29.9 | 26.9 | 26.4 | 14.1 |
+
+![Per-class AP50 on TelecomEval](telecom_eval/per_class_ap.png)
+
+- **A clear domain gap**: E2 scores 73.7% on the validation split (building sites) but 42.7% on TelecomEval and 46.9% on real telecom photos.
+- **Conventional augmentation still helps**: E2 beats E1 on every subset, most on real telecom photos (+13.5 points).
+- **Power-line work is the hardest** (26.0%): workers in bucket trucks or far up poles are small and often missed.
+- **Generated images are easier than real photos** (52.7% vs 36.4%), so they are only a supplement.
+
 ## Weak classes (phase 2 generation targets)
 
-See [`weak_classes-EN.md`](weak_classes-EN.md). Suggested generation priority: **vehicle ≈ no_helmet > harness in telecom scenes > machinery (telecom-specific vehicles and equipment) > no_vest**. The final list follows the TelecomEval results.
+From TelecomEval ([`telecom_eval/weak_classes.md`](telecom_eval/weak_classes.md), in Chinese). Generation priority: **no_helmet > vehicle ≈ machinery (bucket trucks, cable-pulling rigs, cable-drum trailers) > harness in telecom scenes > no_vest**. The earlier list from the validation split is in [`weak_classes-EN.md`](weak_classes-EN.md).
 
 ## Problems found and fixed along the way
 
@@ -134,15 +158,15 @@ See [`weak_classes-EN.md`](weak_classes-EN.md). Suggested generation priority: *
 
 ## Limitations
 
-- **Evaluation**: not yet evaluated on TelecomEval; the validation split shares sources with training, so metrics are optimistic.
+- **Evaluation**: TelecomEval has only 222 images, 98 of them generated (44%); there are 77 real telecom photos, with a seed-to-seed spread of about 4 points. Generated images are easier than real photos and are reported separately.
 - **Harness in telecom scenes**: validation AP50 is now 0.81, but Work at Height is mostly scaffolding and aerial platforms; on pole and tower telecom work the harness confidence is generally low (0.20–0.22 in Demo examples 4 and 5).
 - **Pseudo-labels**: 18.7% of boxes; the teacher rarely fills in missing classes on images it was trained on.
-- **Single-person assessment**: every manual check (dataset label inspection, TelecomEval screening and annotation) is done by one person, with no inter-rater agreement.
+- **Label consistency**: each of the 5 contributors labelled their own TelecomEval images, all to `configs/taxonomy.yaml` and through the automatic checks (format, licences, consistency rules, de-duplication against training), but there was no cross-review and no inter-rater agreement.
 - **Rules**: person–machine distance is scaled from the person's box height, a monocular approximation that ignores depth.
 - **Data sources**: APD is private data shared with us whose images come from news websites; internal training only, never redistributed.
 
 ## Next steps
 
-1. Finish annotating and freeze TelecomEval, then evaluate E1 / E2 (3 seeds) on it, reporting telecom and power-line images separately, and update this page and the weak-class list.
+1. ~~Finish TelecomEval and evaluate E1 / E2~~ (done 2026-10-23, see above).
 2. TGB meeting (end of W7): present following the phase 1 plan, run the Demo live, and have a screen recording ready as backup.
 3. Phase 2 (M3, W8–W10): generative augmentation targeting the weak classes; E3 keeps `configs/baseline.yaml`, changes only the training data, and also runs 3 seeds.
