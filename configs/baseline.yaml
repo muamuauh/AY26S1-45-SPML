@@ -5,7 +5,7 @@
 # E1 = 本配置 + 关闭全部内置增广（由 telecomsafe/train.py 覆盖，见 NO_AUGMENTATION）。
 # 参数含义见 https://docs.ultralytics.com/modes/train/#train-settings
 
-model: yolo11s.pt      # 与 yolov8s、yolo11m 对比后保留（见 reports/phase1/README.md）
+model: yolo11s.pt      # 与 yolov8s、yolo11m 对比后保留（见 docs/results/phase1/README.md）
 imgsz: 640             # 960 试验后保留 640
 epochs: 100
 patience: 20

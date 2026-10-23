@@ -5,7 +5,7 @@
     python -m telecomsafe.data.contrib export <folder>                     # Label Studio → <folder>/labels/
     python -m telecomsafe.data.contrib intake <folder> --contributor <name>    # merge into data/raw/telecom_eval/
 
-A contribution folder (format: docs/TelecomEval-Contribution-EN.md):
+A contribution folder (format: docs/guides/TelecomEval-Contribution-EN.md):
 
     images/        the photos (jpg / png / webp)
     labels/        one YOLO file per image, class ids in configs/taxonomy.yaml order (0 person ... 7 vehicle)
@@ -189,7 +189,7 @@ def annotate(folder: Path) -> None:
     c = ls.Client()
     project = c.call("POST", "/api/projects", json={
         "title": f"TelecomEval – {folder.name}", "label_config": ls.label_config(),
-        "description": "Label by docs/TelecomEval-Contribution-EN.md; every image needs its boxes checked.",
+        "description": "Label by docs/guides/TelecomEval-Contribution-EN.md; every image needs its boxes checked.",
         "show_skip_button": False})
     c.call("POST", "/api/storages/localfiles", json={
         "project": project["id"], "title": folder.name, "path": str(folder / "images"),

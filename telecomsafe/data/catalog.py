@@ -2,8 +2,8 @@
 
     python -m telecomsafe.data.catalog
 
-Writes data/README.md (Chinese), data/README-EN.md (English) and
-reports/phase1/dataset_licences.csv. Never edit the READMEs by hand — change the
+Writes docs/datasets/README.md (Chinese), docs/datasets/README-EN.md (English) and
+docs/results/phase1/dataset_licences.csv. Never edit the READMEs by hand — change the
 configs (English texts live in each entry's `en:` block) and re-run. Re-run after
 downloading and after building so the "actual" counts are current.
 """
@@ -14,7 +14,9 @@ import csv
 from collections import Counter
 from pathlib import Path
 
-from telecomsafe.paths import DATA, IMAGE_SUFFIXES, REPORTS, SPLITS, load_sources, load_taxonomy, resolve
+from telecomsafe.paths import DATA, DOCS, IMAGE_SUFFIXES, REPORTS, SPLITS, load_sources, load_taxonomy, resolve
+
+CATALOG = DOCS / "datasets"
 
 TEXT = {
     "zh": {
@@ -254,10 +256,11 @@ def write_licences(sources: list[dict], path: Path = REPORTS / "dataset_licences
 def main() -> None:
     sources, taxonomy, built = load_sources(), load_taxonomy(), built_counts()
     DATA.mkdir(parents=True, exist_ok=True)
-    (DATA / "README.md").write_text(render(sources, taxonomy, built, "zh"), encoding="utf-8")
-    (DATA / "README-EN.md").write_text(render(sources, taxonomy, built, "en"), encoding="utf-8")
+    CATALOG.mkdir(parents=True, exist_ok=True)
+    (CATALOG / "README.md").write_text(render(sources, taxonomy, built, "zh"), encoding="utf-8")
+    (CATALOG / "README-EN.md").write_text(render(sources, taxonomy, built, "en"), encoding="utf-8")
     write_licences(sources)
-    print(f"wrote {DATA / 'README.md'}, {DATA / 'README-EN.md'} and {REPORTS / 'dataset_licences.csv'}")
+    print(f"wrote {CATALOG / 'README.md'}, {CATALOG / 'README-EN.md'} and {REPORTS / 'dataset_licences.csv'}")
 
 
 if __name__ == "__main__":

@@ -16,7 +16,7 @@ without its trailing number) and anything over SCENE_CAP per scene, so the list 
 The shortlist folder has the images, shortlist.csv (scores, licence) and review.html: mark telecom (1),
 near (2) or reject (X) and export. --apply copies the telecom / near picks into
 data/raw/telecomeval_contrib/<name>/ (images + sources.csv, the contribution format of
-docs/TelecomEval-Contribution-EN.md), fetching Wikimedia images again at full resolution.
+docs/guides/TelecomEval-Contribution-EN.md), fetching Wikimedia images again at full resolution.
 """
 
 from __future__ import annotations

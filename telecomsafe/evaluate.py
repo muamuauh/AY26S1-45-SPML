@@ -1,13 +1,13 @@
 """Evaluate E1/E2 on TelecomEval and write the phase 1 reports.
 
     python -m telecomsafe.evaluate                 # runs/phase1/{e1,e2,e2_s1,e2_s2}/weights/best.pt
-    python -m telecomsafe.evaluate --out reports/phase1/telecom_eval     # TelecomEval, by subset
+    python -m telecomsafe.evaluate --out docs/results/phase1/telecom_eval     # TelecomEval, by subset
     python -m telecomsafe.evaluate --exps e1 e2 e2_s1 e2_s2 --split val --skip-check --out <folder>
 
 On TelecomEval (--split test) every run is also scored on its subsets, from
 data/raw/telecom_eval/subsets.csv: real photos (all, telecom, near) and generated images. Real telecom
 photos are the headline figure — generated images are reported beside them, never in their place.
-Subset scores go to subsets.csv and results.md, as percentages (0–100 %).
+Subset scores go to subsets.csv and results.md / results-EN.md, as percentages (0–100 %).
 
 Runs named <exp>_s<k> are further seeds of <exp>: they are grouped with it and every
 table and chart reports the mean over seeds (± standard deviation when there are several).
@@ -15,9 +15,9 @@ table and chart reports the mean over seeds (± standard deviation when there ar
 Refuses to run if TelecomEval changed since it was frozen (use --skip-check only
 while TelecomEval does not exist yet, e.g. to evaluate on val during development).
 
-Outputs in reports/phase1/: <run>_metrics.csv, summary.csv (mean ± std per experiment),
+Outputs in docs/results/phase1/: <run>_metrics.csv, summary.csv (mean ± std per experiment),
 <exp>_confusion_matrix.png, per_class_ap.csv, per_class_ap.png, class_distribution.png, weak_classes.md
-(weak_classes.md is written only if absent — its "reason" column is filled by hand;
+(weak_classes.md and weak_classes-EN.md are written only if absent — the "reason" column is filled by hand;
 pass --rewrite-weak-classes to regenerate it).
 """
 
@@ -35,13 +35,25 @@ from telecomsafe.paths import PROCESSED, RAW, REPORTS, RUNS
 
 EVAL_DIR = RAW / "telecom_eval"
 EVAL_LISTS = PROCESSED / "telecom_eval"
-# subset name → (what it holds, test on rows of subsets.csv)
+# subset name → (English label, Chinese label, test on rows of subsets.csv)
 SUBSETS = {
-    "all": ("all TelecomEval images", lambda r: True),
-    "real": ("real photos", lambda r: r["method"] != "generated"),
-    "real_telecom": ("real photos, telecom work", lambda r: r["method"] != "generated" and r["subset"] == "telecom"),
-    "real_near": ("real photos, power-line work", lambda r: r["method"] != "generated" and r["subset"] == "near"),
-    "generated": ("generated images", lambda r: r["method"] == "generated"),
+    "all": ("all TelecomEval images", "TelecomEval 全部", lambda r: True),
+    "real": ("real photos", "真实照片 · 合计", lambda r: r["method"] != "generated"),
+    "real_telecom": ("real photos, telecom work", "真实照片 · 电信作业",
+                     lambda r: r["method"] != "generated" and r["subset"] == "telecom"),
+    "real_near": ("real photos, power-line work", "真实照片 · 电力线路作业",
+                  lambda r: r["method"] != "generated" and r["subset"] == "near"),
+    "generated": ("generated images", "生成图", lambda r: r["method"] == "generated"),
+}
+RESULTS_TEXT = {
+    "en": ("# TelecomEval results", "> 中文版：[results.md](results.md)",
+           "All figures are percentages (0–100 %), mean ± standard deviation over the seeds of each experiment.",
+           "**Real telecom photos** are the headline figure; generated images are reported separately.",
+           "| Subset | Images | Experiment | mAP50 | mAP50-95 | Precision | Recall |", "run", "runs"),
+    "zh": ("# TelecomEval 评测结果", "> English version: [results-EN.md](results-EN.md)",
+           "所有数字均为百分比（0–100 %），多个种子时为均值 ± 标准差。",
+           "**真实照片 · 电信作业是主指标**；生成图单独报告，不代替真实照片。",
+           "| 子集 | 张数 | 实验 | mAP50 | mAP50-95 | Precision | Recall |", "个种子", "个种子"),
 }
 
 # Categorical palette in fixed slot order (validated default palette, light surface).
@@ -123,7 +135,7 @@ def subset_yamls(names: list[str], eval_dir: Path = EVAL_DIR, out: Path = EVAL_L
         rows = list(csv.DictReader(f))
     out.mkdir(parents=True, exist_ok=True)
     made = {}
-    for key, (_, keep) in SUBSETS.items():
+    for key, (_, _, keep) in SUBSETS.items():
         files = [str((eval_dir / "images" / r["file"]).resolve()) for r in rows if keep(r)]
         if not files:
             continue
@@ -143,12 +155,8 @@ def pct(v: float | None) -> str:
 
 
 def subset_report(runs_by_subset: dict[str, dict[str, dict]], sizes: dict[str, int], out: Path) -> None:
-    """subsets.csv (fractions) and results.md (percentages) — mean ± std over seeds per experiment."""
-    rows, lines = [], []
-    lines += ["# TelecomEval results", "",
-              "All figures are percentages (0–100 %), mean ± standard deviation over the seeds of each experiment.",
-              "**Real telecom photos** are the headline figure; generated images are reported separately.", "",
-              "| Subset | Images | Experiment | mAP50 | mAP50-95 | Precision | Recall |", "|---|---|---|---|---|---|---|"]
+    """subsets.csv (fractions), results.md (Chinese) and results-EN.md (percentages, mean ± std over seeds)."""
+    rows, table = [], []  # table: (subset key, exp, runs, cells)
     for key, runs in runs_by_subset.items():
         for exp, r in aggregate(runs).items():
             o = r["overall"]
@@ -158,11 +166,18 @@ def subset_report(runs_by_subset: dict[str, dict[str, dict]], sizes: dict[str, i
                 row[k], row[f"{k}_std"] = fmt(o[k]), fmt(o[f"{k}_std"])
                 cells.append(pct(o[k]) + (f" ± {pct(o[f'{k}_std'])}" if o[f"{k}_std"] is not None else ""))
             rows.append(row)
-            lines.append(f"| {SUBSETS[key][0]} | {sizes[key]} | {exp.upper()} ({o['runs']} run{'s' if o['runs'] > 1 else ''}) | "
-                         + " | ".join(cells) + " |")
+            table.append((key, exp, o["runs"], cells))
     write_rows(out / "subsets.csv", rows)
-    (out / "results.md").write_text("\n".join(lines) + "\n", encoding="utf-8")
-    print("\n".join(lines[6:]))
+    for lang, name in (("zh", "results.md"), ("en", "results-EN.md")):
+        title, other, note1, note2, head, one, many = RESULTS_TEXT[lang]
+        label = 0 if lang == "en" else 1
+        lines = [title, "", other, "", note1, note2, "", head, "|---|---|---|---|---|---|---|"]
+        for key, exp, n, cells in table:
+            runs_txt = f"{n} {one if n == 1 else many}"
+            lines.append(f"| {SUBSETS[key][label]} | {sizes[key]} | {exp.upper()} ({runs_txt}) | " + " | ".join(cells) + " |")
+        (out / name).write_text("\n".join(lines) + "\n", encoding="utf-8")
+        if lang == "en":
+            print("\n".join(lines[7:]))
 
 
 def train_instances() -> dict[str, int]:
@@ -246,26 +261,46 @@ def plot_distribution(counts: dict[str, int], out: Path) -> None:
     plt.close(fig)
 
 
-def weak_classes_md(results: dict[str, dict], classes: list[str], counts: dict[str, int], k: int, eval_name: str) -> str:
+def weak_classes_md(results: dict[str, dict], classes: list[str], counts: dict[str, int], k: int, eval_name: str,
+                    lang: str = "zh") -> str:
     exp = "e2" if "e2" in results else next(iter(results))
     present = [c for c in classes if c in results[exp]["per_class"]]
     absent = [c for c in classes if c not in results[exp]["per_class"]]
     ranked = sorted(present, key=lambda c: results[exp]["per_class"][c]["ap50"])
-    lines = [
-        "# 弱类别清单（阶段二生成目标）",
-        "",
-        f"按 {exp.upper()}{'（' + str(results[exp].get('runs', 1)) + ' 个种子的均值）' if results[exp].get('runs', 1) > 1 else ''}"
-        f" 在 {eval_name} 上的 AP50 从低到高取前 {k} 类。阶段二（M3）的风险场景规格库优先覆盖这些类别。",
-        "",
-        "| 排名 | 类别 | AP50 | 训练实例数 | 可能原因（人工填写） |",
-        "|---|---|---|---|---|",
-    ]
+    n = results[exp].get("runs", 1)
+    if lang == "en":
+        lines = [
+            "# Weak classes (phase 2 generation targets)",
+            "",
+            "> 中文版：[weak_classes.md](weak_classes.md)",
+            "",
+            f"The {k} classes with the lowest AP50 of {exp.upper()}{f' (mean of {n} seeds)' if n > 1 else ''} on {eval_name}."
+            " Phase 2's (M3) risk-scenario specification covers these classes first.",
+            "",
+            "| Rank | Class | AP50 | Training instances | Likely reason (filled by hand) |",
+            "|---|---|---|---|---|",
+        ]
+    else:
+        lines = [
+            "# 弱类别清单（阶段二生成目标）",
+            "",
+            "> English version: [weak_classes-EN.md](weak_classes-EN.md)",
+            "",
+            f"按 {exp.upper()}{'（' + str(n) + ' 个种子的均值）' if n > 1 else ''}"
+            f" 在 {eval_name} 上的 AP50 从低到高取前 {k} 类。阶段二（M3）的风险场景规格库优先覆盖这些类别。",
+            "",
+            "| 排名 | 类别 | AP50 | 训练实例数 | 可能原因（人工填写） |",
+            "|---|---|---|---|---|",
+        ]
     for i, c in enumerate(ranked[:k], 1):
         pc = results[exp]["per_class"].get(c, {})
         ap, sd = pc.get("ap50"), pc.get("ap50_std")
         shown = "—" if ap is None else f"{ap:.3f}" + (f" ± {sd:.3f}" if sd is not None else "")
         lines.append(f"| {i} | {c} | {shown} | {counts.get(c, '—')} | |")
-    if absent:
+    if absent and lang == "en":
+        lines += ["", f"⚠️ Classes with no samples in {eval_name}, so they cannot be evaluated: {', '.join(absent)}."
+                  " They are not ranked; add test samples if needed, or state it in the report."]
+    elif absent:
         lines += ["", f"⚠️ {eval_name} 中没有样本、因而无法评估的类别：{', '.join(absent)}。"
                   "它们不参与排名；需要时补充测试样本，否则在报告中说明。"]
     return "\n".join(lines) + "\n"
@@ -277,10 +312,10 @@ def main(argv: list[str] | None = None) -> None:
     ap.add_argument("--data", default=str(PROCESSED / "yolo" / "dataset.yaml"))
     ap.add_argument("--split", default="test", help="test = TelecomEval; val only for development")
     ap.add_argument("--top-k", type=int, default=4)
-    ap.add_argument("--out", type=Path, default=REPORTS, help="report folder (default reports/phase1)")
+    ap.add_argument("--out", type=Path, default=REPORTS, help="report folder (default docs/results/phase1)")
     ap.add_argument("--skip-check", action="store_true")
     ap.add_argument("--rewrite-weak-classes", action="store_true",
-                    help="regenerate weak_classes.md (overwrites the hand-written reasons)")
+                    help="regenerate weak_classes(-EN).md (overwrites the hand-written reasons)")
     args = ap.parse_args(argv)
 
     if args.split == "test" and not args.skip_check:
@@ -326,11 +361,12 @@ def main(argv: list[str] | None = None) -> None:
     plot_per_class(results, classes, args.out / "per_class_ap.png", eval_name)
     if counts:
         plot_distribution({c: counts.get(c, 0) for c in classes}, args.out / "class_distribution.png")
-    weak = args.out / "weak_classes.md"
-    if args.rewrite_weak_classes or not weak.exists():
-        weak.write_text(weak_classes_md(results, classes, counts, args.top_k, eval_name), encoding="utf-8")
-    else:
-        print(f"  kept {weak.name} (hand-written reasons); use --rewrite-weak-classes to regenerate")
+    for lang, name in (("zh", "weak_classes.md"), ("en", "weak_classes-EN.md")):
+        weak = args.out / name
+        if args.rewrite_weak_classes or not weak.exists():
+            weak.write_text(weak_classes_md(results, classes, counts, args.top_k, eval_name, lang), encoding="utf-8")
+        else:
+            print(f"  kept {weak.name} (hand-written reasons); use --rewrite-weak-classes to regenerate")
 
     if yamls:
         by_subset = {"all": runs}

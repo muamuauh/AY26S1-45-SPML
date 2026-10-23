@@ -1,9 +1,26 @@
 # TelecomSafe 项目文档集 / Project Documentation
 
 > 项目 / Project：A Novel Generative Image-based Learning Framework for Enhancing the Construction Safety of Telecommunication Projects
-> 生成日期 / Generated：2026-08-18 ｜ 修订 / Revised：2026-09-28（全部文档已同步 v3.0 两阶段流程）
+> 生成日期 / Generated：2026-08-18 ｜ 修订 / Revised：2026-10-23（所有文档集中到 docs/，按用途分文件夹）
 > 全部文档提供中英双版，章节编号与表格结构一一对应，可逐段对照使用。
 > All documents exist in Chinese and English versions with matching section numbering and table structure, usable side by side.
+
+---
+
+## 目录结构 / Folder Layout
+
+所有文档都在 `docs/` 下，按用途分为以下文件夹；仓库根目录只保留 README。
+*Every document lives under `docs/`, grouped by purpose; only the README stays in the repository root.*
+
+| 文件夹 / Folder | 内容 / Content |
+|---|---|
+| [`plan/`](plan/) | 00–07 设计文档（需求、方案、数据调研、增广设计、综述、路线图、分工、章程）与项目简介 `project.txt` / design documents 00–07 and the project brief |
+| [`guides/`](guides/) | 操作指南：[阶段一训练复现](guides/08-阶段一训练复现指南-CN.md)（[EN](guides/08-Phase1-Training-Guide-EN.md)）、[TelecomEval 贡献规范](guides/TelecomEval-贡献规范-CN.md)（[EN](guides/TelecomEval-Contribution-EN.md)）/ how-to guides |
+| [`status/`](status/) | 进展与里程碑：[里程碑](status/milestones.md)（[EN](status/milestones-EN.md)）、[TelecomEval 进展](status/TelecomEval-进展与待办-CN.md)（[EN](status/TelecomEval-Status-EN.md)）、[给组员的进展说明](status/Status-and-Next-Steps-EN.md) / progress and milestones |
+| [`results/phase1/`](results/phase1/) | 阶段一结果：[成果总结](results/phase1/README.md)（[EN](results/phase1/README-EN.md)）、[TelecomEval 评测](results/phase1/telecom_eval/results.md)（[EN](results/phase1/telecom_eval/results-EN.md)）、[弱类别清单](results/phase1/telecom_eval/weak_classes.md)（[EN](results/phase1/telecom_eval/weak_classes-EN.md)），以及指标表、图表、Demo 示例 / phase 1 results |
+| [`datasets/`](datasets/) | [数据集说明](datasets/README.md)（[EN](datasets/README-EN.md)），由 `python -m telecomsafe.data.catalog` 生成 / dataset catalogue (generated) |
+| [`releases/`](releases/) | 发布说明：[v1](releases/phase1-baseline-v1.md)、[v2](releases/phase1-baseline-v2.md) / release notes |
+| [`templates/`](templates/) | 学校官方模板（项目章程、项目报告）/ official school templates |
 
 ---
 
@@ -15,7 +32,7 @@
   → 阶段二 增广（W8–W16）：  ⑥生成式增广 → ⑦同配置再训练对比 → ⑧升级与交付
 ```
 
-*Phase 1 builds a baseline demo from the curated public data only; phase 2 adds generative augmentation and compares against the baseline on the same test set and training configuration.* 详见 / See [05](05-技术路线图-CN.md)。
+*Phase 1 builds a baseline demo from the curated public data only; phase 2 adds generative augmentation and compares against the baseline on the same test set and training configuration.* 详见 / See [05](plan/05-技术路线图-CN.md)。
 
 ---
 
@@ -23,18 +40,18 @@
 
 | # | 中文版 | English | 内容 / Content |
 |---|--------|---------|---------------|
-| 00 | [项目需求分析](00-项目需求分析-CN.md) | [Requirements Analysis](00-Requirements-Analysis-EN.md) | 项目本质拆解、四个风险维度、三大技术支柱、创新点定位、交付物要求、非技术约束、三大难点 |
-| 01 | [技术方案与里程碑](01-技术方案与里程碑-CN.md) | [Technical Plan & Milestones](01-Technical-Plan-and-Milestones-EN.md) | 五层架构、分层技术选型、E1–E9 实验矩阵、**两阶段里程碑 M0–M7**、风险登记表、算力配置、EE6008 报告写作指引 |
-| 02 | [数据集与预训练模型调研](02-数据集与预训练模型调研-CN.md) | [Datasets & Pretrained Models](02-Datasets-and-Pretrained-Models-EN.md) | T1–T4 纯公开来源策略、学术与社区数据集、开放许可图像库、生成与感知模型选型、许可证合规、**阶段一准备清单** |
-| 03 | [生成式数据增广 Pipeline 设计](03-生成式数据增广Pipeline设计-CN.md) | [Generative Augmentation Pipeline](03-Generative-Augmentation-Pipeline-EN.md) | 阶段二的施工图：规格库（按弱类别排优先级）、生成路线实施顺序、四道质量闸门、混合训练策略、失败模式对策 |
-| 04 | [文献综述](04-文献综述-CN.md) | [Literature Survey](04-Literature-Survey-EN.md) | 四条文献主线、50 条参考文献、5 个研究空白（G1–G5）、定位陈述、引文核实状态表 |
-| 05 | [技术路线图](05-技术路线图-CN.md) | [Technological Roadmap](05-Technological-Roadmap-EN.md) | ⭐ **v3.0 Baseline 优先**：为什么先做 baseline、主流程图、八步详解、两阶段衔接的三条硬约束、决策门（TGB、TG1–TG5）与降级路径、甘特时间线、关键路径 |
-| 06 | [团队分工](06-团队分工-CN.md) | [Teamwork Allocation](06-Teamwork-Allocation-EN.md) | 5 人角色与两阶段交付物、队长选举、RACI 矩阵、工作量分布、接口约定、协作机制、应急预案、**阶段一启动会议议程** |
-| 07 | [项目章程](07-项目章程-CN.md) | [Project Charter](07-Project-Charter-EN.md) | 按学校官方模板组织：立项依据、项目描述、里程碑摘要、成员活动矩阵、预算、风险评估；模板外内容在附录 A |
-| 08 | [阶段一训练复现指南](08-阶段一训练复现指南-CN.md) | [Phase 1 Training Guide](08-Phase1-Training-Guide-EN.md) | 从零复现阶段一：环境、API key、数据获取、teacher 与伪标签、构建、E1/E2 训练、评估、Demo；每步的预期输出与常见问题 |
+| 00 | [项目需求分析](plan/00-项目需求分析-CN.md) | [Requirements Analysis](plan/00-Requirements-Analysis-EN.md) | 项目本质拆解、四个风险维度、三大技术支柱、创新点定位、交付物要求、非技术约束、三大难点 |
+| 01 | [技术方案与里程碑](plan/01-技术方案与里程碑-CN.md) | [Technical Plan & Milestones](plan/01-Technical-Plan-and-Milestones-EN.md) | 五层架构、分层技术选型、E1–E9 实验矩阵、**两阶段里程碑 M0–M7**、风险登记表、算力配置、EE6008 报告写作指引 |
+| 02 | [数据集与预训练模型调研](plan/02-数据集与预训练模型调研-CN.md) | [Datasets & Pretrained Models](plan/02-Datasets-and-Pretrained-Models-EN.md) | T1–T4 纯公开来源策略、学术与社区数据集、开放许可图像库、生成与感知模型选型、许可证合规、**阶段一准备清单** |
+| 03 | [生成式数据增广 Pipeline 设计](plan/03-生成式数据增广Pipeline设计-CN.md) | [Generative Augmentation Pipeline](plan/03-Generative-Augmentation-Pipeline-EN.md) | 阶段二的施工图：规格库（按弱类别排优先级）、生成路线实施顺序、四道质量闸门、混合训练策略、失败模式对策 |
+| 04 | [文献综述](plan/04-文献综述-CN.md) | [Literature Survey](plan/04-Literature-Survey-EN.md) | 四条文献主线、50 条参考文献、5 个研究空白（G1–G5）、定位陈述、引文核实状态表 |
+| 05 | [技术路线图](plan/05-技术路线图-CN.md) | [Technological Roadmap](plan/05-Technological-Roadmap-EN.md) | ⭐ **v3.0 Baseline 优先**：为什么先做 baseline、主流程图、八步详解、两阶段衔接的三条硬约束、决策门（TGB、TG1–TG5）与降级路径、甘特时间线、关键路径 |
+| 06 | [团队分工](plan/06-团队分工-CN.md) | [Teamwork Allocation](plan/06-Teamwork-Allocation-EN.md) | 5 人角色与两阶段交付物、队长选举、RACI 矩阵、工作量分布、接口约定、协作机制、应急预案、**阶段一启动会议议程** |
+| 07 | [项目章程](plan/07-项目章程-CN.md) | [Project Charter](plan/07-Project-Charter-EN.md) | 按学校官方模板组织：立项依据、项目描述、里程碑摘要、成员活动矩阵、预算、风险评估；模板外内容在附录 A |
+| 08 | [阶段一训练复现指南](guides/08-阶段一训练复现指南-CN.md) | [Phase 1 Training Guide](guides/08-Phase1-Training-Guide-EN.md) | 从零复现阶段一：环境、API key、数据获取、teacher 与伪标签、构建、E1/E2 训练、评估、Demo；每步的预期输出与常见问题 |
 
-> 📄 **学校官方模板**存放于 [`template/`](../template/)：`EE6008_Project_Charter_Template.docx`（项目章程）与 `EE6008-Project ReportTemplate.docx`（项目报告）。文档 07 按 Charter 模板组织；文档 01 §7 与 04 §9 按 Report 模板校准。
-> *Official school templates live in [`template/`](../template/). Document 07 follows the Charter template; documents 01 §7 and 04 §9 are calibrated to the Report template.*
+> 📄 **学校官方模板**存放于 [`docs/templates/`](templates/)：`EE6008_Project_Charter_Template.docx`（项目章程）与 `EE6008-Project ReportTemplate.docx`（项目报告）。文档 07 按 Charter 模板组织；文档 01 §7 与 04 §9 按 Report 模板校准。
+> *Official school templates live in [`docs/templates/`](templates/). Document 07 follows the Charter template; documents 01 §7 and 04 §9 are calibrated to the Report template.*
 
 > 中文版 04 的参考文献额外附了中文标题译名，方便撰写中文报告时引用。
 > *The Chinese version of document 04 additionally provides Chinese translations of reference titles.*
@@ -90,8 +107,8 @@
    *The Baseline Demo is not the finish line. Generative augmentation is why the project exists; settle the weak-class list and the phase 2 start date at the TGB meeting.*
 
 4. **报告要「计划 vs 实际」对照，必须全程记录**
-   学校报告模板的 Schedule 与 Cost 都有 Planned / Actual 两列，Scope 要说明范围变更（取消现场采集、改为两阶段）。建 `progress/` 目录，每周例会后更新。详见 [01 §7.4](01-技术方案与里程碑-CN.md)。
-   *The report template requires planned-vs-actual columns and a record of scope changes (field collection cancelled, two-phase flow). Keep a `progress/` directory updated weekly.*
+   学校报告模板的 Schedule 与 Cost 都有 Planned / Actual 两列，Scope 要说明范围变更（取消现场采集、改为两阶段）。建 `docs/status/` 目录，每周例会后更新。详见 [01 §7.4](plan/01-技术方案与里程碑-CN.md)。
+   *The report template requires planned-vs-actual columns and a record of scope changes (field collection cancelled, two-phase flow). Keep a `docs/status/` directory updated weekly.*
 
 ---
 

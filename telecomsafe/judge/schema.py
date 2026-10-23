@@ -1,4 +1,4 @@
-"""Perception → judgement interface (I5 in docs/06 §6).
+"""Perception → judgement interface (I5 in docs/plan/06 §6).
 
 Phase 1 perception emits boxes only. Phase 2 may add fields (masks, attributes)
 but must not change the existing ones.
