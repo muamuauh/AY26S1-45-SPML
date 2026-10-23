@@ -12,7 +12,7 @@ telecomsafe.data.screen) are imported. `pull` also writes subsets.csv, so the te
 images and the power-line "near" images can be evaluated separately.
 Images are served from disk (local-files storage), nothing is uploaded or copied.
 
-Annotation rules: follow the criteria in configs/taxonomy.yaml (also in data/README.md).
+Annotation rules: follow the criteria in configs/taxonomy.yaml (also in docs/datasets/README.md).
 Every pre-label must be checked; add missing boxes (harness and machinery are never
 pre-labelled). "Skip" an image that turns out to be unusable — skipped images are
 left out of TelecomEval.

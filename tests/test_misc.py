@@ -117,3 +117,18 @@ def test_local_zip_is_found_and_its_top_folder_lifted(tmp_path):
     extract_local_zip(archive, dest)
     assert (dest / "data.yaml").exists() and (dest / "train" / "images" / "x.jpg").exists()
     assert not (dest / "APD.v1i").exists()
+
+
+def test_evaluation_reports_are_bilingual(tmp_path):
+    from telecomsafe import evaluate as ev
+    run = {"overall": {"exp": "e2", "split": "test", "mAP50": 0.5, "mAP50-95": 0.3, "precision": 0.6, "recall": 0.4},
+           "per_class": {"person": {"ap50": 0.8, "ap50_95": 0.5}, "no_helmet": {"ap50": 0.1, "ap50_95": 0.05}},
+           "names": ["person", "no_helmet"]}
+    ev.subset_report({"all": {"e2": run}, "real_telecom": {"e2": run}}, {"all": 10, "real_telecom": 4}, tmp_path)
+    zh, en = (tmp_path / "results.md").read_text(encoding="utf-8"), (tmp_path / "results-EN.md").read_text(encoding="utf-8")
+    assert "真实照片 · 电信作业" in zh and "50.0" in zh and "results-EN.md" in zh
+    assert "real photos, telecom work" in en and "50.0" in en and "results.md" in en
+    res = ev.aggregate({"e2": run})
+    assert "未戴" not in ev.weak_classes_md(res, ["person", "no_helmet"], {}, 1, "TelecomEval", "en")
+    assert "| 1 | no_helmet |" in ev.weak_classes_md(res, ["person", "no_helmet"], {}, 1, "TelecomEval", "en")
+    assert "弱类别清单" in ev.weak_classes_md(res, ["person", "no_helmet"], {}, 1, "TelecomEval", "zh")

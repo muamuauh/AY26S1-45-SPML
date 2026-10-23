@@ -1,7 +1,7 @@
 """TelecomSafe Baseline Demo v1.
 
     python -m telecomsafe.demo.app --weights runs/phase1/e2/weights/best.pt
-    python -m telecomsafe.demo.app --weights ... --examples reports/phase1/demo_examples --open
+    python -m telecomsafe.demo.app --weights ... --examples docs/results/phase1/demo_examples --open
 
 Three decoupled stages: detect() → judge() → render(). Phase 2 swaps only the weights.
 Runs on localhost; no public share link. Styling lives in style.css next to this file.
@@ -310,7 +310,7 @@ def theme():
 def main(argv: list[str] | None = None) -> None:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--weights", required=True)
-    ap.add_argument("--examples", default="reports/phase1/demo_examples", help="folder of example images")
+    ap.add_argument("--examples", default="docs/results/phase1/demo_examples", help="folder of example images")
     ap.add_argument("--port", type=int, default=7860)
     ap.add_argument("--open", action="store_true", help="open the browser once the server is ready")
     args = ap.parse_args(argv)

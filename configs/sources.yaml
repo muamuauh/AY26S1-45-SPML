@@ -1,7 +1,7 @@
 # 数据来源登记表 —— 数据集信息的唯一出处
 #
 # 下载（telecomsafe.data.download）、构建（telecomsafe.data.build）和
-# 数据集说明文档 data/README.md（telecomsafe.data.catalog 生成）都读这份文件。
+# 数据集说明文档 docs/datasets/README.md（telecomsafe.data.catalog 生成）都读这份文件。
 #
 # 字段说明
 #   name          本地目录名，数据放在 path（默认 data/raw/<name>/）
@@ -17,7 +17,7 @@
 #   download      method: kaggle | roboflow | ultralytics | url_zip | manual
 #   verified      类别表与规模是否已按下载后的实际文件核对过
 #   en            上面中文字段的英文版（title / description / licence / planned_size / notes / reason /
-#                 instructions），用于生成英文的 data/README-EN.md；没有写的字段沿用原值
+#                 instructions），用于生成英文的 docs/datasets/README-EN.md；没有写的字段沿用原值
 
 sources:
   # ------------------------------------------------------------------ A 核心
@@ -465,7 +465,7 @@ sources:
       licence: "Recorded per image (CC0 / public domain / CC BY / CC BY-SA), see licence_manifest.csv"
       citation: "Per-image attribution in licence_manifest.csv"
       planned_size: ">= 150 images (ideally 200)"
-      instructions: "collect_open / collect_video find candidates -> screen scores them and review.html records keep / reject -> pseudo_label pre-labels -> labelstudio serve / push to annotate -> labelstudio pull exports to data/raw/telecom_eval/ -> freeze_eval --create (see data/README-EN.md)"
+      instructions: "collect_open / collect_video find candidates -> screen scores them and review.html records keep / reject -> pseudo_label pre-labels -> labelstudio serve / push to annotate -> labelstudio pull exports to data/raw/telecom_eval/ -> freeze_eval --create (see docs/datasets/README-EN.md)"
     tier: eval
     role: eval
     enabled: true
@@ -485,7 +485,7 @@ sources:
       instructions: >-
         collect_open / collect_video 收集候选图 → screen 打分并在 review.html 中人工筛选
         → pseudo_label 预标注 → labelstudio serve / push 标注
-        → labelstudio pull 导出到 data/raw/telecom_eval/ → freeze_eval --create（详见 data/README.md）
+        → labelstudio pull 导出到 data/raw/telecom_eval/ → freeze_eval --create（详见 docs/datasets/README.md）
     class_map: identity     # 直接按目标类别标注
     annotates: [person, helmet, no_helmet, vest, no_vest, harness, machinery, vehicle]
     verified: false

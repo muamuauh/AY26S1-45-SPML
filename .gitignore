@@ -16,11 +16,9 @@ venv/
 .ipynb_checkpoints/
 
 # Data & model artefacts (do not commit)
-# Only data/README.md is tracked. Ignore the contents (data/*), not the directory,
+# Nothing under data/ is tracked (the dataset catalogue lives in docs/datasets/).
 # otherwise git cannot re-include the README.
 data/*
-!data/README.md
-!data/README-EN.md
 *.pt
 *.pth
 *.safetensors
