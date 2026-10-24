@@ -15,7 +15,7 @@
 | 文件夹 / Folder | 内容 / Content |
 |---|---|
 | [`plan/`](plan/) | 00–07 设计文档（需求、方案、数据调研、增广设计、综述、路线图、分工、章程）与项目简介 `project.txt` / design documents 00–07 and the project brief |
-| [`guides/`](guides/) | 操作指南：[阶段一训练复现](guides/08-阶段一训练复现指南-CN.md)（[EN](guides/08-Phase1-Training-Guide-EN.md)）、[TelecomEval 贡献规范](guides/TelecomEval-贡献规范-CN.md)（[EN](guides/TelecomEval-Contribution-EN.md)）/ how-to guides |
+| [`guides/`](guides/) | 操作指南：[阶段一训练复现](guides/08-阶段一训练复现指南-CN.md)（[EN](guides/08-Phase1-Training-Guide-EN.md)）、[TelecomEval 贡献规范](guides/TelecomEval-贡献规范-CN.md)（[EN](guides/TelecomEval-Contribution-EN.md)）、[第二阶段合成数据任务](guides/第二阶段合成数据任务-CN.md)（[EN](guides/Phase2-Synth-Task-EN.md)）/ how-to guides |
 | [`status/`](status/) | 进展与里程碑：[里程碑](status/milestones.md)（[EN](status/milestones-EN.md)）、[TelecomEval 进展](status/TelecomEval-进展与待办-CN.md)（[EN](status/TelecomEval-Status-EN.md)）、[给组员的进展说明](status/Status-and-Next-Steps-EN.md) / progress and milestones |
 | [`results/phase1/`](results/phase1/) | 阶段一结果：[成果总结](results/phase1/README.md)（[EN](results/phase1/README-EN.md)）、[TelecomEval 评测](results/phase1/telecom_eval/results.md)（[EN](results/phase1/telecom_eval/results-EN.md)）、[弱类别清单](results/phase1/telecom_eval/weak_classes.md)（[EN](results/phase1/telecom_eval/weak_classes-EN.md)），以及指标表、图表、Demo 示例 / phase 1 results |
 | [`datasets/`](datasets/) | [数据集说明](datasets/README.md)（[EN](datasets/README-EN.md)），由 `python -m telecomsafe.data.catalog` 生成 / dataset catalogue (generated) |

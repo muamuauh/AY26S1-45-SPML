@@ -197,3 +197,54 @@ def test_contributor_is_a_traceable_suffix():
     assert eval_name("tower_01.JPG", "Lu") == "tower_01__Lu.jpg"
     assert owned_by("tower_01__Lu.jpg", "Lu") and not owned_by("tower_01__Lu.jpg", "Lin")
     assert owned_by("tower_01__Lu.txt", "Lu")
+
+
+def _synth_folder(root, n, with_target, size=(1280, 1024), method="generated"):
+    from telecomsafe.data.contrib import FIELDS
+    import csv
+    (root / "images").mkdir(parents=True)
+    (root / "labels").mkdir()
+    rows = []
+    for i in range(n):
+        rng = np.random.default_rng(i)
+        Image.fromarray(rng.integers(0, 255, (size[1] // 16, size[0] // 16, 3), dtype=np.uint8)).resize(size).save(root / "images" / f"g{i}.png")
+        lines = ["0 0.5 0.5 0.2 0.6", "3 0.5 0.4 0.15 0.2"] + (["2 0.5 0.25 0.05 0.05"] if i < with_target else ["1 0.5 0.25 0.05 0.05"])
+        (root / "labels" / f"g{i}.txt").write_text("\n".join(lines))
+        rows.append({"file": f"g{i}.png", "subset": "telecom", "method": method, "licence": "GENERATED" if method == "generated" else "CC0",
+                     "creator": "gpt-image-2", "notes": "photo of a worker without a helmet"})
+    with open(root / "sources.csv", "w", newline="", encoding="utf-8") as f:
+        w = csv.DictWriter(f, fieldnames=FIELDS); w.writeheader(); w.writerows({k: r.get(k, "") for k in FIELDS} for r in rows)
+    return root
+
+
+def test_synth_check_needs_target_coverage_resolution_and_generated(tmp_path):
+    from telecomsafe.data.synth import check
+    ok = _synth_folder(tmp_path / "ok", 5, 5)
+    errors, _, _ = check(ok, "no_helmet", eval_dir=tmp_path / "none")
+    assert errors == []
+    few = _synth_folder(tmp_path / "few", 5, 2)
+    assert any("only 2/5 images contain a no_helmet" in e for e in check(few, "no_helmet", eval_dir=tmp_path / "none")[0])
+    small = _synth_folder(tmp_path / "small", 2, 2, size=(800, 600))
+    assert any("short side 600 px" in e for e in check(small, "no_helmet", eval_dir=tmp_path / "none")[0])
+    real = _synth_folder(tmp_path / "real", 2, 2, method="collected")
+    assert any("method = generated" in e for e in check(real, "no_helmet", eval_dir=tmp_path / "none")[0])
+
+
+def test_synth_intake_and_e3_dataset(tmp_path, monkeypatch):
+    from telecomsafe.data import synth
+    monkeypatch.setattr(synth, "SYNTH_DIR", tmp_path / "telecomsynth")
+    monkeypatch.setattr(synth, "check", lambda folder, target, eval_dir=None: ([], [], __import__("collections").Counter()))
+    sub = _synth_folder(tmp_path / "sub", 3, 3)
+    synth.intake(sub, "Lu", "no_helmet")
+    synth.intake(sub, "Lu", "no_helmet")                  # handing in again replaces, not duplicates
+    rows = synth.read_sources(tmp_path / "telecomsynth" / "sources.csv")
+    assert len(rows) == 3 and {r["file"] for r in rows} == {"g0__Lu.png", "g1__Lu.png", "g2__Lu.png"}
+    assert {r["target"] for r in rows} == {"no_helmet"} and rows[0]["original_file"] == "g0.png"
+    train = tmp_path / "processed" / "yolo" / "images" / "train"
+    train.mkdir(parents=True)
+    (tmp_path / "processed" / "yolo" / "images" / "val").mkdir()
+    Image.new("RGB", (8, 8)).save(train / "a.jpg")
+    monkeypatch.setattr(synth, "PROCESSED", tmp_path / "processed")
+    y = synth.dataset(max_images=2, out=tmp_path / "e3")
+    lst = (tmp_path / "e3" / "dataset_synth2_train.txt").read_text().splitlines()
+    assert len(lst) == 3 and "train:" in y.read_text()
