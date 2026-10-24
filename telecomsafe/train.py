@@ -6,6 +6,8 @@
     python -m telecomsafe.train --exp e2 --seed 1 --name e2_s1    # another seed of the same experiment
     python -m telecomsafe.train --exp e2 --imgsz 960 --name e2_960   # input-size trial before freezing
     python -m telecomsafe.train --exp teacher --data data/processed/teacher/dataset.yaml --epochs 50
+    python -m telecomsafe.train --exp e3 --seed 0                 # phase 2: E2's configuration + TelecomSynth
+                                                                  # (data/processed/e3/dataset.yaml, see telecomsafe.data.synth)
 
 Runs land in runs/phase1/<name>/ (Ultralytics saves args.yaml there — check it to
 confirm E1 really trained with augmentation off). Only the command-line overrides
@@ -39,8 +41,8 @@ def train_args(exp: str, data: str, overrides: dict) -> dict:
 
 def main(argv: list[str] | None = None) -> None:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("--exp", required=True, choices=["e1", "e2", "teacher"])
-    ap.add_argument("--data", default=str(PROCESSED / "yolo" / "dataset.yaml"))
+    ap.add_argument("--exp", required=True, choices=["e1", "e2", "e3", "teacher"])
+    ap.add_argument("--data", help="dataset yaml (default: the phase 1 set; for e3 the set from `synth dataset`)")
     ap.add_argument("--name", help="run name (default: the experiment id)")
     ap.add_argument("--model", help="e.g. yolo11m.pt for the s-vs-m comparison")
     ap.add_argument("--epochs", type=int)
@@ -49,6 +51,8 @@ def main(argv: list[str] | None = None) -> None:
     ap.add_argument("--seed", type=int, help="repeat an experiment with another seed (report mean ± std)")
     ap.add_argument("--imgsz", type=int, help="input-size trial before the baseline is frozen")
     args = ap.parse_args(argv)
+    if args.data is None:  # E3 changes only the training data — the configuration stays E2's
+        args.data = str(PROCESSED / ("e3" if args.exp == "e3" else "yolo") / "dataset.yaml")
 
     from ultralytics import YOLO
     from ultralytics.cfg import DEFAULT_CFG_DICT
