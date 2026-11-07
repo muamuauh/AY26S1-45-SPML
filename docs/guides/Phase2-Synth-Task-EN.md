@@ -23,7 +23,8 @@ The ranking comes from E2 on TelecomEval (AP50). Owners and the deadline will be
 1. **The image contains your class.** At least 80% of your images must contain at least one box of your class; the check refuses the set otherwise.
 2. **Every visible object of all 8 classes is labelled**, not only your class. A missing box teaches the model that the object is background, which does real harm. Follow the class table and consistency rules in [TelecomEval-Contribution-EN.md §3](TelecomEval-Contribution-EN.md):
    - every visible head gets exactly one `helmet` or `no_helmet`;
-   - every visible torso gets exactly one `vest` or `no_vest`.
+   - every visible torso gets exactly one `vest` or `no_vest`;
+   - **phase 2 addition: passers-by get `person` only.** Pedestrians, cyclists, drivers and others not part of the job get no helmet, vest or harness classes; the PPE classes describe the workers. People helping on the ground (holding a rope, passing tools) are workers.
 3. **One image per generation, at least 1024 px on the short side.**
    - Don't crop panels from a grid or montage.
    - Don't stretch or upscale; export at the original size (in Roboflow: no "Resize").
