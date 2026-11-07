@@ -18,6 +18,7 @@
 | [`guides/`](guides/) | 操作指南：[阶段一训练复现](guides/08-阶段一训练复现指南-CN.md)（[EN](guides/08-Phase1-Training-Guide-EN.md)）、[TelecomEval 贡献规范](guides/TelecomEval-贡献规范-CN.md)（[EN](guides/TelecomEval-Contribution-EN.md)）、[第二阶段合成数据任务](guides/第二阶段合成数据任务-CN.md)（[EN](guides/Phase2-Synth-Task-EN.md)）/ how-to guides |
 | [`status/`](status/) | 进展与里程碑：[里程碑](status/milestones.md)（[EN](status/milestones-EN.md)）、[TelecomEval 进展](status/TelecomEval-进展与待办-CN.md)（[EN](status/TelecomEval-Status-EN.md)）、[给组员的进展说明](status/Status-and-Next-Steps-EN.md) / progress and milestones |
 | [`results/phase1/`](results/phase1/) | 阶段一结果：[成果总结](results/phase1/README.md)（[EN](results/phase1/README-EN.md)）、[TelecomEval 评测](results/phase1/telecom_eval/results.md)（[EN](results/phase1/telecom_eval/results-EN.md)）、[弱类别清单](results/phase1/telecom_eval/weak_classes.md)（[EN](results/phase1/telecom_eval/weak_classes-EN.md)），以及指标表、图表、Demo 示例 / phase 1 results |
+| [`results/phase2/`](results/phase2/) | 阶段二结果：[E3 对比 E2](results/phase2/README.md)（[EN](results/phase2/README-EN.md)）、[TelecomEval 评测](results/phase2/telecom_eval/results.md)（[EN](results/phase2/telecom_eval/results-EN.md)） / phase 2 results |
 | [`datasets/`](datasets/) | [数据集说明](datasets/README.md)（[EN](datasets/README-EN.md)），由 `python -m telecomsafe.data.catalog` 生成 / dataset catalogue (generated) |
 | [`releases/`](releases/) | 发布说明：[v1](releases/phase1-baseline-v1.md)、[v2](releases/phase1-baseline-v2.md) / release notes |
 | [`templates/`](templates/) | 学校官方模板（项目章程、项目报告）/ official school templates |
