@@ -77,7 +77,7 @@ The source of truth is `configs/taxonomy.yaml`.
 | `no_helmet` | A head without a safety helmet | Caps, headscarves and hoods count as `no_helmet` |
 | `vest` | The worn hi-vis vest or hi-vis workwear (upper body) | Only garments with reflective strips |
 | `no_vest` | The torso of a person without a hi-vis vest | Ordinary or camouflage clothes |
-| `harness` | A full-body harness worn on the body | Not ropes and hooks on the structure; a missing harness gets no box |
+| `harness` | A full-body harness worn on the body (shoulder, chest and leg straps), boxed from the shoulder straps to the leg loops | Not ropes and hooks on the structure; a lineman's waist belt alone is not a harness; a missing harness gets no box |
 | `machinery` | The whole machine incl. booms | Excavators, cranes, bucket trucks, aerial work platforms, cable-pulling rigs, cable-drum trailers |
 | `vehicle` | The whole vehicle | Ordinary cars, pickups, vans, plain trucks |
 

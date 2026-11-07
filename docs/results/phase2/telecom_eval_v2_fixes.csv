@@ -1,0 +1,315 @@
+﻿file,action,class,old_box,new_box,reason
+gen_rooftop_antennas__Guo.png,delete,no_helmet,"[640, 382, 732, 501]",,stray no_helmet box under a helmeted head
+wikimedia_116628563__Guo.jpg,delete,helmet,"[1533, 734, 1828, 1137]",,"second, oversized head box"
+wikimedia_181267877__Guo.jpg,delete,no_vest,"[1171, 738, 1675, 1159]",,duplicate no_vest box
+lu_027__Lu.jpg,delete,no_vest,"[1970, 1115, 2412, 1544]",,"no_vest box over a worker wearing a vest (the upper body, not a torso box)"
+wikimedia_116628563__Guo.jpg,reclass,helmet -> no_helmet,"[1578, 776, 1848, 1042]","[1578, 776, 1848, 1042]","hood, no hard hat"
+gen_tower_no_ppe__Guo.png,reclass,helmet -> no_helmet,"[798, 283, 847, 334]","[798, 283, 847, 334]",checked on the image
+lu_023__Lu.jpg,reclass,helmet -> no_helmet,"[4200, 2130, 4291, 2214]","[4200, 2130, 4291, 2214]",checked on the image
+meng_017__Meng.png,reclass,no_helmet -> helmet,"[642, 244, 739, 346]","[642, 244, 739, 346]",checked on the image
+gen_storm_repair__Guo.png,reclass,no_vest -> vest,"[444, 156, 500, 190]","[444, 156, 500, 190]",checked on the image
+gen_trench_excavator__Guo.png,reclass,no_vest -> vest,"[72, 305, 136, 341]","[72, 305, 136, 341]",checked on the image
+wikimedia_163167484__Guo.jpg,reclass,no_vest -> vest,"[438, 1376, 669, 1658]","[438, 1376, 669, 1658]",checked on the image
+gen_cabinet_kneel__Guo.png,reclass,machinery -> vehicle,"[767, 190, 1460, 597]","[767, 190, 1460, 597]",van / pickup is vehicle; loader is machinery
+gen_tower_climb_mixed__Guo.png,reclass,machinery -> vehicle,"[145, 798, 597, 1024]","[145, 798, 597, 1024]",van / pickup is vehicle; loader is machinery
+meng_014__Meng.png,reclass,machinery -> vehicle,"[199, 475, 764, 845]","[199, 475, 764, 845]",van / pickup is vehicle; loader is machinery
+lu_058__Lu.jpg,reclass,vehicle -> machinery,"[927, 1640, 1124, 1795]","[927, 1640, 1124, 1795]",van / pickup is vehicle; loader is machinery
+lu_003__Lu.jpg,delete,vehicle,"[416, 1020, 976, 1537]",,merged: truck body + boom are one machine
+lu_003__Lu.jpg,delete,machinery,"[468, 639, 1030, 1333]",,merged: truck body + boom are one machine
+lu_003__Lu.jpg,add,machinery,,"[416, 639, 1030, 1537]",whole bucket / crane truck including the boom
+lu_012__Lu.jpg,delete,vehicle,"[2155, 1908, 3446, 3292]",,merged: truck body + boom are one machine
+lu_012__Lu.jpg,delete,machinery,"[1993, 0, 3092, 2596]",,merged: truck body + boom are one machine
+lu_012__Lu.jpg,add,machinery,,"[1993, 0, 3446, 3292]",whole bucket / crane truck including the boom
+lu_017__Lu.jpg,delete,vehicle,"[3495, 2550, 4877, 3180]",,merged: truck body + boom are one machine
+lu_017__Lu.jpg,delete,machinery,"[3675, 455, 4794, 2694]",,merged: truck body + boom are one machine
+lu_017__Lu.jpg,add,machinery,,"[3495, 455, 4877, 3180]",whole bucket / crane truck including the boom
+lu_022__Lu.jpg,delete,vehicle,"[2060, 1997, 4039, 2936]",,merged: truck body + boom are one machine
+lu_022__Lu.jpg,delete,machinery,"[1557, 1387, 3859, 2078]",,merged: truck body + boom are one machine
+lu_022__Lu.jpg,add,machinery,,"[1557, 1387, 4039, 2936]",whole bucket / crane truck including the boom
+lu_023__Lu.jpg,delete,vehicle,"[3345, 2047, 4171, 2479]",,merged: truck body + boom are one machine
+lu_023__Lu.jpg,delete,machinery,"[3340, 1962, 4193, 2092]",,merged: truck body + boom are one machine
+lu_023__Lu.jpg,add,machinery,,"[3340, 1962, 4193, 2479]",whole bucket / crane truck including the boom
+lu_024__Lu.jpg,delete,vehicle,"[710, 1695, 3181, 3084]",,merged: truck body + boom are one machine
+lu_024__Lu.jpg,delete,machinery,"[2375, 1175, 3101, 2461]",,merged: truck body + boom are one machine
+lu_024__Lu.jpg,add,machinery,,"[710, 1175, 3181, 3084]",whole bucket / crane truck including the boom
+lu_054__Lu.jpg,delete,vehicle,"[1560, 2235, 2592, 2812]",,merged: truck body + boom are one machine
+lu_054__Lu.jpg,delete,machinery,"[1520, 1235, 2076, 2202]",,merged: truck body + boom are one machine
+lu_054__Lu.jpg,add,machinery,,"[1520, 1235, 2592, 2812]",whole bucket / crane truck including the boom
+lu_054__Lu.jpg,delete,vehicle,"[990, 2200, 1453, 2646]",,merged: truck body + boom are one machine
+lu_054__Lu.jpg,delete,machinery,"[970, 1380, 1413, 2196]",,merged: truck body + boom are one machine
+lu_054__Lu.jpg,add,machinery,,"[970, 1380, 1453, 2646]",whole bucket / crane truck including the boom
+lu_057__Lu.jpg,delete,vehicle,"[845, 2080, 1596, 2609]",,merged: truck body + boom are one machine
+lu_057__Lu.jpg,delete,machinery,"[813, 1085, 1406, 2142]",,merged: truck body + boom are one machine
+lu_057__Lu.jpg,add,machinery,,"[813, 1085, 1596, 2609]",whole bucket / crane truck including the boom
+lu_052__Lu.jpg,rebox,harness,"[4184, 2205, 4523, 2366]","[4156, 2115, 4670, 2412]",torso box (pose box reached the head)
+lu_046__Lu.jpg,delete,harness,"[868, 2134, 948, 2156]",,"waist belt, not a full-body harness"
+lu_046__Lu.jpg,delete,harness,"[1248, 2201, 1303, 2234]",,"waist belt, not a full-body harness"
+lu_046__Lu.jpg,delete,harness,"[1579, 2156, 1634, 2180]",,"waist belt, not a full-body harness"
+lu_046__Lu.jpg,delete,harness,"[1648, 2238, 1696, 2259]",,"waist belt, not a full-body harness"
+lu_046__Lu.jpg,delete,harness,"[1958, 2150, 2007, 2181]",,"waist belt, not a full-body harness"
+lu_046__Lu.jpg,delete,harness,"[2095, 2158, 2172, 2178]",,"waist belt, not a full-body harness"
+lu_046__Lu.jpg,delete,harness,"[2270, 2212, 2335, 2236]",,"waist belt, not a full-body harness"
+lu_046__Lu.jpg,delete,harness,"[2413, 2172, 2510, 2197]",,"waist belt, not a full-body harness"
+lu_046__Lu.jpg,delete,harness,"[2533, 2139, 2606, 2164]",,"waist belt, not a full-body harness"
+lu_046__Lu.jpg,delete,harness,"[2755, 2185, 2823, 2224]",,"waist belt, not a full-body harness"
+lu_046__Lu.jpg,delete,harness,"[3282, 2175, 3350, 2220]",,"waist belt, not a full-body harness"
+lu_046__Lu.jpg,delete,harness,"[2941, 2154, 3018, 2199]",,"waist belt, not a full-body harness"
+lu_054__Lu.jpg,rebox,harness,"[1013, 1280, 1068, 1334]","[1014, 1260, 1068, 1316]",torso box (pose box reached the head)
+lu_054__Lu.jpg,rebox,harness,"[1334, 1303, 1401, 1340]","[1318, 1263, 1432, 1330]",torso box (pose box reached the head)
+lu_058__Lu.jpg,rebox,harness,"[2154, 219, 2212, 283]","[2152, 220, 2185, 279]",torso box (pose box reached the head)
+wikimedia_186127122__Guo.jpg,add,harness,,"[966, 552, 1395, 977]","full-body harness visible, was unlabelled"
+gen_manhole_tripod__Guo.png,add,harness,,"[707, 596, 841, 731]","full-body harness visible, was unlabelled"
+gen_rooftop_antennas__Guo.png,rebox,harness,"[643, 377, 733, 507]","[655, 387, 717, 534]",pose-derived harness box
+gen_rooftop_dish_edge__Guo.png,rebox,harness,"[524, 374, 714, 620]","[537, 390, 692, 695]",pose-derived harness box
+gen_rooftop_rain__Guo.png,rebox,harness,"[489, 150, 647, 536]","[497, 155, 615, 458]",pose-derived harness box
+gen_rooftop_rain__Guo.png,add,harness,,"[936, 457, 1160, 693]","full-body harness visible, was unlabelled"
+gen_monopole_bucket__Guo.png,rebox,harness,"[729, 255, 892, 456]","[774, 276, 879, 494]",pose-derived harness box
+gen_tower_night__Guo.png,rebox,harness,"[941, 343, 1030, 516]","[962, 354, 1023, 536]",pose-derived harness box
+gen_tower_platform_three__Guo.png,rebox,harness,"[268, 293, 367, 526]","[281, 293, 362, 519]",pose-derived harness box
+gen_tower_platform_three__Guo.png,delete,harness,"[274, 292, 369, 461]",,second harness box on one person
+gen_tower_platform_three__Guo.png,rebox,harness,"[677, 316, 785, 537]","[676, 308, 802, 524]",pose-derived harness box
+gen_tower_platform_three__Guo.png,delete,harness,"[687, 304, 790, 475]",,second harness box on one person
+gen_tower_crane_lift__Guo.png,add,harness,,"[1277, 75, 1333, 180]","full-body harness visible, was unlabelled"
+gen_transmission_tower__Guo.png,rebox,harness,"[1134, 129, 1227, 304]","[1131, 133, 1218, 286]",pose-derived harness box
+gen_transmission_tower__Guo.png,rebox,harness,"[757, 379, 823, 497]","[760, 387, 815, 486]",pose-derived harness box
+lin_006__Lin.png,rebox,harness,"[155, 393, 351, 869]","[160, 373, 298, 658]",pose-derived harness box
+lin_015__Lin.png,rebox,harness,"[182, 496, 374, 842]","[203, 479, 332, 801]",pose-derived harness box
+lu_009__Lu.jpg,delete,harness,"[475, 665, 743, 821]",,no full-body harness visible
+lu_028__Lu.jpg,rebox,harness,"[201, 633, 412, 717]","[316, 537, 415, 780]",pose-derived harness box
+lu_031__Lu.jpg,rebox,harness,"[1205, 1295, 1859, 1618]","[1315, 975, 1866, 2059]",pose-derived harness box
+lu_031__Lu.jpg,rebox,harness,"[1760, 2725, 2506, 3317]","[1826, 2694, 2330, 3313]",pose-derived harness box
+lu_030__Lu.jpg,rebox,harness,"[1860, 1885, 2262, 2084]","[1984, 1512, 2217, 2219]",pose-derived harness box
+lu_030__Lu.jpg,rebox,harness,"[2260, 1925, 2532, 2168]","[2267, 1724, 2546, 2369]",person-fraction harness box (no pose)
+lu_032__Lu.jpg,rebox,harness,"[1245, 1590, 1922, 1888]","[1307, 1290, 1737, 1928]",pose-derived harness box
+lu_034__Lu.jpg,rebox,harness,"[1820, 2680, 2272, 3001]","[1965, 2166, 2089, 2960]",pose-derived harness box
+lu_033__Lu.jpg,rebox,harness,"[3122, 1792, 3460, 1931]","[3205, 1536, 3383, 2025]",pose-derived harness box
+lu_029__Lu.jpg,delete,harness,"[3530, 1740, 3864, 1907]",,"waist belt, not a full-body harness"
+lu_029__Lu.jpg,delete,harness,"[4635, 1645, 5010, 1837]",,"waist belt, not a full-body harness"
+lu_039__Lu.jpg,rebox,harness,"[1044, 1792, 1228, 1850]","[1085, 1696, 1172, 1902]",pose-derived harness box
+lu_040__Lu.jpg,rebox,harness,"[817, 2102, 1034, 2185]","[864, 1931, 955, 2233]",pose-derived harness box
+lu_042__Lu.jpg,add,harness,,"[962, 2545, 1470, 2826]","full-body harness visible, was unlabelled"
+lu_043__Lu.jpg,add,harness,,"[992, 1095, 1287, 1335]","full-body harness visible, was unlabelled"
+lu_044__Lu.jpg,rebox,harness,"[1022, 1098, 1512, 1251]","[1092, 834, 1441, 1286]",pose-derived harness box
+lu_053__Lu.jpg,delete,harness,"[565, 1957, 1326, 2347]",,no full-body harness visible
+lu_049__Lu.jpg,rebox,harness,"[2975, 1405, 3287, 1716]","[2736, 1365, 3460, 2395]",pose-derived harness box
+lu_051__Lu.jpg,rebox,harness,"[1415, 1120, 1606, 1283]","[1390, 1105, 1629, 1313]",torso box (pose box reached the head)
+meng_001__Meng.png,rebox,harness,"[613, 238, 743, 454]","[631, 219, 653, 366]",pose-derived harness box
+lu_064__Lu.jpg,delete,harness,"[497, 490, 658, 543]",,no full-body harness visible
+meng_003__Meng.png,rebox,harness,"[651, 237, 865, 567]","[677, 220, 745, 474]",pose-derived harness box
+meng_008__Meng.png,rebox,harness,"[647, 306, 790, 554]","[644, 308, 726, 486]",pose-derived harness box
+meng_010__Meng.png,rebox,harness,"[610, 223, 770, 510]","[634, 214, 686, 416]",pose-derived harness box
+meng_013__Meng.png,rebox,harness,"[500, 298, 729, 672]","[531, 271, 615, 567]",pose-derived harness box
+meng_015__Meng.png,rebox,harness,"[619, 201, 746, 412]","[631, 186, 669, 341]",pose-derived harness box
+meng_019__Meng.png,rebox,harness,"[603, 113, 722, 281]","[618, 109, 648, 248]",pose-derived harness box
+meng_023__Meng.png,rebox,harness,"[333, 117, 417, 238]","[390, 115, 410, 223]",pose-derived harness box
+meng_025__Meng.png,rebox,harness,"[662, 127, 776, 299]","[665, 114, 709, 252]",pose-derived harness box
+meng_028__Meng.png,rebox,harness,"[543, 207, 677, 409]","[548, 188, 591, 336]",pose-derived harness box
+meng_031__Meng.png,rebox,harness,"[628, 134, 737, 320]","[663, 166, 696, 274]",pose-derived harness box
+meng_033__Meng.png,rebox,harness,"[663, 123, 757, 232]","[666, 126, 685, 232]",pose-derived harness box
+meng_039__Meng.png,rebox,harness,"[650, 142, 712, 249]","[648, 135, 681, 217]",pose-derived harness box
+meng_040__Meng.png,rebox,harness,"[202, 366, 421, 785]","[223, 339, 361, 642]",pose-derived harness box
+openverse_54737244-c522-4875-87c4-4eefc7e2304f__Guo.jpg,rebox,harness,"[874, 284, 1103, 609]","[847, 313, 1074, 653]",pose-derived harness box
+sneha_001__Sneha.jpg,rebox,harness,"[945, 387, 1039, 497]","[946, 392, 1031, 534]",pose-derived harness box
+sneha_003__Sneha.jpg,rebox,harness,"[1380, 155, 1488, 303]","[1398, 154, 1497, 293]",pose-derived harness box
+sneha_005__Sneha.jpg,rebox,harness,"[780, 242, 964, 590]","[800, 239, 951, 597]",pose-derived harness box
+sneha_002__Sneha.jpg,rebox,harness,"[1265, 63, 1452, 289]","[1263, 57, 1431, 298]",pose-derived harness box
+sneha_006__Sneha.jpg,rebox,harness,"[1054, 253, 1233, 507]","[1042, 257, 1191, 509]",pose-derived harness box
+sneha_008__Sneha.jpg,rebox,harness,"[1258, 102, 1392, 349]","[1257, 110, 1389, 404]",pose-derived harness box
+wikimedia_156132123__Guo.jpg,rebox,harness,"[1771, 978, 2629, 2466]","[1658, 1075, 2948, 2560]",pose-derived harness box
+wikimedia_157355954__Guo.jpg,rebox,harness,"[1715, 883, 2774, 2251]","[2020, 955, 2499, 2390]",pose-derived harness box
+sneha_007__Sneha.jpg,rebox,harness,"[1246, 106, 1419, 353]","[1249, 126, 1384, 326]",pose-derived harness box
+wikimedia_157355958__Guo.jpg,rebox,harness,"[1332, 758, 2236, 2274]","[1535, 830, 2193, 2351]",pose-derived harness box
+wikimedia_157501889__Guo.jpg,add,harness,,"[611, 1000, 1041, 1894]","full-body harness visible, was unlabelled"
+wikimedia_157501889__Guo.jpg,add,harness,,"[2823, 584, 3459, 1337]","full-body harness visible, was unlabelled"
+wikimedia_157818077__Guo.jpg,rebox,harness,"[1135, 910, 2302, 2633]","[1017, 1415, 2200, 2738]",pose-derived harness box
+wikimedia_163167529__Guo.jpg,rebox,harness,"[2220, 1632, 2537, 2203]","[2280, 1631, 2484, 2164]",pose-derived harness box
+wikimedia_163167529__Guo.jpg,add,harness,,"[2207, 268, 2338, 793]","full-body harness visible, was unlabelled"
+wikimedia_163167484__Guo.jpg,rebox,harness,"[453, 1320, 662, 1642]","[432, 1369, 675, 1750]",person-fraction harness box (no pose)
+wikimedia_163167484__Guo.jpg,add,harness,,"[2551, 870, 2780, 1127]","full-body harness visible, was unlabelled"
+wikimedia_186127351__Guo.jpg,rebox,harness,"[1852, 840, 2710, 1904]","[1846, 965, 2540, 1942]",pose-derived harness box
+wikimedia_194765493__Guo.jpg,rebox,harness,"[2191, 1105, 3256, 2560]","[2174, 1288, 3212, 2549]",pose-derived harness box
+wikimedia_197287886__Guo.jpg,rebox,harness,"[1707, 1025, 2458, 2089]","[1737, 788, 2289, 1645]",pose-derived harness box
+wikimedia_197287886__Guo.jpg,add,harness,,"[3237, 370, 3810, 1375]","full-body harness visible, was unlabelled"
+wikimedia_197710203__Guo.jpg,rebox,harness,"[1175, 1251, 1595, 1831]","[1349, 1328, 1547, 1875]",pose-derived harness box
+wikimedia_197710239__Guo.jpg,rebox,harness,"[515, 622, 1484, 1750]","[653, 838, 1200, 1695]",pose-derived harness box
+wikimedia_197710239__Guo.jpg,rebox,harness,"[2050, 1106, 2629, 1758]","[2113, 1162, 2994, 1995]",pose-derived harness box
+wikimedia_186127215__Guo.jpg,rebox,harness,"[1715, 1231, 2256, 1780]","[1774, 1291, 2095, 1730]",pose-derived harness box
+wikimedia_199379536__Guo.jpg,add,harness,,"[416, 870, 825, 1307]","full-body harness visible, was unlabelled"
+wikimedia_199379534__Guo.jpg,add,harness,,"[578, 695, 766, 979]","full-body harness visible, was unlabelled"
+wikimedia_39842546__Guo.jpg,add,harness,,"[656, 916, 973, 1421]","full-body harness visible, was unlabelled"
+wikimedia_53810162__Guo.jpg,rebox,harness,"[1346, 2700, 2109, 4241]","[1262, 2658, 2199, 4157]",pose-derived harness box
+wikimedia_54795542__Guo.jpg,rebox,harness,"[1704, 907, 2380, 1612]","[1757, 828, 2279, 1515]",pose-derived harness box
+wikimedia_62470407__Guo.jpg,rebox,harness,"[1301, 1994, 1867, 2890]","[1325, 2036, 1676, 2814]",pose-derived harness box
+wikimedia_64450808__Guo.jpg,rebox,harness,"[1702, 1071, 1930, 1547]","[1669, 1088, 1939, 1507]",pose-derived harness box
+wikimedia_64976312__Guo.jpg,add,harness,,"[251, 929, 1367, 2210]","full-body harness visible, was unlabelled"
+wikimedia_80722553__Guo.jpg,add,harness,,"[1758, 775, 2037, 1211]","full-body harness visible, was unlabelled"
+wikimedia_92599620__Guo.jpg,rebox,harness,"[1463, 763, 1870, 1345]","[1509, 733, 1826, 1415]",pose-derived harness box
+wikimedia_92599620__Guo.jpg,rebox,harness,"[2521, 524, 2913, 989]","[2615, 535, 2920, 1331]",pose-derived harness box
+wikimedia_80722049__Guo.jpg,add,harness,,"[1914, 1039, 2187, 1515]","full-body harness visible, was unlabelled"
+youtube_JeNsiAtJLO8_t0675__Guo.jpg,rebox,harness,"[663, 127, 860, 539]","[668, 157, 861, 504]",pose-derived harness box
+youtube_DjJwRy6viXk_t0023__Guo.jpg,rebox,harness,"[648, 390, 803, 603]","[614, 384, 807, 631]",pose-derived harness box
+youtube_JeNsiAtJLO8_t0693__Guo.jpg,rebox,harness,"[667, 387, 743, 529]","[689, 398, 713, 509]",pose-derived harness box
+wikimedia_53808817__Guo.jpg,add,harness,,"[1773, 2447, 2250, 2913]","full-body harness visible, was unlabelled"
+wikimedia_53808817__Guo.jpg,add,harness,,"[1630, 2089, 2206, 3149]","full-body harness visible, was unlabelled"
+gen_tower_base_crew__Guo.png,add,helmet,,"[865, 542, 882, 565]",visible head / torso was unlabelled
+lu_049__Lu.jpg,add,helmet,,"[2969, 1110, 3177, 1319]",visible head / torso was unlabelled
+wikimedia_39480976__Guo.jpg,add,no_helmet,,"[2541, 1080, 2634, 1183]",visible head / torso was unlabelled
+gen_tower_base_crew__Guo.png,add,vest,,"[857, 565, 890, 616]",visible head / torso was unlabelled
+gen_trench_hand_dig__Guo.png,add,no_vest,,"[1240, 535, 1481, 751]",visible head / torso was unlabelled
+lu_021__Lu.jpg,add,no_vest,,"[3044, 2735, 3375, 3259]",visible head / torso was unlabelled
+lu_054__Lu.jpg,add,vest,,"[1014, 1260, 1068, 1302]",visible head / torso was unlabelled
+wikimedia_181263137__Guo.jpg,add,no_vest,,"[1514, 1092, 2518, 2297]",visible head / torso was unlabelled
+wikimedia_53808817__Guo.jpg,add,no_vest,,"[1773, 2447, 2250, 2801]",visible head / torso was unlabelled
+gen_tower_far_small__Guo.png,add,vehicle,,"[871, 797, 1085, 937]",visible vehicle was unlabelled
+lu_016__Lu.jpg,add,vehicle,,"[3, 3562, 1284, 5181]",visible vehicle was unlabelled
+gen_aerial_cable_ladder__Guo.png,add,person,,"[91, 587, 176, 802]",visible person was unlabelled
+gen_aerial_cable_ladder__Guo.png,add,no_helmet,,"[116, 587, 157, 615]",head of the added person
+gen_aerial_cable_ladder__Guo.png,add,no_vest,,"[110, 625, 159, 692]",torso of the added person
+gen_aerial_cable_ladder__Guo.png,add,person,,"[281, 606, 324, 688]",visible person was unlabelled
+gen_aerial_cable_ladder__Guo.png,add,no_helmet,,"[293, 606, 312, 620]",head of the added person
+gen_aerial_cable_ladder__Guo.png,add,no_vest,,"[285, 620, 321, 651]",torso of the added person
+gen_aerial_cable_ladder__Guo.png,add,person,,"[479, 615, 496, 667]",visible person was unlabelled
+gen_aerial_cable_ladder__Guo.png,add,person,,"[447, 614, 467, 668]",visible person was unlabelled
+gen_aerial_cable_tangle__Guo.png,add,person,,"[151, 672, 361, 1022]",visible person was unlabelled
+gen_aerial_cable_tangle__Guo.png,add,no_helmet,,"[227, 672, 298, 729]",head of the added person
+gen_aerial_cable_tangle__Guo.png,add,no_vest,,"[221, 740, 333, 880]",torso of the added person
+gen_aerial_cable_tangle__Guo.png,add,person,,"[513, 670, 608, 867]",visible person was unlabelled
+gen_aerial_cable_tangle__Guo.png,add,no_helmet,,"[544, 670, 582, 693]",head of the added person
+gen_aerial_cable_tangle__Guo.png,add,no_vest,,"[536, 702, 585, 769]",torso of the added person
+gen_aerial_cable_tangle__Guo.png,add,person,,"[1113, 669, 1189, 984]",visible person was unlabelled
+gen_aerial_cable_tangle__Guo.png,add,no_helmet,,"[1152, 669, 1180, 697]",head of the added person
+gen_aerial_cable_tangle__Guo.png,add,no_vest,,"[1145, 714, 1189, 822]",torso of the added person
+gen_aerial_cable_tangle__Guo.png,add,person,,"[613, 667, 691, 875]",visible person was unlabelled
+gen_aerial_cable_tangle__Guo.png,add,no_helmet,,"[634, 670, 652, 689]",head of the added person
+gen_aerial_cable_tangle__Guo.png,add,no_vest,,"[630, 702, 676, 770]",torso of the added person
+gen_aerial_cable_tangle__Guo.png,add,person,,"[1011, 674, 1102, 972]",visible person was unlabelled
+gen_aerial_cable_tangle__Guo.png,add,no_helmet,,"[1049, 677, 1075, 703]",head of the added person
+gen_aerial_cable_tangle__Guo.png,add,no_vest,,"[1022, 719, 1071, 814]",torso of the added person
+gen_aerial_cable_tangle__Guo.png,add,person,,"[733, 704, 827, 1010]",visible person was unlabelled
+gen_aerial_cable_tangle__Guo.png,add,no_helmet,,"[760, 704, 801, 756]",head of the added person
+gen_aerial_cable_tangle__Guo.png,add,no_vest,,"[770, 752, 809, 851]",torso of the added person
+gen_aerial_cable_tangle__Guo.png,add,person,,"[702, 674, 737, 775]",visible person was unlabelled
+gen_aerial_cable_tangle__Guo.png,add,no_helmet,,"[712, 674, 727, 691]",head of the added person
+gen_aerial_cable_tangle__Guo.png,add,no_vest,,"[705, 691, 734, 729]",torso of the added person
+gen_aerial_cable_tangle__Guo.png,add,vehicle,,"[373, 651, 538, 769]",visible vehicle was unlabelled
+gen_aerial_cable_tangle__Guo.png,add,vehicle,,"[1, 650, 345, 880]",visible vehicle was unlabelled
+gen_aerial_cable_tangle__Guo.png,add,vehicle,,"[534, 591, 647, 724]",visible vehicle was unlabelled
+gen_aerial_cable_tangle__Guo.png,add,vehicle,,"[296, 663, 392, 741]",visible vehicle was unlabelled
+gen_aerial_cable_crew__Guo.png,add,person,,"[526, 719, 581, 817]",visible person was unlabelled
+gen_aerial_cable_crew__Guo.png,add,no_helmet,,"[542, 719, 565, 736]",head of the added person
+gen_aerial_cable_crew__Guo.png,add,no_vest,,"[531, 736, 576, 773]",torso of the added person
+gen_manhole_pulling__Guo.png,add,vehicle,,"[1, 147, 502, 1016]",visible vehicle was unlabelled
+gen_manhole_pulling__Guo.png,add,vehicle,,"[1450, 274, 1535, 417]",visible vehicle was unlabelled
+gen_manhole_tripod__Guo.png,add,vehicle,,"[71, 22, 589, 486]",visible vehicle was unlabelled
+gen_manhole_tripod__Guo.png,add,vehicle,,"[0, 173, 48, 224]",visible vehicle was unlabelled
+gen_bucket_truck_lineman__Guo.png,add,person,,"[1211, 743, 1251, 861]",visible person was unlabelled
+gen_bucket_truck_lineman__Guo.png,add,no_helmet,,"[1222, 743, 1240, 763]",head of the added person
+gen_bucket_truck_lineman__Guo.png,add,no_vest,,"[1214, 763, 1247, 808]",torso of the added person
+gen_bucket_truck_lineman__Guo.png,add,person,,"[789, 723, 821, 788]",visible person was unlabelled
+gen_cabinet_new_install__Guo.png,add,person,,"[74, 365, 105, 431]",visible person was unlabelled
+gen_cabinet_new_install__Guo.png,add,person,,"[14, 361, 43, 426]",visible person was unlabelled
+gen_cabinet_new_install__Guo.png,add,person,,"[368, 270, 423, 333]",visible person was unlabelled
+gen_cabinet_new_install__Guo.png,add,person,,"[454, 369, 499, 455]",visible person was unlabelled
+gen_cabinet_new_install__Guo.png,add,no_helmet,,"[467, 369, 487, 384]",head of the added person
+gen_cabinet_new_install__Guo.png,add,no_vest,,"[458, 384, 496, 416]",torso of the added person
+gen_rooftop_rain__Guo.png,add,vehicle,,"[2, 40, 570, 1012]",visible vehicle was unlabelled
+gen_monopole_bucket__Guo.png,add,vehicle,,"[30, 547, 177, 615]",visible vehicle was unlabelled
+gen_monopole_bucket__Guo.png,add,vehicle,,"[1264, 586, 1314, 645]",visible vehicle was unlabelled
+gen_monopole_bucket__Guo.png,add,vehicle,,"[929, 662, 1049, 734]",visible vehicle was unlabelled
+gen_monopole_bucket__Guo.png,add,vehicle,,"[1331, 547, 1367, 579]",visible vehicle was unlabelled
+gen_monopole_bucket__Guo.png,add,vehicle,,"[218, 505, 371, 569]",visible vehicle was unlabelled
+gen_cabinet_two_vests__Guo.png,add,person,,"[1410, 169, 1467, 312]",visible person was unlabelled
+gen_cabinet_two_vests__Guo.png,add,no_helmet,,"[1426, 169, 1451, 193]",head of the added person
+gen_cabinet_two_vests__Guo.png,add,no_vest,,"[1415, 193, 1462, 248]",torso of the added person
+gen_cabinet_two_vests__Guo.png,add,person,,"[1274, 150, 1316, 273]",visible person was unlabelled
+gen_cabinet_two_vests__Guo.png,add,no_helmet,,"[1286, 150, 1304, 171]",head of the added person
+gen_cabinet_two_vests__Guo.png,add,no_vest,,"[1278, 171, 1312, 218]",torso of the added person
+gen_cabinet_two_vests__Guo.png,add,person,,"[1485, 151, 1535, 286]",visible person was unlabelled
+gen_cabinet_two_vests__Guo.png,add,no_helmet,,"[1499, 151, 1521, 174]",head of the added person
+gen_cabinet_two_vests__Guo.png,add,no_vest,,"[1489, 174, 1531, 225]",torso of the added person
+gen_cabinet_two_vests__Guo.png,add,person,,"[794, 139, 826, 234]",visible person was unlabelled
+gen_cabinet_two_vests__Guo.png,add,no_helmet,,"[803, 139, 817, 155]",head of the added person
+gen_cabinet_two_vests__Guo.png,add,no_vest,,"[797, 155, 824, 191]",torso of the added person
+gen_cabinet_two_vests__Guo.png,add,person,,"[730, 169, 802, 278]",visible person was unlabelled
+gen_cabinet_two_vests__Guo.png,add,no_helmet,,"[750, 169, 782, 187]",head of the added person
+gen_cabinet_two_vests__Guo.png,add,no_vest,,"[736, 187, 797, 229]",torso of the added person
+gen_cabinet_two_vests__Guo.png,add,person,,"[156, 209, 203, 317]",visible person was unlabelled
+gen_cabinet_two_vests__Guo.png,add,no_helmet,,"[169, 209, 190, 227]",head of the added person
+gen_cabinet_two_vests__Guo.png,add,no_vest,,"[160, 227, 199, 268]",torso of the added person
+gen_cabinet_two_vests__Guo.png,add,person,,"[424, 133, 451, 187]",visible person was unlabelled
+gen_cabinet_two_vests__Guo.png,add,person,,"[735, 139, 756, 191]",visible person was unlabelled
+gen_tower_base_crew__Guo.png,reclass,no_helmet -> person,"[247, 324, 423, 632]","[247, 324, 423, 632]",person box carried a part class
+gen_tower_base_crew__Guo.png,add,vehicle,,"[1, 434, 639, 847]",visible vehicle was unlabelled
+gen_tower_no_ppe__Guo.png,add,vehicle,,"[2, 639, 873, 1017]",visible vehicle was unlabelled
+gen_small_cell_pole__Guo.png,add,vehicle,,"[931, 710, 1315, 959]",visible vehicle was unlabelled
+gen_tower_crane_lift__Guo.png,add,person,,"[41, 454, 93, 536]",visible person was unlabelled
+gen_transmission_tower__Guo.png,add,vehicle,,"[595, 859, 697, 952]",visible vehicle was unlabelled
+gen_transmission_tower__Guo.png,add,vehicle,,"[1, 548, 656, 1019]",visible vehicle was unlabelled
+lin_001__Lin.png,add,person,,"[370, 303, 463, 575]",visible person was unlabelled
+lin_001__Lin.png,add,helmet,,"[415, 314, 439, 338]",head of the added person
+lin_001__Lin.png,add,vest,,"[386, 353, 437, 444]",torso of the added person
+gen_trench_hand_dig__Guo.png,reclass,no_helmet -> person,"[490, 420, 634, 723]","[490, 420, 634, 723]",person box carried a part class
+lin_008__Lin.png,add,person,,"[50, 525, 142, 949]",visible person was unlabelled
+lin_008__Lin.png,add,helmet,,"[86, 525, 142, 576]",head of the added person
+lin_008__Lin.png,add,no_vest,,"[64, 600, 109, 738]",torso of the added person
+gen_storm_repair__Guo.png,add,person,,"[897, 729, 938, 840]",visible person was unlabelled
+gen_storm_repair__Guo.png,add,helmet,,"[909, 729, 927, 748]",head of the added person
+gen_storm_repair__Guo.png,add,no_vest,,"[900, 748, 935, 790]",torso of the added person
+gen_storm_repair__Guo.png,add,machinery,,"[1209, 273, 1535, 931]",visible vehicle was unlabelled
+lin_010__Lin.png,add,person,,"[230, 644, 311, 911]",visible person was unlabelled
+lin_010__Lin.png,add,helmet,,"[248, 644, 297, 676]",head of the added person
+lin_010__Lin.png,add,no_vest,,"[245, 689, 299, 779]",torso of the added person
+lin_010__Lin.png,add,person,,"[93, 652, 171, 864]",visible person was unlabelled
+lin_010__Lin.png,add,helmet,,"[116, 652, 147, 677]",head of the added person
+lin_010__Lin.png,add,no_vest,,"[102, 688, 127, 759]",torso of the added person
+gen_trench_drum_trailer__Guo.png,add,machinery,,"[306, 169, 749, 626]",visible vehicle was unlabelled
+gen_trench_drum_trailer__Guo.png,add,vehicle,,"[138, 341, 381, 590]",visible vehicle was unlabelled
+lin_007__Lin.png,add,person,,"[337, 511, 457, 872]",visible person was unlabelled
+lin_007__Lin.png,add,helmet,,"[352, 511, 413, 557]",head of the added person
+lin_007__Lin.png,add,vest,,"[362, 560, 424, 688]",torso of the added person
+lin_007__Lin.png,add,person,,"[128, 518, 231, 897]",visible person was unlabelled
+lin_007__Lin.png,add,helmet,,"[190, 532, 223, 565]",head of the added person
+lin_007__Lin.png,add,vest,,"[149, 585, 211, 718]",torso of the added person
+lin_007__Lin.png,add,person,,"[84, 548, 156, 858]",visible person was unlabelled
+lin_007__Lin.png,add,helmet,,"[115, 548, 156, 592]",head of the added person
+lin_007__Lin.png,add,vest,,"[94, 606, 130, 712]",torso of the added person
+lin_013__Lin.png,add,person,,"[330, 732, 412, 970]",visible person was unlabelled
+lin_013__Lin.png,add,helmet,,"[349, 732, 397, 763]",head of the added person
+lin_013__Lin.png,add,vest,,"[342, 775, 398, 857]",torso of the added person
+lu_002__Lu.jpg,add,vehicle,,"[1, 926, 887, 1585]",visible vehicle was unlabelled
+lu_006__Lu.jpg,add,vehicle,,"[1303, 1966, 2272, 2716]",visible vehicle was unlabelled
+lu_008__Lu.jpg,add,vehicle,,"[3764, 2682, 5464, 5299]",visible vehicle was unlabelled
+lu_005__Lu.jpg,add,vehicle,,"[2, 2013, 797, 3775]",visible vehicle was unlabelled
+lu_007__Lu.jpg,add,vehicle,,"[2, 2084, 2132, 3594]",visible vehicle was unlabelled
+lu_015__Lu.jpg,add,vehicle,,"[1101, 2029, 1167, 2087]",visible vehicle was unlabelled
+lu_025__Lu.jpg,add,person,,"[3251, 1724, 3548, 2424]",visible person was unlabelled
+lu_025__Lu.jpg,add,no_vest,,"[3275, 1843, 3524, 2109]",torso of the added person
+lu_014__Lu.jpg,add,vehicle,,"[1359, 2369, 3259, 3886]",visible vehicle was unlabelled
+lu_022__Lu.jpg,add,vehicle,,"[3, 2014, 821, 3021]",visible vehicle was unlabelled
+lu_027__Lu.jpg,add,person,,"[1899, 1187, 2367, 1777]",visible person was unlabelled
+lu_037__Lu.jpg,add,vehicle,,"[293, 2219, 2322, 3100]",visible vehicle was unlabelled
+lu_047__Lu.jpg,add,vehicle,,"[34, 1403, 4371, 5458]",visible vehicle was unlabelled
+lu_035__Lu.jpg,add,vehicle,,"[2, 2692, 1100, 3789]",visible vehicle was unlabelled
+lu_049__Lu.jpg,add,machinery,,"[1, 2194, 643, 3298]",visible vehicle was unlabelled
+meng_020__Meng.png,add,person,,"[678, 171, 749, 280]",visible person was unlabelled
+meng_035__Meng.png,add,vehicle,,"[989, 420, 1024, 484]",visible vehicle was unlabelled
+openverse_7d7effe9-b9bf-4745-8edf-8f293b916d50__Guo.jpg,add,person,,"[192, 164, 236, 274]",visible person was unlabelled
+openverse_7d7effe9-b9bf-4745-8edf-8f293b916d50__Guo.jpg,add,helmet,,"[204, 164, 224, 183]",head of the added person
+openverse_7d7effe9-b9bf-4745-8edf-8f293b916d50__Guo.jpg,add,vest,,"[196, 183, 232, 224]",torso of the added person
+openverse_c42fd349-83b5-496d-84fb-478ae5abda9f__Guo.jpg,add,vehicle,,"[176, 171, 344, 384]",visible vehicle was unlabelled
+wikimedia_197287886__Guo.jpg,add,machinery,,"[417, 874, 3465, 2531]",visible vehicle was unlabelled
+wikimedia_186127215__Guo.jpg,add,person,,"[2122, 783, 2177, 983]",visible person was unlabelled
+wikimedia_199379534__Guo.jpg,add,vehicle,,"[255, 3, 398, 165]",visible vehicle was unlabelled
+wikimedia_199379534__Guo.jpg,add,vehicle,,"[847, 51, 955, 189]",visible vehicle was unlabelled
+wikimedia_199379534__Guo.jpg,add,vehicle,,"[741, 150, 872, 282]",visible vehicle was unlabelled
+wikimedia_195450476__Guo.jpg,add,person,,"[1046, 546, 2026, 1675]",visible person was unlabelled
+wikimedia_195450476__Guo.jpg,add,person,,"[10, 954, 67, 1099]",visible person was unlabelled
+wikimedia_195450476__Guo.jpg,add,person,,"[239, 972, 311, 1155]",visible person was unlabelled
+wikimedia_195450476__Guo.jpg,add,vehicle,,"[252, 954, 816, 1193]",visible vehicle was unlabelled
+wikimedia_195450476__Guo.jpg,add,vehicle,,"[2935, 446, 3838, 2043]",visible vehicle was unlabelled
+wikimedia_195450476__Guo.jpg,add,vehicle,,"[1595, 901, 2170, 1294]",visible vehicle was unlabelled
+wikimedia_195450476__Guo.jpg,add,vehicle,,"[2070, 966, 2795, 1323]",visible vehicle was unlabelled
+wikimedia_54794724__Guo.jpg,add,person,,"[293, 104, 3210, 2717]",visible person was unlabelled
+wikimedia_54794724__Guo.jpg,add,no_vest,,"[733, 1417, 1732, 2462]",torso of the added person
+youtube_CXtWMwzMxzs_t0017__Guo.jpg,add,vehicle,,"[950, 178, 1152, 260]",visible vehicle was unlabelled
+youtube_CXtWMwzMxzs_t0017__Guo.jpg,add,vehicle,,"[1224, 217, 1279, 282]",visible vehicle was unlabelled
