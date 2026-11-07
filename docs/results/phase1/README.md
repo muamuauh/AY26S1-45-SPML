@@ -123,7 +123,7 @@ python -m telecomsafe.demo.app --weights runs/phase1/e2/weights/best.pt
 
 ## TelecomEval 评测（冻结后，222 张）
 
-TelecomEval 于 2026-10-23 冻结（[`splits/telecom_eval.sha256`](../../../splits/telecom_eval.sha256)，总哈希 `36432926…`；2026-11-07 重新生成为 `4a4f90ec…`，原因是 10 张 JPEG 在第一次评测时被 Ultralytics 原地重存，内容不变，见[阶段二结果](../phase2/README.md#已知问题与限制)），由 5 位组员提供，每张图的组员、来源、许可和真实 / 生成都记在 `data/raw/telecom_eval/sources.csv`，文件名以 `__<组员>` 结尾。下表数字均为**百分比**，E2 为 3 个种子的均值 ± 标准差。**真实照片 · 电信作业是主指标**；生成图单独报告，不代替真实照片。完整结果：[`telecom_eval/results.md`](telecom_eval/results.md)。
+TelecomEval 于 2026-10-23 冻结（[`splits/telecom_eval.sha256`](../../../splits/telecom_eval.sha256)，总哈希 `36432926…`；下文数字均基于这一版 v1。2026-11-07 修订标注后冻结为 v2（总哈希 `73cfb8df…`），E1、E2 在 v2 上的数字见[阶段二结果](../phase2/README.md)），由 5 位组员提供，每张图的组员、来源、许可和真实 / 生成都记在 `data/raw/telecom_eval/sources.csv`，文件名以 `__<组员>` 结尾。下表数字均为**百分比**，E2 为 3 个种子的均值 ± 标准差。**真实照片 · 电信作业是主指标**；生成图单独报告，不代替真实照片。完整结果：[`telecom_eval/results.md`](telecom_eval/results.md)。
 
 | 子集 | 张数 | E1 mAP50 | E2 mAP50 | E2 mAP50-95 |
 |---|---|---|---|---|

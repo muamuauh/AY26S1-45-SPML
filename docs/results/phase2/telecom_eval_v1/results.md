@@ -1,4 +1,4 @@
-# TelecomEval 评测结果
+# TelecomEval v1 评测结果
 
 > English version: [results-EN.md](results-EN.md)
 
