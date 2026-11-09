@@ -85,6 +85,7 @@ The repository holds code, configuration and reports only.
 | Content | Where |
 |---|---|
 | Baseline weights (E1, E2 and two more E2 seeds) | GitHub release [`phase1-baseline-v2`](https://github.com/muamuauh/AY26S1-45-SPML/releases/tag/phase1-baseline-v2); `python -m telecomsafe.weights` |
+| Phase 2 weights (E3, three seeds) | GitHub release [`phase2-e3`](https://github.com/muamuauh/AY26S1-45-SPML/releases/tag/phase2-e3); `python -m telecomsafe.weights e3 e3_s1 e3_s2` |
 | Public datasets | Their original pages; versions pinned in `configs/sources.yaml`, catalogue in [docs/datasets/README-EN.md](docs/datasets/README-EN.md) |
 | TelecomEval, TelecomSynth and a private dataset (APD) | Team shared folder only. APD is private data shared with the team for internal training; it must not be committed or redistributed |
 

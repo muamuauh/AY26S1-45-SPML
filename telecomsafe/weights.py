@@ -44,6 +44,13 @@ def fetch(url: str, dest: Path) -> None:
     tmp.replace(dest)
 
 
+def release_url(cfg: dict, w: dict) -> str:
+    """Download URL of a model's release: its own `release` tag if given, else the default release."""
+    if "release" not in w:
+        return cfg["url"]
+    return f"{cfg['url'].rsplit('/', 1)[0]}/{w['release']}"
+
+
 def main(argv: list[str] | None = None) -> None:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("names", nargs="*", help="model names from configs/weights.yaml (default: all)")
@@ -67,7 +74,7 @@ def main(argv: list[str] | None = None) -> None:
             print(f"  ✗ {name}: {'missing' if not dest.exists() else 'sha256 mismatch'} — {dest}")
             failed = True
             continue
-        url = f"{cfg['url']}/{w['asset']}"
+        url = f"{release_url(cfg, w)}/{w['asset']}"
         print(f"  ↓ {name}: {url}")
         try:
             fetch(url, dest)

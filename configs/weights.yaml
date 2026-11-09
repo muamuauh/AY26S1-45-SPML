@@ -1,7 +1,8 @@
 # Released model weights (GitHub Release assets). Download with:
 #   python -m telecomsafe.weights            # all
-#   python -m telecomsafe.weights e2         # one
+#   python -m telecomsafe.weights e3         # one
 # The sha256 is checked after download; a mismatch means a corrupted or wrong file.
+# `release` / `url` are the default release; a model with its own `release` key comes from that release instead.
 # v1 (2026-09-29) weights stay available in the phase1-baseline-v1 release.
 
 release: phase1-baseline-v2
@@ -28,3 +29,21 @@ weights:
     path: runs/phase1/e2_s2/weights/best.pt
     sha256: 3156f1e1d3daabc263b580315032c6c5704087353cb1b200abfdfd5abdf030fc
     description: E2, seed 2 — for the mean ± std over seeds
+  e3:
+    release: phase2-e3
+    asset: e3_best.pt
+    path: runs/phase1/e3/weights/best.pt
+    sha256: c76630f011d60f2ea2de1bf329a3ddf5d91487a07ceb12e9855e25fbf2421a49
+    description: E3, seed 0 — E2's configuration trained on real + TelecomSynth generated images
+  e3_s1:
+    release: phase2-e3
+    asset: e3_s1_best.pt
+    path: runs/phase1/e3_s1/weights/best.pt
+    sha256: 3ad4dccb0fbcd8e0d8abac1cdb5e052e832cc07bce04749b534fb6eb312512e2
+    description: E3, seed 1 — for the mean ± std over seeds
+  e3_s2:
+    release: phase2-e3
+    asset: e3_s2_best.pt
+    path: runs/phase1/e3_s2/weights/best.pt
+    sha256: 6c72d239156c2eace0b0d68d9a1acde1a43fd21e0b817bdd0e588ed0d79729d9
+    description: E3, seed 2 — for the mean ± std over seeds

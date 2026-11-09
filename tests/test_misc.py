@@ -67,6 +67,13 @@ def test_released_weights_config_is_consistent():
         assert len(w["sha256"]) == 64 and w["path"].endswith(".pt")
 
 
+def test_a_model_can_come_from_its_own_release():
+    from telecomsafe.weights import release_url
+    cfg = {"release": "a", "url": "https://github.com/o/r/releases/download/a"}
+    assert release_url(cfg, {"asset": "x.pt"}) == "https://github.com/o/r/releases/download/a"
+    assert release_url(cfg, {"asset": "x.pt", "release": "b"}) == "https://github.com/o/r/releases/download/b"
+
+
 def test_experiment_colours_follow_the_experiment():
     from telecomsafe.evaluate import PALETTE, exp_color
     assert exp_color("e2", ["e2"]) == exp_color("e2", ["e1", "e2", "e2_yolov8s"]) == PALETTE[1]
