@@ -45,11 +45,11 @@ conda env create -f environment.yml && conda activate telecomsafe
 pytest                                   # unit tests, no GPU or data needed
 ```
 
-**Demo.** On Windows, double-click `start_demo.bat`; it downloads the released weights (SHA-256 checked) and opens http://127.0.0.1:7860. On any system:
+**Demo.** The demo uses the phase 2 model E3 by default. On Windows, double-click `start_demo.bat`; it downloads the released weights (SHA-256 checked) and opens http://127.0.0.1:7860. On any system:
 
 ```bash
-python -m telecomsafe.weights            # download the released baseline weights
-python -m telecomsafe.demo.app --weights runs/phase1/e2/weights/best.pt
+python -m telecomsafe.weights e3         # download the E3 weights from the phase2-e3 release
+python -m telecomsafe.demo.app --open    # E3; add --weights runs/phase1/e2/weights/best.pt for the baseline E2
 ```
 
 ## Reproducing the experiments

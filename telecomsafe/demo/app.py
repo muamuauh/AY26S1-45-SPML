@@ -1,6 +1,7 @@
-"""TelecomSafe Baseline Demo v1.
+"""TelecomSafe Demo v2 (default model: E3, phase 2).
 
-    python -m telecomsafe.demo.app --weights runs/phase1/e2/weights/best.pt
+    python -m telecomsafe.demo.app                                          # E3 (runs/phase1/e3/weights/best.pt)
+    python -m telecomsafe.demo.app --weights runs/phase1/e2/weights/best.pt # the phase 1 baseline E2
     python -m telecomsafe.demo.app --weights ... --examples docs/results/phase1/demo_examples --open
 
 Three decoupled stages: detect() → judge() → render(). Phase 2 swaps only the weights.
@@ -201,7 +202,7 @@ def header(weights: str, n_classes: int, n_rules: int) -> str:
     <div class="ts-logo">📡</div>
     <div>
       <h1 class="ts-title">TelecomSafe · Construction Safety Risk Detection</h1>
-      <p class="ts-subtitle">Object detection → safety rules → risk level · telecom construction sites · Baseline Demo v1</p>
+      <p class="ts-subtitle">Object detection → safety rules → risk level · telecom construction sites · Demo v2</p>
     </div>
   </div>
   <div class="ts-badges">
@@ -212,11 +213,24 @@ def header(weights: str, n_classes: int, n_rules: int) -> str:
 </div>"""
 
 
-FOOTER = """
+DEFAULT_WEIGHTS = "runs/phase1/e3/weights/best.pt"
+NOTES = {
+    "e3": ("phase 2 model E3: YOLO11s trained on six public datasets plus 1,724 generated telecom images (TelecomSynth). "
+           "On the real telecom photos of TelecomEval it reaches mAP50 50.1%, against 44.2% for the phase 1 baseline E2 "
+           "(means of 3 seeds). Harness, machinery and vehicle detection on real telecom sites is still the weakest."),
+    "e2": ("phase 1 baseline E2: YOLO11s trained on six public datasets. On the real telecom photos of TelecomEval it "
+           "reaches mAP50 44.2% (mean of 3 seeds); the phase 2 model E3 reaches 50.1%."),
+}
+
+
+def footer(weights: str) -> str:
+    """The note under the demo, matching the experiment the weights come from (e3, e3_s1 ... → e3)."""
+    parts = Path(weights).parts
+    run = parts[-3] if len(parts) >= 3 and parts[-2] == "weights" else Path(weights).stem
+    note = NOTES.get(run.split("_")[0].lower(), f"model loaded from {html.escape(weights)}.")
+    return f"""
 <div class="ts-footer">
-  <b>Note</b>: phase 1 baseline (YOLO11s trained on six public datasets), validation mAP50 = 0.737 (mean of 3 seeds);
-  the telecom test set (TelecomEval) is still being annotated. Vehicle and no-helmet detection remain weak, and harness
-  detection in telecom scenes (towers, poles) is still unreliable — the focus of phase 2 generative augmentation.
+  <b>Note</b>: {note}
   Person–machine distance is estimated from the person's box height and is indicative only.
 </div>"""
 
@@ -270,7 +284,7 @@ def build_ui(weights: str, examples: list[str]):
                 gr.HTML(section(4, "Detected objects"))
                 chips = gr.HTML(detection_chips(None))
         outputs = [out_image, risk, rules, chips]
-        gr.HTML(FOOTER)
+        gr.HTML(footer(weights))
 
         if examples:
             def pick(conf_value, evt):
@@ -309,13 +323,13 @@ def theme():
 
 def main(argv: list[str] | None = None) -> None:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("--weights", required=True)
+    ap.add_argument("--weights", default=DEFAULT_WEIGHTS, help=f"model weights (default: E3, {DEFAULT_WEIGHTS})")
     ap.add_argument("--examples", default="docs/results/phase1/demo_examples", help="folder of example images")
     ap.add_argument("--port", type=int, default=7860)
     ap.add_argument("--open", action="store_true", help="open the browser once the server is ready")
     args = ap.parse_args(argv)
     if not Path(args.weights).exists():
-        raise SystemExit(f"weights not found: {args.weights}")
+        raise SystemExit(f"weights not found: {args.weights} (download them: python -m telecomsafe.weights e3)")
     ex_dir = Path(args.examples)
     examples = sorted(str(p) for p in ex_dir.iterdir() if p.suffix.lower() in IMAGE_SUFFIXES) if ex_dir.exists() else []
     build_ui(args.weights, examples).launch(

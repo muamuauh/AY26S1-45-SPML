@@ -139,3 +139,11 @@ def test_evaluation_reports_are_bilingual(tmp_path):
     assert "未戴" not in ev.weak_classes_md(res, ["person", "no_helmet"], {}, 1, "TelecomEval", "en")
     assert "| 1 | no_helmet |" in ev.weak_classes_md(res, ["person", "no_helmet"], {}, 1, "TelecomEval", "en")
     assert "弱类别清单" in ev.weak_classes_md(res, ["person", "no_helmet"], {}, 1, "TelecomEval", "zh")
+
+
+def test_demo_note_matches_the_model():
+    from telecomsafe.demo.app import DEFAULT_WEIGHTS, footer
+    assert "e3" in DEFAULT_WEIGHTS
+    assert "phase 2 model E3" in footer("runs/phase1/e3_s1/weights/best.pt")
+    assert "phase 1 baseline E2" in footer("runs/phase1/e2/weights/best.pt")
+    assert "model loaded from" in footer("custom.pt")

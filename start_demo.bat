@@ -1,6 +1,6 @@
 @echo off
-rem TelecomSafe Baseline Demo v1 - double-click to start.
-rem Optional: start_demo.bat path\to\weights.pt   (default: the E2 baseline)
+rem TelecomSafe Demo v2 - double-click to start.
+rem Optional: start_demo.bat path\to\weights.pt   (default: E3, the phase 2 model)
 rem Keep this file ASCII-only: cmd.exe misparses lines with multi-byte UTF-8 text
 rem (part of a line gets run as a command), with or without chcp 65001.
 setlocal
@@ -18,16 +18,16 @@ if not exist "%PY%" (
     exit /b 1
 )
 
-set "WEIGHTS=runs\phase1\e2\weights\best.pt"
+set "WEIGHTS=runs\phase1\e3\weights\best.pt"
 if not "%~1"=="" set "WEIGHTS=%~1"
 if not exist "%WEIGHTS%" if "%~1"=="" (
-    echo E2 weights not found locally; downloading them from the GitHub Release...
-    "%PY%" -m telecomsafe.weights e2
+    echo E3 weights not found locally; downloading them from the GitHub Release...
+    "%PY%" -m telecomsafe.weights e3
 )
 if not exist "%WEIGHTS%" (
     echo [Error] weights not found: %WEIGHTS%
-    echo         Download them: python -m telecomsafe.weights e2
-    echo         or retrain:    python -m telecomsafe.train --exp e2
+    echo         Download them: python -m telecomsafe.weights e3
+    echo         or retrain:    python -m telecomsafe.train --exp e3
     pause
     exit /b 1
 )
