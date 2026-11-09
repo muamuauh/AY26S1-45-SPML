@@ -33,6 +33,9 @@ mlruns/
 # Teammates' TelecomEval submissions, unpacked locally (merged into data/raw/telecom_eval/)
 temp_package/
 
+# Local working copy of the report template (the tracked copy is docs/templates/)
+template/
+
 # Secrets
 .env
 
