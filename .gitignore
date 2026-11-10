@@ -36,6 +36,12 @@ temp_package/
 # Local working copy of the report template (the tracked copy is docs/templates/)
 template/
 
+# Presentation videos (Remotion project, node_modules and renders stay local)
+presentation/
+
+# Final submission files (reports, videos), uploaded manually
+submission/
+
 # Secrets
 .env
 
